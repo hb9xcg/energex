@@ -30,7 +30,7 @@
 #include "delay.h"
 
 #define SUPERVISOR_STACK_SIZE  256
-#define NUMBER_OF_CELLS          1
+#define NUMBER_OF_CELLS         10
 #define SUPERVISOR_POWER      0x10
 #define SUPERVISOR_WAKEUP     0x80
 #define SEND_ERROR            0x01

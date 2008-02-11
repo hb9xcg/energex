@@ -18,7 +18,7 @@
     <FILE SHOWN="FALSE" NAME="i2c.h" />
     <FILE SHOWN="FALSE" NAME="i2c.c" />
     <FILE SHOWN="FALSE" NAME="timer-low.c" />
-    <FILE SHOWN="FALSE" NAME="uart.c" />
+    <FILE SHOWN="TRUE" NAME="uart.c" />
     <FILE SHOWN="TRUE" NAME="uart.h" />
     <FILE SHOWN="FALSE" NAME="fifo.c" />
     <FILE SHOWN="FALSE" NAME="fifo.h" />

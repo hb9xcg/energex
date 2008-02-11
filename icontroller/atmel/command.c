@@ -154,15 +154,14 @@ void cmd_temperatur(void)
 
 	adc_read_int(4, &value);
 
-	os_thread_sleep(20);
+	os_thread_sleep(10);
 
 	temperatur = value;
 	temperatur *= 2500;// Reference [mV]
 	temperatur /= 1024;
-//	temperatur -= 600;
+	temperatur -= 600;
 
-	sprintf( cmd_answer, "IController temp voltage: %dmV", (int16_t)temperatur);
-//	sprintf( cmd_answer, "IController temperatur: %d°C", (int16_t)temperatur/10);
+	sprintf( cmd_answer, "IController temperatur: %d°C", (int16_t)temperatur/10);
 }
 
 void cmd_voltage(void)
@@ -172,14 +171,13 @@ void cmd_voltage(void)
 
 	adc_read_int(5, &value);
 
-	os_thread_sleep(20);
+	os_thread_sleep(10);
 
 	voltage = value;
 	voltage *= 2500;// Reference [mV]
-	voltage *= 146; // calculate voltage divider
+	voltage *= 146; // Calculate voltage divider
 	voltage /= 1024;
 
-//	sprintf( cmd_answer, "IController voltage: %dmV", (int16_t)voltage);
 	sprintf( cmd_answer, "IController voltage: %d.%dV", (int16_t)((voltage+500)/1000), (int16_t)((voltage%1000+50)/100));
 }
 
@@ -210,8 +208,6 @@ void cmd_reset(void)
 
 static void cmd_supervisor(const char* cmd)
 {
-	cell_t info;
-
 	if( strstr( cmd, "on") )
 	{
 		supervisor_activate();
@@ -224,21 +220,27 @@ static void cmd_supervisor(const char* cmd)
 	}
 	else if( strstr( cmd, "info") )
 	{
+		cell_t info;
 		int8_t nbr_of_info;
-		uint8_t idx;		
-		char line[22];
+		uint8_t idx;
 
 		char* header = "cell temp voltage err\n\r";
 		uart_write( (uint8_t*)header, strlen(header) );
-
+		
+		char* line   = (char*)&cmd_line[0]; // temporarily available memory
 		nbr_of_info = supervisor_get_nbr_of_info();
 		for(idx=0; idx<nbr_of_info; idx++)
 		{
 			supervisor_get_info( idx, &info);
-			sprintf( line, "%4d %2d°C %5dmV %3x\n\r", idx, info.temperture, info.voltage, info.error);
+			sprintf( line, "%4d %2d°C %5dmV %#x\n\r", idx, info.temperture, info.voltage, info.error);
 			uart_write( (uint8_t*)line, strlen(line) );
 			uart_flush();
 		}
+		strcpy(cmd_answer, "=====================");
+	}
+	else
+	{
+		strcpy(cmd_answer, "Use \'on\', \'off\' or \'info\' as argument");
 	}
 }
 
