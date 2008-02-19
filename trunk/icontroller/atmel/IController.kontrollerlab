@@ -18,8 +18,8 @@
     <FILE SHOWN="FALSE" NAME="i2c.h" />
     <FILE SHOWN="FALSE" NAME="i2c.c" />
     <FILE SHOWN="FALSE" NAME="timer-low.c" />
-    <FILE SHOWN="TRUE" NAME="uart.c" />
-    <FILE SHOWN="TRUE" NAME="uart.h" />
+    <FILE SHOWN="FALSE" NAME="uart.c" />
+    <FILE SHOWN="FALSE" NAME="uart.h" />
     <FILE SHOWN="FALSE" NAME="fifo.c" />
     <FILE SHOWN="FALSE" NAME="fifo.h" />
     <FILE SHOWN="TRUE" NAME="command.c" />
@@ -27,7 +27,9 @@
     <FILE SHOWN="TRUE" NAME="supervisor.c" />
     <FILE SHOWN="TRUE" NAME="supervisor.h" />
     <FILE SHOWN="FALSE" NAME="charge.c" />
-    <FILE SHOWN="FALSE" NAME="charge.h" />
+    <FILE SHOWN="TRUE" NAME="charge.h" />
+    <FILE SHOWN="TRUE" NAME="balancer.c" />
+    <FILE SHOWN="TRUE" NAME="balancer.h" />
   </FILES>
   <SETTINGS>
     <ASSEMBLER_COMMAND VALUE="avr-gcc" />
