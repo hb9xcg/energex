@@ -30,11 +30,14 @@
 #include "delay.h"
 
 #define SUPERVISOR_STACK_SIZE  256
-#define NUMBER_OF_CELLS         10
+#define NUMBER_OF_CELLS        100
 #define SUPERVISOR_POWER      0x10
 #define SUPERVISOR_WAKEUP     0x80
-#define SEND_ERROR            0x01
-#define RECV_ERROR            0x02
+#define ERROR_SEND            0x01
+#define ERROR_RECV            0x02
+#define ERROR_OFF             0x04
+
+
 
 uint8_t supervisor_stack[SUPERVISOR_STACK_SIZE];
 static Tcb_t * supervisor_thread;
@@ -77,43 +80,53 @@ void supervisor_deactivate()
 
 void supervisor(void)
 {
+	int slave;
+	
 	for(;;)
 	{
 		if(active)
 		{
-			int slave;
-			for( slave=1; slave<=NUMBER_OF_CELLS; slave++)
+			for( slave=89; slave<=89; slave++)
 			{
 				if(!active)
 					break;
-				measure_voltage(89);
+				power_pack[slave-1].error &= ~ERROR_OFF;
+				measure_voltage(slave);
 				if( i2c_wait() != TW_NO_INFO)
 				{
 					// send error
-					power_pack[slave-1].error |= SEND_ERROR;
+					power_pack[slave-1].error |= ERROR_SEND;
 				}
 				else
 				{
-					power_pack[slave-1].error &= ~SEND_ERROR;
+					power_pack[slave-1].error &= ~ERROR_SEND;
 				}
 			}
 			
 			delay(1000);
 			
-			for( slave=1; slave<=NUMBER_OF_CELLS; slave++)
+			for( slave=89; slave<=89; slave++)
 			{
 				if(!active)
 					break;
-				power_pack[slave-1].voltage = read_voltage(89);
+				power_pack[slave-1].voltage = read_voltage(slave);
 				if( i2c_wait() != TW_NO_INFO)
 				{
 					// receive error
-					power_pack[slave-1].error |= RECV_ERROR;
+					power_pack[slave-1].error |= ERROR_RECV;
 				}
 				else
 				{
-					power_pack[slave-1].error &= ~RECV_ERROR;
+					power_pack[slave-1].error &= ~ERROR_RECV;
 				}
+			}
+		}
+		else
+		{
+			for( slave=1; slave<=NUMBER_OF_CELLS; slave++)
+			{
+				power_pack[slave-1].error |= ERROR_OFF;
+				power_pack[slave-1].voltage = 0;
 			}
 		}
 		delay(1000);
@@ -204,6 +217,7 @@ void supervisor_get_info(int8_t idx, cell_t* info)
 {
 	if( idx < NUMBER_OF_CELLS)
 	{
+		// TODO May be we copy the address later instead the values.
 		*info = power_pack[idx];
 	}
 }
@@ -212,3 +226,5 @@ int8_t supervisor_get_nbr_of_info(void)
 {
 	return NUMBER_OF_CELLS;
 }
+
+
