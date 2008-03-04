@@ -4,6 +4,9 @@ HEADERS += twikeanalyzer.h
 TEMPLATE = app
 CONFIG += warn_on \
 	  thread \
-          qt
+          qt \
+ debug
 TARGET = ../bin/twikeanalyzer
 RESOURCES = application.qrc
+CONFIG -= release
+
