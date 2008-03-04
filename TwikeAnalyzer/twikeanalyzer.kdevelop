@@ -25,6 +25,7 @@
     <tree>
       <hidenonprojectfiles>false</hidenonprojectfiles>
       <hidepatterns>*.o,*.lo,CVS</hidepatterns>
+      <showvcsfields>false</showvcsfields>
     </tree>
   </kdevfileview>
   <kdevcppsupport>
@@ -122,6 +123,15 @@
       <mainprogram>./bin/twikeanalyzer</mainprogram>
       <programargs/>
       <directoryradio>executable</directoryradio>
+      <runarguments>
+        <twikeanalyzer/>
+      </runarguments>
+      <cwd>
+        <twikeanalyzer>/home/markus/energex/trunk/TwikeAnalyzer</twikeanalyzer>
+      </cwd>
+      <debugarguments>
+        <twikeanalyzer/>
+      </debugarguments>
     </run>
     <general>
       <activedir>src</activedir>
@@ -158,6 +168,6 @@
     <QMAKE>/usr/bin/qmake</QMAKE>
     <VERSION>0.1</VERSION>
     <YEAR>2008</YEAR>
-    <dest>/home/markus/Atmel/energex/trunk/TwikeAnalyzer</dest>
+    <dest>/home/markus/energex/trunk/TwikeAnalyzer</dest>
   </substmap>
 </kdevelop>
