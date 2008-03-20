@@ -92,10 +92,10 @@ bool TwikeAnalyzer::saveAs()
 
 void TwikeAnalyzer::about()
 {
-      QMessageBox::about(this, tr("About Application"),
-            tr("The <b>Application</b> example demonstrates how to "
-                  "write modern GUI applications using Qt, with a menu bar, "
-                  "toolbars, and a status bar."));
+      QMessageBox::about(this, tr("About TwikeAnalyzer"),
+            tr("<b>TwikeAnalyzer</b> can be used "
+                  "to record and analyze the Twike RS485 "
+                  "protocoll."));
 }
 
 void TwikeAnalyzer::documentWasModified()
