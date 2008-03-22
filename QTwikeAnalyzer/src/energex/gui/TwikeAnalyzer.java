@@ -1,4 +1,4 @@
-package energex;
+package energex.gui;
 
 import com.trolltech.qt.core.QDataStream;
 import com.trolltech.qt.core.QFile;
