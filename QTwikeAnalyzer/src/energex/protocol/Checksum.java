@@ -11,7 +11,7 @@ public class Checksum {
 	EChecksum decodeChecksum(QByteArray data) {
 		EChecksum eChecksum = EChecksum.INVALID;
 		short checksum = 0;
-		for(int i=2; i<data.size()-3; i++) {
+		for(int i=2; i<data.size(); i++) {
 			byte checkByte = data.at(i);
 			checksum ^= checkByte;
 		}

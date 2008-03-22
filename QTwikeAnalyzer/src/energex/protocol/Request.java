@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.trolltech.qt.core.QByteArray;
+import com.trolltech.qt.core.QRegExp;
 
 public class Request {
 	Map<Short,String> typeToDesc = new HashMap<Short, String>();
@@ -35,6 +36,7 @@ public class Request {
 	static final	short LEISTUNG           = 0x29;
 	static final	short BATTERIE_TEMP      = 0x2a;
 	static final	short FINFO              = 0x2b;
+	static final short SYM_SPANNUNG       = 0x31;
 			
 	static final	short TEILSPANNUNG1      = 0x32;
 	static final	short TEILSPANNUNG2      = 0x33;
@@ -169,6 +171,7 @@ public class Request {
 		typeToDesc.put(LEISTUNG,         "LEISTUNG");
 		typeToDesc.put(BATTERIE_TEMP,    "BATTERIE_TEMP");
 		typeToDesc.put(FINFO,            "FINFO");
+		typeToDesc.put(SYM_SPANNUNG,     "SYM_SPANNUNG");		
 				
 		typeToDesc.put(TEILSPANNUNG1,    "TEILSPANNUNG1");
 		typeToDesc.put(TEILSPANNUNG2,    "TEILSPANNUNG1");
@@ -283,5 +286,39 @@ public class Request {
 			description = "UNKNOWN";
 		}
 		return description;		
+	}
+
+	public short requestType(QByteArray data) {
+		return data.at(3);
+	}
+	
+	public String getUnit(short type) {
+		String description = typeToDesc.get(type);
+		
+		String unit = "";
+		
+		if( description != null) {
+			QRegExp regSpannung   = new QRegExp("(SPG|SPANNUNG|SPNG)");
+			QRegExp regStrom      = new QRegExp("(STROM|STRM)");
+			QRegExp regTemperatur = new QRegExp("(TEMPERATUR|TEMP)");
+			QRegExp regCharge     = new QRegExp("(KAPAZITAET|Q|AH)");
+			QRegExp regPower     = new QRegExp("(LEISTUNG)");
+			if( regSpannung.indexIn(description) != -1) {
+				unit = "V";
+			} 
+			else if( regStrom.indexIn(description) != -1) {
+				unit = "A";
+			}
+			else if( regTemperatur.indexIn(description) != -1) {
+				unit = "°C";
+			}
+			else if( regCharge.indexIn(description) != -1) {
+				unit = "Ah";
+			}
+			else if( regPower.indexIn(description) != -1) {
+				unit = "W";
+			}
+		}		
+		return unit;
 	}
 }
