@@ -52,6 +52,14 @@ public class TwikeAnalyzer extends QMainWindow{
         ui.setupUi(this);
     }
 	
+	public void on_actionExit_triggered() {
+    	try {
+			port.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+    }
+	
 	public void on_actionRecord_triggered() {
     	try {
 			port.open();
