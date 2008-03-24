@@ -11,7 +11,7 @@
 	<classpathentry kind="src" path="Generated JUIC files"/>
 	<classpathentry kind="lib" path="lib/RXTXcomm.jar">
 		<attributes>
-			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="/home/markus/Download/rxtx-2.1-7-bins-r2/Linux/i686-unknown-linux-gnu"/>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="/home/markus/.eclipse/QTwikeAnalyzer/lib"/>
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="output" path="bin"/>
