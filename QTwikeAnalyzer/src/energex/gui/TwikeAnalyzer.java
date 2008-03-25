@@ -19,9 +19,13 @@
  ***************************************************************************/
 package energex.gui;
 
+import java.util.List;
+
+import com.trolltech.qt.core.QCoreApplication;
 import com.trolltech.qt.core.QDataStream;
 import com.trolltech.qt.core.QFile;
 import com.trolltech.qt.core.QIODevice;
+import com.trolltech.qt.core.QSettings;
 import com.trolltech.qt.gui.*;
 
 import energex.communication.TwikePort;
@@ -31,8 +35,8 @@ public class TwikeAnalyzer extends QMainWindow{
 
     Ui_TwikeAnalyzerClass ui = new Ui_TwikeAnalyzerClass();
     QDataStream binaryStream;
+    TwikePort port = null;
     
-    TwikePort port = new TwikePort("/dev/ttyS0");
     
     public static void main(String[] args) {
         QApplication.initialize(args);
@@ -43,8 +47,10 @@ public class TwikeAnalyzer extends QMainWindow{
     
     public TwikeAnalyzer(){
         ui.setupUi(this);
+        QCoreApplication.setOrganizationName("Energex");
+        QCoreApplication.setApplicationName("QTwikeAnalyzer");
         QStyle style = QStyleFactory.create("Plastique");
-        QApplication.setStyle(style);
+        QApplication.setStyle(style);        
     }
     
 	public TwikeAnalyzer(QWidget parent){
@@ -59,6 +65,17 @@ public class TwikeAnalyzer extends QMainWindow{
 			e.printStackTrace();
 		}
     }
+	
+	public void on_actionSettings_triggered() {
+		SettingsDialog settingsDialog = new SettingsDialog(this);
+		
+    	if (settingsDialog.exec() != 0)
+    	{ 
+    		String portName = settingsDialog.getPortName();
+    		//String name = settings()
+    		port = new TwikePort(settingsDialog.getPort());
+    	}
+	}
 	
 	public void on_actionRecord_triggered() {
     	try {

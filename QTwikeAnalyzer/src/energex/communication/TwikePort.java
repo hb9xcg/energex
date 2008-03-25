@@ -30,54 +30,42 @@ import gnu.io.SerialPort;
 import gnu.io.UnsupportedCommOperationException;
 
 public class TwikePort {
-	String wantedPortName = null;
 	BufferedReader is = null;
 	PrintStream    os = null;
 	SerialPort port = null;
+	CommPortIdentifier portId = null;
 
-	public TwikePort(String portName) {
-		//
-		// Platform specific port name, here a Unix name
-		//
-		// NOTE: On at least one Unix JavaComm implementation JavaComm 
-		//		       enumerates the ports as "COM1" ... "COMx", too, and not
-		//		       by their Unix device names "/dev/tty...". 
-		//		       Yet another good reason to not hard-code the wanted
-		//		       port, but instead make it user configurable.
-		//
-		wantedPortName = portName;
+	public TwikePort(CommPortIdentifier portId) {
+		this.portId = portId;
 	}
 	
-	public void open() throws IOException, UnsupportedCommOperationException {
-		//
+	@SuppressWarnings("unchecked")
+	public TwikePort(String portName) {
 		// Get an enumeration of all ports known to JavaComm
 		//
 		Enumeration portIdentifiers = CommPortIdentifier.getPortIdentifiers();
-		//
+		
 		// Check each port identifier if 
 		//   (a) it indicates a serial (not a parallel) port, and
 		//   (b) matches the desired name.
 		//
-		CommPortIdentifier portId = null;  // will be set if port found
 		while (portIdentifiers.hasMoreElements())
 		{
 		    CommPortIdentifier pid = (CommPortIdentifier) portIdentifiers.nextElement();
-		    if(pid.getPortType() == CommPortIdentifier.PORT_SERIAL &&
-		       pid.getName().equals(wantedPortName)) 
-		    {
-		        portId = pid;
-		        break;
+		    if( pid.getPortType() == CommPortIdentifier.PORT_SERIAL &&
+		    	 pid.getName().equals(portName) ) {
+		    	portId = pid;
+		    	break;
 		    }
 		}
+	}
+
+	public void open() throws IOException, UnsupportedCommOperationException {
 		if(portId == null)
 		{
-		    System.err.println("Could not find serial port " + wantedPortName);
+		    System.err.println("No serial port specifeid");
 		    System.exit(1);
 		}
-		//
-		// Use port identifier for acquiring the port
-		//
-//-------------------------------------------------------------------------------		
 		//
 		// Use port identifier for acquiring the port
 		//
@@ -90,24 +78,19 @@ public class TwikePort {
 		    System.err.println("Port already in use: " + e);
 		    System.exit(1);
 		}
-		//
 		// Now we are granted exclusive access to the particular serial
 		// port. We can configure it and obtain input and output streams.
 		//
 		
-//-------------------------------------------------------------------------------		
-		
-		//
+
 		// Set all the params.  
 		// This may need to go in a try/catch block which throws UnsupportedCommOperationException
-		//
 		port.setSerialPortParams(
 		    2400,
 		    SerialPort.DATABITS_8,
 		    SerialPort.STOPBITS_1,
 		    SerialPort.PARITY_NONE);
 
-		//
 		// Open the input Reader and output stream. The choice of a
 		// Reader and Stream are arbitrary and need to be adapted to
 		// the actual application. Typically one would use Streams in
