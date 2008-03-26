@@ -19,8 +19,7 @@
  ***************************************************************************/
 package energex.gui;
 
-import java.util.List;
-
+import java.io.IOException;
 import com.trolltech.qt.core.QCoreApplication;
 import com.trolltech.qt.core.QDataStream;
 import com.trolltech.qt.core.QFile;
@@ -40,6 +39,10 @@ public class TwikeAnalyzer extends QMainWindow{
     
     public static void main(String[] args) {
         QApplication.initialize(args);
+        
+        QCoreApplication.setOrganizationName("Energex");
+        QCoreApplication.setApplicationName("QTwikeAnalyzer");
+		
         TwikeAnalyzer testTwikeAnalyzer = new TwikeAnalyzer();
         testTwikeAnalyzer.show();
         QApplication.exec();
@@ -47,10 +50,23 @@ public class TwikeAnalyzer extends QMainWindow{
     
     public TwikeAnalyzer(){
         ui.setupUi(this);
-        QCoreApplication.setOrganizationName("Energex");
-        QCoreApplication.setApplicationName("QTwikeAnalyzer");
+
         QStyle style = QStyleFactory.create("Plastique");
-        QApplication.setStyle(style);        
+        QApplication.setStyle(style);     
+        
+        // restore current default
+        QSettings settings = new QSettings();
+		String storedPort = (String) settings.value("Port");
+		
+		if(storedPort!=null) {
+			port = new TwikePort(storedPort);
+			ui.actionRecord.setEnabled(true);
+		} else {
+			ui.actionRecord.setEnabled(false);
+		}
+		ui.actionPlay.setEnabled(false);
+		ui.actionPause.setEnabled(false);
+		ui.actionStop.setEnabled(false);
     }
     
 	public TwikeAnalyzer(QWidget parent){
@@ -60,7 +76,9 @@ public class TwikeAnalyzer extends QMainWindow{
 	
 	public void on_actionExit_triggered() {
     	try {
-			port.close();
+    		if(port!=null && port.isOpen()) {
+    			port.close();
+    		}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -71,8 +89,13 @@ public class TwikeAnalyzer extends QMainWindow{
 		
     	if (settingsDialog.exec() != 0)
     	{ 
-    		String portName = settingsDialog.getPortName();
-    		//String name = settings()
+    		if(port!=null && port.isOpen()) {
+    			try {
+					port.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+    		}
     		port = new TwikePort(settingsDialog.getPort());
     	}
 	}

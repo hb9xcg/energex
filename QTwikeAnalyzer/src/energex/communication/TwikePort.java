@@ -34,6 +34,7 @@ public class TwikePort {
 	PrintStream    os = null;
 	SerialPort port = null;
 	CommPortIdentifier portId = null;
+	boolean opened = false;
 
 	public TwikePort(CommPortIdentifier portId) {
 		this.portId = portId;
@@ -114,6 +115,7 @@ public class TwikePort {
 		// Actual data communication would happen here
 		// performReadWriteCode();
 		//
+		opened = true;
 	}
 	
 	public void close() throws IOException {
@@ -124,5 +126,11 @@ public class TwikePort {
 		if (is != null) is.close();
 		if (os != null) os.close();
 		if (port != null) port.close();
+		opened = false;
+	}
+	
+	public boolean isOpen() {
+		return opened;
+		
 	}
 }
