@@ -28,13 +28,16 @@ import com.trolltech.qt.core.QSettings;
 import com.trolltech.qt.gui.*;
 
 import energex.communication.TwikePort;
-import energex.protocol.Decoder;
+import energex.protocol.DataInterface;
+import energex.protocol.OfflineDecoder;
+import energex.protocol.OnlineDecoder;
 
-public class TwikeAnalyzer extends QMainWindow{
+public class TwikeAnalyzer extends QMainWindow implements DataInterface {
 
     Ui_TwikeAnalyzerClass ui = new Ui_TwikeAnalyzerClass();
     QDataStream binaryStream;
     TwikePort port = null;
+    OnlineDecoder onlineDecoder = null;
     
     
     public static void main(String[] args) {
@@ -102,11 +105,12 @@ public class TwikeAnalyzer extends QMainWindow{
 	
 	public void on_actionRecord_triggered() {
     	try {
-			port.open();
+    		onlineDecoder = new OnlineDecoder(this);
+			port.open(onlineDecoder);
 			ui.actionRecord.setEnabled(false);
 			ui.actionPlay.setEnabled(false);
 			ui.actionPause.setEnabled(true);
-			ui.actionStop.setEnabled(true);
+			ui.actionStop.setEnabled(true);			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -137,6 +141,7 @@ public class TwikeAnalyzer extends QMainWindow{
 			ui.actionPlay.setEnabled(false);
 			ui.actionPause.setEnabled(false);
 			ui.actionStop.setEnabled(false);
+			onlineDecoder = null;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -160,7 +165,12 @@ public class TwikeAnalyzer extends QMainWindow{
     	}
     	
     	QDataStream binaryStream = new QDataStream( file ); // we will serialize the data into the file
-    	Decoder decoder = new Decoder();
-    	ui.logTable.setModel(decoder.decode(binaryStream));
+    	OfflineDecoder decoder = new OfflineDecoder();
+    	ui.logTable.setModel(decoder.decodeOffline(binaryStream));
     }
+
+	@Override
+	public void updateData(QStandardItemModel model) {
+		ui.logTable.setModel(model);		
+	}
 }

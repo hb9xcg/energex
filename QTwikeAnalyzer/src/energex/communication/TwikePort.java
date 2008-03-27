@@ -19,23 +19,27 @@
  ***************************************************************************/
 package energex.communication;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Enumeration;
+
 import gnu.io.CommPortIdentifier;
 import gnu.io.PortInUseException;
 import gnu.io.SerialPort;
+import gnu.io.SerialPortEvent;
+import gnu.io.SerialPortEventListener;
 import gnu.io.UnsupportedCommOperationException;
 
-public class TwikePort {
-	BufferedReader is = null;
-	PrintStream    os = null;
-	SerialPort port = null;
-	CommPortIdentifier portId = null;
-	boolean opened = false;
-
+public class TwikePort implements SerialPortEventListener{
+	private InputStream inputStream;
+	private OutputStream outputStream;
+	private SerialPort port = null;
+	private CommPortIdentifier portId = null;
+	private boolean opened = false;
+	private ReceiverInterface receiver;
+	
+	
 	public TwikePort(CommPortIdentifier portId) {
 		this.portId = portId;
 	}
@@ -61,7 +65,7 @@ public class TwikePort {
 		}
 	}
 
-	public void open() throws IOException, UnsupportedCommOperationException {
+	public void open(ReceiverInterface receiver) throws IOException, UnsupportedCommOperationException {
 		if(portId == null)
 		{
 		    System.err.println("No serial port specifeid");
@@ -99,12 +103,12 @@ public class TwikePort {
 		// not only character data transfer.
 		//
 		try {
-		  is = new BufferedReader(new InputStreamReader(port.getInputStream()));
+		  inputStream = port.getInputStream();
 		} catch (IOException e) {
 		  System.err.println("Can't open input stream: write-only");
-		  is = null;
+		  inputStream = null;
 		}
-		os = new PrintStream(port.getOutputStream(), true);
+		outputStream = port.getOutputStream();
 
 		// New Linuxes rely on UNICODE and it is possible you need to specify here the encoding scheme to be used
 		// for example : 
@@ -116,6 +120,7 @@ public class TwikePort {
 		// performReadWriteCode();
 		//
 		opened = true;
+		this.receiver = receiver;
 	}
 	
 	public void close() throws IOException {
@@ -123,14 +128,89 @@ public class TwikePort {
 		// It is very important to close output/input streams as well as the port.
 		// Otherwise Java, driver and OS resources are not released.
 		//
-		if (is != null) is.close();
-		if (os != null) os.close();
-		if (port != null) port.close();
+		if (inputStream != null) { 
+			inputStream.close();
+		}
+		if (outputStream != null) {
+			outputStream.close();
+		}
+		if (port != null) { 
+			port.close();
+		}
 		opened = false;
+		receiver = null;
 	}
 	
 	public boolean isOpen() {
 		return opened;
+	}
+
+	@Override
+	public void serialEvent(SerialPortEvent event) {
+        //
+        // Dispatch event to individual methods, to avoid a
+        // cluttered, messy switch/case statement.
+        //
+        switch(event.getEventType()) {
+            case SerialPortEvent.OUTPUT_BUFFER_EMPTY:
+                outputBufferEmpty(event);
+                break;
+
+            case SerialPortEvent.DATA_AVAILABLE:
+                dataAvailable(event);
+                break;
+
+/* Other events, not implemented here ->
+            case SerialPortEvent.BI:
+                breakInterrupt(event);
+                break;
+
+            case SerialPortEvent.CD:
+                carrierDetect(event);
+                break;
+
+            case SerialPortEvent.CTS:
+                clearToSend(event);
+                break;
+
+            case SerialPortEvent.DSR:
+                dataSetReady(event);
+                break;
+
+            case SerialPortEvent.FE:
+                framingError(event);
+                break;
+
+            case SerialPortEvent.OE:
+                overrunError(event);
+                break;
+
+            case SerialPortEvent.PE:
+                parityError(event);
+                break;
+            case SerialPortEvent.RI:
+                ringIndicator(event);
+                break;
+<- other events, not implemented here */
+
+        }
 		
+	}
+
+	private void outputBufferEmpty(SerialPortEvent event) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void dataAvailable(SerialPortEvent event) {
+		byte data = 0;
+    	try{
+            while (inputStream.available() > 0) {
+            	data = (byte) inputStream.read();
+            	receiver.receiveData(data);
+            }
+        }catch(IOException e){
+            System.out.print(e);
+        }
 	}
 }

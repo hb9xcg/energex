@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.trolltech.qt.core.QByteArray;
-import com.trolltech.qt.core.QDataStream;
 import com.trolltech.qt.core.QTime;
 import com.trolltech.qt.core.Qt;
 import com.trolltech.qt.gui.QBrush;
@@ -31,29 +30,36 @@ import com.trolltech.qt.gui.QColor;
 import com.trolltech.qt.gui.QStandardItem;
 import com.trolltech.qt.gui.QStandardItemModel;
 
+import energex.communication.ReceiverInterface;
 import energex.protocol.Checksum.EChecksum;
-import energex.protocol.Address;
-import exceptions.EndOfFileException;
 
-public class Decoder {
+public class OnlineDecoder implements ReceiverInterface {
 	List<String> labels = new ArrayList<String>();
 	QStandardItemModel model;
 	int currentRow;
-	EType currentType = EType.UNKNOWN;
 	short currentRequest;
+	EType currentType;
 	QByteArray currentData;
 	Request requestDecoder = new Request();
 	Checksum checksumDecoder = new Checksum();
 	Address addressDecoder = new Address();
 	Response responseDecoder = new Response();
-	
-
+	DataInterface table;
+	byte currentStartByte;
+	byte currentAddressByte;
+	byte currentTypeByte;
 	
 	enum EState {
 		eMessage,
 		eRequest,
 		eResponse,
 		eUnknown
+	}
+	
+	enum EHeaderState {
+		eStart,
+		eType,
+		eAddress
 	}
 	
 	enum EType {
@@ -64,8 +70,9 @@ public class Decoder {
 	}
 	
 	EState eState;
+	EHeaderState eHeaderState;
 	
-	public Decoder() {
+	public OnlineDecoder(DataInterface table) {
 		labels.add("Time");
 	    labels.add("Paket");
 	    labels.add("Address");
@@ -74,25 +81,15 @@ public class Decoder {
 	    labels.add("Checksum");
 	    
 	    eState = EState.eUnknown;
-	}
-	
-	public QStandardItemModel decode(QDataStream input) {
-		try {
-			currentRow = -1;
-			int nbrOfColumns = labels.size();
-			model = new QStandardItemModel(1, nbrOfColumns);
-			
-			do {
-				decodeHeader(input);				
-			} while(!input.atEnd());	    
-		} catch (Exception e) {
-			model.removeRow(currentRow);
-		}
+	    eHeaderState = EHeaderState.eStart;
 	    
+		currentRow = -1; // Skip first chunk
+		int nbrOfColumns = labels.size();
+		model = new QStandardItemModel(1, nbrOfColumns);
 	    model.setHorizontalHeaderLabels(labels);
-	    
-		return model;
-	}
+	    this.table = table;
+	    table.updateData(model);
+	}    
 	
 	private void unknowType() {
 		QStandardItem msgItem   = new QStandardItem( "Unknown type");
@@ -147,8 +144,6 @@ public class Decoder {
 		Checksum.EChecksum eChecksum = checksumDecoder.decodeChecksum(data);		
 		addChecksum(eChecksum);		
 	}
-
-	
 	
 	private boolean isStart(byte start) {
 		return (start==0x10);
@@ -156,60 +151,6 @@ public class Decoder {
 	
 	private boolean isType(byte type) {
 		return type==0x42 || type==0x48 || type==0x24;
-	}
-
-	private EType decodeHeader(QDataStream input) throws Exception {
-		Byte start, address, type;
-		if(currentRow<0) {
-			currentData = new QByteArray();
-		}
-		do {
-			do {
-				do {
-					start = input.readByte();
-					currentData.append(start);					
-					if(input.atEnd())
-						throw new EndOfFileException("Reached input stream end");
-				} while( !isStart(start) );
-				address = input.readByte();
-				currentData.append(address);
-			} while(!addressDecoder.isAddress(address));
-			type = input.readByte();
-			currentData.append(start);
-		} while(!isType(type));
-		
-		// Ignore first chunk
-		if(currentRow>=0) {
-			String rawPacket = new String();
-			for(int idx=0; idx<currentData.size()-3; idx++) {
-				rawPacket += byteToHexString(currentData.at(idx)) + " ";
-			}
-			// Dump last raw packet...
-			QStandardItem packetItem = new QStandardItem(rawPacket);
-			model.setItem(currentRow, 1, packetItem);
-			QByteArray data = currentData;
-			data.chop(3);
-			decodeContent(data);
-		}
-		currentData = new QByteArray();
-		
-		currentRow++;
-		currentType = getType(type);
-		
-		currentData.append(start);
-		currentData.append(address);
-		currentData.append(type);
-		
-		QStandardItem timeItem   = new QStandardItem(QTime.currentTime().toString());
-		QStandardItem addrItem   = new QStandardItem(addressDecoder.decodeAddress(address));
-
-		model.setItem(currentRow, 0, timeItem);	
-		model.setItem(currentRow, 2, addrItem);
-	
-		QStandardItem typeItem   = new QStandardItem(currentType.toString());
-		model.setItem(currentRow, 3, typeItem);
-		
-		return currentType;
 	}
 	
 	private void decodeContent(QByteArray data) {
@@ -261,5 +202,84 @@ public class Decoder {
 			break;
 		}
 		return eType;
-	}	
+	}
+
+	@Override
+	public void receiveData(byte data) {
+		boolean newFrame = false;
+		
+		if(currentRow<0) {
+			currentData = new QByteArray();
+		}
+		
+		switch(eHeaderState) 
+		{
+		case eStart:
+			if( isStart(data) ) {
+				eHeaderState = EHeaderState.eAddress;
+				currentStartByte = data;
+			}
+			break;
+		case eAddress:
+			if( addressDecoder.isAddress(data) ) {
+				eHeaderState = EHeaderState.eType;
+				currentAddressByte = data;
+			} else {
+				eHeaderState = EHeaderState.eStart;
+			}
+			break;
+		case eType:
+			if( isType(data) ) {
+				eHeaderState = EHeaderState.eStart;
+				currentTypeByte = data;
+				newFrame = true;
+			} 
+			break;
+		}
+		
+		currentData.append(data);
+		
+		if(newFrame) {
+			if (currentRow >= 0) {
+				processPacket();
+			} else {
+				// Skip first chunk
+				currentRow++;
+			}
+		}	
+	}
+	
+	public void processPacket() {
+		// Ignore first chunk
+		String rawPacket = new String();
+		currentData.chop(3);
+		for(int idx=0; idx<currentData.size(); idx++) {
+			rawPacket += byteToHexString(currentData.at(idx)) + " ";
+		}
+		// Dump last raw packet...
+		QStandardItem packetItem = new QStandardItem(rawPacket);
+		model.setItem(currentRow, 1, packetItem);
+		
+		decodeContent(currentData);
+		
+		table.updateData(model);
+		
+		
+		// Prepare next packet
+		currentData = new QByteArray();
+		currentRow++;
+		currentData.append(currentStartByte);
+		currentData.append(currentAddressByte);
+		currentData.append(currentTypeByte);	
+		
+		QStandardItem timeItem   = new QStandardItem(QTime.currentTime().toString());
+		QStandardItem addrItem   = new QStandardItem(addressDecoder.decodeAddress(currentAddressByte));
+
+		model.setItem(currentRow, 0, timeItem);	
+		model.setItem(currentRow, 2, addrItem);
+
+		currentType = getType(currentTypeByte);
+		QStandardItem typeItem   = new QStandardItem(currentType.toString());
+		model.setItem(currentRow, 3, typeItem);
+	}
 }
