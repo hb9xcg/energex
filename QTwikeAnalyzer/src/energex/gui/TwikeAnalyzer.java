@@ -63,10 +63,10 @@ public class TwikeAnalyzer extends QMainWindow implements DataInterface {
 		
 		if(storedPort!=null) {
 			port = new TwikePort(storedPort);
-			ui.actionRecord.setEnabled(true);
-		} else {
-			ui.actionRecord.setEnabled(false);
+			ui.statusBar.showMessage("Using serial port " + storedPort);
 		}
+		
+		ui.actionRecord.setEnabled(port!=null);
 		ui.actionPlay.setEnabled(false);
 		ui.actionPause.setEnabled(false);
 		ui.actionStop.setEnabled(false);
@@ -100,6 +100,7 @@ public class TwikeAnalyzer extends QMainWindow implements DataInterface {
 				}
     		}
     		port = new TwikePort(settingsDialog.getPort());
+    		ui.statusBar.showMessage("Using serial port "+settingsDialog.getPortName());
     	}
 	}
 	
@@ -167,6 +168,12 @@ public class TwikeAnalyzer extends QMainWindow implements DataInterface {
     	QDataStream binaryStream = new QDataStream( file ); // we will serialize the data into the file
     	OfflineDecoder decoder = new OfflineDecoder();
     	ui.logTable.setModel(decoder.decodeOffline(binaryStream));
+    }
+    
+    public void on_actionAbout_triggered() {
+    	AboutDialog aboutDialog = new AboutDialog(this);
+		
+    	aboutDialog.exec();
     }
 
 	@Override
