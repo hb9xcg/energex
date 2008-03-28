@@ -21,6 +21,11 @@ package exceptions;
 
 public class EndOfFileException extends Exception {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	public EndOfFileException(String string) {
 		super(string);
 	}
