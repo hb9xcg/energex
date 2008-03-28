@@ -23,28 +23,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.trolltech.qt.core.QByteArray;
-import com.trolltech.qt.core.QTime;
-import com.trolltech.qt.core.Qt;
-import com.trolltech.qt.gui.QBrush;
-import com.trolltech.qt.gui.QColor;
-import com.trolltech.qt.gui.QStandardItem;
-import com.trolltech.qt.gui.QStandardItemModel;
-
 import energex.communication.ReceiverInterface;
-import energex.protocol.Checksum.EChecksum;
 
 public class OnlineDecoder implements ReceiverInterface {
 	List<String> labels = new ArrayList<String>();
-	QStandardItemModel model;
 	int currentRow;
 	short currentRequest;
-	EType currentType;
+	EType currentType = EType.UNKNOWN;
 	QByteArray currentData;
 	Request requestDecoder = new Request();
 	Checksum checksumDecoder = new Checksum();
 	Address addressDecoder = new Address();
 	Response responseDecoder = new Response();
 	DataInterface table;
+	DataPacket currentPacket;
 	byte currentStartByte;
 	byte currentAddressByte;
 	byte currentTypeByte;
@@ -84,46 +76,24 @@ public class OnlineDecoder implements ReceiverInterface {
 	    eHeaderState = EHeaderState.eStart;
 	    
 		currentRow = -1; // Skip first chunk
-		int nbrOfColumns = labels.size();
-		model = new QStandardItemModel(1, nbrOfColumns);
-	    model.setHorizontalHeaderLabels(labels);
-	    this.table = table;
-	    table.updateData(model);
-	}    
-	
-	private void unknowType() {
-		QStandardItem msgItem   = new QStandardItem( "Unknown type");
-		model.setItem(currentRow, 4, msgItem);
+		
+		this.table = table;
+		
+		//createTableModel(); 
 	}
 	
-	private void addChecksum(EChecksum eChecksum) {
-		QStandardItem chksumItem = new QStandardItem( eChecksum.toString());
-		
-		QBrush brush = new QBrush();
-        QColor color = new QColor();
-        if(eChecksum==EChecksum.INVALID) {
-        	color.setRed(180);
-        } else {
-        	color.setGreen(180);
-        }
-        brush.setColor(color);
-        brush.setStyle(Qt.BrushStyle.SolidPattern);
-        chksumItem.setBackground(brush);
-        
-        chksumItem.setTextAlignment(Qt.AlignmentFlag.AlignCenter);
-        
-        model.setItem(currentRow, 5, chksumItem);
+	private void unknowType() {
+		currentPacket.setContentData("Unknown type");
 	}
 
 	private void decodeResponse(QByteArray data) {
 		String description = responseDecoder.decodeResponse(currentRequest, data);
 		description = "Response " + description;
 		
-		QStandardItem requestItem = new QStandardItem(description);
-		model.setItem(currentRow, 4, requestItem);
+		currentPacket.setContentData(description);
 		
 		Checksum.EChecksum eChecksum = checksumDecoder.decodeChecksum(data);		
-		addChecksum(eChecksum);	
+		currentPacket.setChecksumData(eChecksum);	
 	}
 
 	private void decodeRequest(QByteArray data) {
@@ -131,18 +101,16 @@ public class OnlineDecoder implements ReceiverInterface {
 		String description = requestDecoder.decodeRequest(data);
 		description = "Request " + description;
 		
-		QStandardItem requestItem = new QStandardItem(description);
-		model.setItem(currentRow, 4, requestItem);
+		currentPacket.setContentData(description);
 		
 		Checksum.EChecksum eChecksum = checksumDecoder.decodeChecksum(data);
 		
-		addChecksum(eChecksum);
+		currentPacket.setChecksumData(eChecksum);
 	}
 
 	private void decodeMessage(QByteArray data) {
-		
 		Checksum.EChecksum eChecksum = checksumDecoder.decodeChecksum(data);		
-		addChecksum(eChecksum);		
+		currentPacket.setChecksumData(eChecksum);		
 	}
 	
 	private boolean isStart(byte start) {
@@ -171,19 +139,6 @@ public class OnlineDecoder implements ReceiverInterface {
 		}
 	}
 
-	private String byteToHexString(byte input) {
-		String hexString = Integer.toHexString(input);
-		if(hexString.length()!=2)
-		{
-			if( hexString.length()==1) {
-				hexString = "0" + hexString;
-			} else {
-				hexString = hexString.substring(6, 8);
-			}
-		}
-		return hexString;
-	}
-	
 	private EType getType(byte byteType) {
 		EType eType;
 
@@ -209,6 +164,7 @@ public class OnlineDecoder implements ReceiverInterface {
 		boolean newFrame = false;
 		
 		if(currentRow<0) {
+			// Create buffer for initial waste chunk
 			currentData = new QByteArray();
 		}
 		
@@ -243,43 +199,33 @@ public class OnlineDecoder implements ReceiverInterface {
 			if (currentRow >= 0) {
 				processPacket();
 			} else {
-				// Skip first chunk
+				// Skip first waste chunk
 				currentRow++;
 			}
 		}	
 	}
 	
 	public void processPacket() {
-		// Ignore first chunk
-		String rawPacket = new String();
-		currentData.chop(3);
-		for(int idx=0; idx<currentData.size(); idx++) {
-			rawPacket += byteToHexString(currentData.at(idx)) + " ";
-		}
-		// Dump last raw packet...
-		QStandardItem packetItem = new QStandardItem(rawPacket);
-		model.setItem(currentRow, 1, packetItem);
+		currentData.chop(3); // Cut off the next header
 		
-		decodeContent(currentData);
-		
-		table.updateData(model);
-		
+		if(currentPacket!=null) {
+			currentPacket.setRawData(currentData);
+			decodeContent(currentData);
+			table.updateData(currentPacket); // Moves ownership to main thread
+		}		
 		
 		// Prepare next packet
-		currentData = new QByteArray();
 		currentRow++;
+		currentPacket = new DataPacket(currentRow);
+		currentData   = new QByteArray();
+		
 		currentData.append(currentStartByte);
 		currentData.append(currentAddressByte);
 		currentData.append(currentTypeByte);	
 		
-		QStandardItem timeItem   = new QStandardItem(QTime.currentTime().toString());
-		QStandardItem addrItem   = new QStandardItem(addressDecoder.decodeAddress(currentAddressByte));
-
-		model.setItem(currentRow, 0, timeItem);	
-		model.setItem(currentRow, 2, addrItem);
-
 		currentType = getType(currentTypeByte);
-		QStandardItem typeItem   = new QStandardItem(currentType.toString());
-		model.setItem(currentRow, 3, typeItem);
+		
+		currentPacket.setAddressData(currentAddressByte);
+		currentPacket.setTypeData(currentType);
 	}
 }

@@ -27,6 +27,12 @@
       <property name="focusPolicy" >
        <enum>com.trolltech.qt.core.Qt.FocusPolicy.WheelFocus</enum>
       </property>
+      <property name="autoScroll" >
+       <bool>true</bool>
+      </property>
+      <property name="selectionBehavior" >
+       <enum>com.trolltech.qt.gui.QAbstractItemView.SelectionBehavior.SelectRows</enum>
+      </property>
      </widget>
     </item>
    </layout>
