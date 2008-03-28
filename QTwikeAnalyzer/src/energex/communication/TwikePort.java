@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Enumeration;
+import java.util.TooManyListenersException;
 
 import gnu.io.CommPortIdentifier;
 import gnu.io.PortInUseException;
@@ -121,6 +122,12 @@ public class TwikePort implements SerialPortEventListener{
 		//
 		opened = true;
 		this.receiver = receiver;
+		try {
+			port.addEventListener(this);
+		} catch (TooManyListenersException e) {
+			e.printStackTrace();
+		}
+		port.notifyOnDataAvailable(true);
 	}
 	
 	public void close() throws IOException {
@@ -198,8 +205,7 @@ public class TwikePort implements SerialPortEventListener{
 	}
 
 	private void outputBufferEmpty(SerialPortEvent event) {
-		// TODO Auto-generated method stub
-		
+
 	}
 
 	private void dataAvailable(SerialPortEvent event) {
@@ -207,7 +213,9 @@ public class TwikePort implements SerialPortEventListener{
     	try{
             while (inputStream.available() > 0) {
             	data = (byte) inputStream.read();
-            	receiver.receiveData(data);
+            	if(receiver!=null) {
+            		receiver.receiveData(data);
+            	}
             }
         }catch(IOException e){
             System.out.print(e);

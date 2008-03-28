@@ -20,6 +20,9 @@
 package energex.gui;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import com.trolltech.qt.core.QCoreApplication;
 import com.trolltech.qt.core.QDataStream;
 import com.trolltech.qt.core.QFile;
@@ -29,6 +32,7 @@ import com.trolltech.qt.gui.*;
 
 import energex.communication.TwikePort;
 import energex.protocol.DataInterface;
+import energex.protocol.DataPacket;
 import energex.protocol.OfflineDecoder;
 import energex.protocol.OnlineDecoder;
 
@@ -36,8 +40,10 @@ public class TwikeAnalyzer extends QMainWindow implements DataInterface {
 
     Ui_TwikeAnalyzerClass ui = new Ui_TwikeAnalyzerClass();
     QDataStream binaryStream;
-    TwikePort port = null;
-    OnlineDecoder onlineDecoder = null;
+    TwikePort port;
+    OnlineDecoder onlineDecoder;
+    List<String> labels = new ArrayList<String>();
+    QStandardItemModel model;
     
     
     public static void main(String[] args) {
@@ -70,6 +76,16 @@ public class TwikeAnalyzer extends QMainWindow implements DataInterface {
 		ui.actionPlay.setEnabled(false);
 		ui.actionPause.setEnabled(false);
 		ui.actionStop.setEnabled(false);
+		
+		labels.add("Time");
+	    labels.add("Paket");
+	    labels.add("Address");
+	    labels.add("Type");	    
+	    labels.add("Message");
+	    labels.add("Checksum");
+		
+		model = new QStandardItemModel(1, labels.size());
+	    model.setHorizontalHeaderLabels(labels);
     }
     
 	public TwikeAnalyzer(QWidget parent){
@@ -142,7 +158,7 @@ public class TwikeAnalyzer extends QMainWindow implements DataInterface {
 			ui.actionPlay.setEnabled(false);
 			ui.actionPause.setEnabled(false);
 			ui.actionStop.setEnabled(false);
-			onlineDecoder = null;
+			//onlineDecoder = null;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -177,7 +193,26 @@ public class TwikeAnalyzer extends QMainWindow implements DataInterface {
     }
 
 	@Override
-	public void updateData(QStandardItemModel model) {
-		ui.logTable.setModel(model);		
+	public void updateData(DataPacket data) {
+		QApplication.invokeLater(new UpdateTable(data));	
 	}
+	
+	class UpdateTable implements Runnable
+	{
+		DataPacket data;
+		
+		public UpdateTable(DataPacket data) {
+			this.data = data;
+//			this.data.moveToThread(QApplication.instance().thread());
+		}
+		
+		@Override
+	    public void run()
+	    { 
+			data.updateModel(model);
+	    	ui.logTable.setModel(model);
+	    }
+	}
+
+
 }

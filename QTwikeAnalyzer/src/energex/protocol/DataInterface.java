@@ -19,8 +19,6 @@
  ***************************************************************************/
 package energex.protocol;
 
-import com.trolltech.qt.gui.QStandardItemModel;
-
-public interface DataInterface {
-	public void updateData(QStandardItemModel model);
+public interface DataInterface  {
+	void updateData(DataPacket data);
 }
