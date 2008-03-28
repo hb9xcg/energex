@@ -27,7 +27,13 @@
       <property name="focusPolicy" >
        <enum>com.trolltech.qt.core.Qt.FocusPolicy.WheelFocus</enum>
       </property>
+      <property name="verticalScrollBarPolicy" >
+       <enum>com.trolltech.qt.core.Qt.ScrollBarPolicy.ScrollBarAsNeeded</enum>
+      </property>
       <property name="autoScroll" >
+       <bool>true</bool>
+      </property>
+      <property name="alternatingRowColors" >
        <bool>true</bool>
       </property>
       <property name="selectionBehavior" >

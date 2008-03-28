@@ -27,6 +27,7 @@ import com.trolltech.qt.core.QCoreApplication;
 import com.trolltech.qt.core.QDataStream;
 import com.trolltech.qt.core.QFile;
 import com.trolltech.qt.core.QIODevice;
+import com.trolltech.qt.core.QModelIndex;
 import com.trolltech.qt.core.QSettings;
 import com.trolltech.qt.gui.*;
 
@@ -44,6 +45,7 @@ public class TwikeAnalyzer extends QMainWindow implements DataInterface {
     OnlineDecoder onlineDecoder;
     List<String> labels = new ArrayList<String>();
     QStandardItemModel model;
+    boolean recordingPaused;
     
     
     public static void main(String[] args) {
@@ -122,12 +124,14 @@ public class TwikeAnalyzer extends QMainWindow implements DataInterface {
 	
 	public void on_actionRecord_triggered() {
     	try {
+    		model.clear();
     		onlineDecoder = new OnlineDecoder(this);
 			port.open(onlineDecoder);
 			ui.actionRecord.setEnabled(false);
 			ui.actionPlay.setEnabled(false);
 			ui.actionPause.setEnabled(true);
-			ui.actionStop.setEnabled(true);			
+			ui.actionStop.setEnabled(true);
+			recordingPaused = false;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -137,6 +141,7 @@ public class TwikeAnalyzer extends QMainWindow implements DataInterface {
     	try {
 			ui.actionPlay.setEnabled(true);
 			ui.actionPause.setEnabled(false);
+			recordingPaused = true;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -146,6 +151,7 @@ public class TwikeAnalyzer extends QMainWindow implements DataInterface {
     	try {
 			ui.actionPlay.setEnabled(false);
 			ui.actionPause.setEnabled(true);
+			recordingPaused = false;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -158,7 +164,7 @@ public class TwikeAnalyzer extends QMainWindow implements DataInterface {
 			ui.actionPlay.setEnabled(false);
 			ui.actionPause.setEnabled(false);
 			ui.actionStop.setEnabled(false);
-			//onlineDecoder = null;
+			onlineDecoder = null;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -211,6 +217,9 @@ public class TwikeAnalyzer extends QMainWindow implements DataInterface {
 	    { 
 			data.updateModel(model);
 	    	ui.logTable.setModel(model);
+	    	if(!recordingPaused) {
+	    		ui.logTable.scrollToBottom();
+	    	}
 	    }
 	}
 
