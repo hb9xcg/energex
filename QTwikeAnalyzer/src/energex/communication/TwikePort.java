@@ -135,6 +135,8 @@ public class TwikePort implements SerialPortEventListener{
 		// It is very important to close output/input streams as well as the port.
 		// Otherwise Java, driver and OS resources are not released.
 		//
+		port.removeEventListener();
+		
 		if (inputStream != null) { 
 			inputStream.close();
 		}

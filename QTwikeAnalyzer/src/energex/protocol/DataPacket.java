@@ -105,4 +105,8 @@ public class DataPacket {
 		}
 		return hexString;
 	}
+
+	public int getRow() {
+		return row;		
+	}
 }
