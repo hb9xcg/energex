@@ -27,7 +27,6 @@ import com.trolltech.qt.core.QCoreApplication;
 import com.trolltech.qt.core.QDataStream;
 import com.trolltech.qt.core.QFile;
 import com.trolltech.qt.core.QIODevice;
-import com.trolltech.qt.core.QModelIndex;
 import com.trolltech.qt.core.QSettings;
 import com.trolltech.qt.gui.*;
 
