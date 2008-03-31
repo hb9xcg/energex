@@ -1,18 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="var" path="JAMBI_LOCATION/qtjambi-4.4.0_01.jar">
-		<attributes>
-			<attribute name="javadoc_location" value="file:/opt/qtjambi-linux32-gpl-4.3.3_01/doc/html"/>
-			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="/opt/qtjambi-linux32-preview-4.4.0_01/lib"/>
-		</attributes>
-	</classpathentry>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="src" path="Generated JUIC files"/>
-	<classpathentry kind="lib" path="lib/RXTXcomm.jar">
+	<classpathentry exported="true" kind="lib" path="lib/RXTXcomm.jar">
 		<attributes>
 			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="/home/markus/.eclipse/QTwikeAnalyzer/lib"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry exported="true" kind="lib" path="lib/qtjambi-4.4.0_01.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/qtjambi-linux32-gcc-4.4.0_01.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
