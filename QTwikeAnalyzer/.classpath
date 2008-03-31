@@ -3,12 +3,12 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="src" path="Generated JUIC files"/>
-	<classpathentry exported="true" kind="lib" path="lib/RXTXcomm.jar">
+	<classpathentry kind="lib" path="lib/RXTXcomm.jar">
 		<attributes>
 			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="QTwikeAnalyzer/lib"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry exported="true" kind="lib" path="lib/qtjambi-4.4.0_01.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/qtjambi-linux32-gcc-4.4.0_01.jar"/>
+	<classpathentry kind="lib" path="lib/qtjambi-4.4.0_01.jar"/>
+	<classpathentry kind="lib" path="lib/qtjambi-linux32-gcc-4.4.0_01.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
