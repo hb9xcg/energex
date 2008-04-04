@@ -16,9 +16,9 @@
    <property name="geometry" >
     <rect>
      <x>0</x>
-     <y>57</y>
+     <y>71</y>
      <width>663</width>
-     <height>330</height>
+     <height>314</height>
     </rect>
    </property>
    <layout class="QGridLayout" name="gridLayout" >
@@ -49,7 +49,7 @@
      <x>0</x>
      <y>0</y>
      <width>663</width>
-     <height>23</height>
+     <height>32</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile" >
@@ -57,8 +57,8 @@
      <string>File</string>
     </property>
     <addaction name="actionOpen" />
-    <addaction name="actionSave" />
-    <addaction name="actionExit" />
+    <addaction name="actionSaveAs" />
+    <addaction name="actionQuit" />
    </widget>
    <widget class="QMenu" name="menuEdit" >
     <property name="title" >
@@ -90,9 +90,9 @@
    <property name="geometry" >
     <rect>
      <x>0</x>
-     <y>23</y>
+     <y>32</y>
      <width>663</width>
-     <height>34</height>
+     <height>39</height>
     </rect>
    </property>
    <property name="windowTitle" >
@@ -114,16 +114,16 @@
    <property name="geometry" >
     <rect>
      <x>0</x>
-     <y>387</y>
+     <y>385</y>
      <width>663</width>
-     <height>23</height>
+     <height>25</height>
     </rect>
    </property>
   </widget>
   <action name="actionOpen" >
    <property name="icon" >
     <iconset>
-     <normaloff>../../../../../../../usr/share/icons/oxygen/32x32/actions/document-open-folder.png</normaloff>../../../../../../../usr/share/icons/oxygen/32x32/actions/document-open-folder.png</iconset>
+     <normaloff>../../../../../../../usr/share/icons/oxygen/32x32/actions/document-open.png</normaloff>../../../../../../../usr/share/icons/oxygen/32x32/actions/document-open.png</iconset>
    </property>
    <property name="text" >
     <string>&amp;Open</string>
@@ -165,17 +165,25 @@
     <string>S&amp;top</string>
    </property>
   </action>
-  <action name="actionExit" >
+  <action name="actionQuit" >
    <property name="text" >
-    <string>E&amp;xit</string>
+    <string>Q&amp;uit</string>
    </property>
   </action>
-  <action name="actionSave" >
+  <action name="actionSaveAs" >
+   <property name="icon" >
+    <iconset>
+     <normaloff>../../../../../../../usr/share/icons/oxygen/32x32/actions/document-save-as.png</normaloff>../../../../../../../usr/share/icons/oxygen/32x32/actions/document-save-as.png</iconset>
+   </property>
    <property name="text" >
-    <string>&amp;Save</string>
+    <string>&amp;Save As</string>
    </property>
   </action>
   <action name="actionSettings" >
+   <property name="icon" >
+    <iconset>
+     <normaloff>../../../../../../../usr/share/icons/oxygen/32x32/actions/configure.png</normaloff>../../../../../../../usr/share/icons/oxygen/32x32/actions/configure.png</iconset>
+   </property>
    <property name="text" >
     <string>Settings</string>
    </property>
