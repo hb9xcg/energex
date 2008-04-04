@@ -5,7 +5,7 @@
 	<classpathentry kind="src" path="Generated JUIC files"/>
 	<classpathentry kind="lib" path="lib/RXTXcomm.jar">
 		<attributes>
-			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="QTwikeAnalyzer/lib"/>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="QTwikeAnalyzer/lib/bin"/>
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="lib" path="lib/qtjambi-4.4.0_01.jar"/>
