@@ -73,7 +73,7 @@ public class TwikeAnalyzer extends QMainWindow implements DataInterface {
 			ui.statusBar.showMessage("Using serial port " + storedPort);
 		}
 		
-		ui.actionRecord.setEnabled(port!=null);
+		ui.actionRecord.setEnabled(!storedPort.isEmpty());
 		ui.actionPlay.setEnabled(false);
 		ui.actionPause.setEnabled(false);
 		ui.actionStop.setEnabled(false);
@@ -118,6 +118,7 @@ public class TwikeAnalyzer extends QMainWindow implements DataInterface {
     		}
     		port = new TwikePort(settingsDialog.getPort());
     		ui.statusBar.showMessage("Using serial port "+settingsDialog.getPortName());
+    		ui.actionRecord.setEnabled(!settingsDialog.getPortName().isEmpty());	
     	}
 	}
 	
