@@ -87,6 +87,8 @@ public class TwikeAnalyzer extends QMainWindow implements DataInterface {
 		
 		model = new QStandardItemModel(1, labels.size());
 	    model.setHorizontalHeaderLabels(labels);
+	    
+	    ui.actionQuit.triggered.connect(QApplication.instance(), "quit()");
     }
     
 	public TwikeAnalyzer(QWidget parent){
