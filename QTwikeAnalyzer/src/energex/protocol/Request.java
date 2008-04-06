@@ -162,6 +162,11 @@ public class Request {
 	static final	short DEBUG_VALUE_H      = 0xf2;
 	static final	short DEBUG_VALUE_ADDR   = 0xf3;
 	
+	static final   int   CMD1_INDEX = 3;
+	static final   int   CMD2_INDEX = 4;
+	static final   int   TYPE_INDEX = 4;
+	
+	
 	public Request() {
 		typeToDesc.put(MODEL_TYPE,       "MODEL_TYPE");
 		typeToDesc.put(PROGRAM_REV,      "PROGRAM_REV");
@@ -299,7 +304,7 @@ public class Request {
 	}
 	
 	public String decodeRequest(QByteArray data) {
-		short requestType = data.at(3);
+		short requestType = data.at(TYPE_INDEX);
 		String description = typeToDesc.get(requestType);
 		if( description == null) {
 			description = "UNKNOWN";
@@ -308,7 +313,7 @@ public class Request {
 	}
 
 	public short requestType(QByteArray data) {
-		return data.at(3);
+		return data.at(TYPE_INDEX);
 	}
 	
 	public String getUnit(short type) {

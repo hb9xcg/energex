@@ -21,11 +21,11 @@ package energex.protocol;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import com.trolltech.qt.core.QByteArray;
-import energex.communication.ReceiverInterface;
 
-public class OnlineDecoder implements ReceiverInterface {
+import energex.communication.TwikeReceiver;
+
+public class OnlineDecoder implements TwikeReceiver {
 	List<String> labels = new ArrayList<String>();
 	int currentRow;
 	short currentRequest;
@@ -159,6 +159,31 @@ public class OnlineDecoder implements ReceiverInterface {
 		return eType;
 	}
 
+	
+	public void processPacket() {
+		currentData.chop(3); // Cut off the next header
+		
+		if(currentPacket!=null) {
+			currentPacket.setRawData(currentData);
+			decodeContent(currentData);
+			table.updateData(currentPacket); // Moves ownership to main thread
+		}		
+		
+		// Prepare next packet
+		currentRow++;
+		currentPacket = new DataPacket(currentRow);
+		currentData   = new QByteArray();
+		
+		currentData.append(currentStartByte);
+		currentData.append(currentAddressByte);
+		currentData.append(currentTypeByte);	
+		
+		currentType = getType(currentTypeByte);
+		
+		currentPacket.setAddressData(currentAddressByte);
+		currentPacket.setTypeData(currentType);
+	}
+
 	@Override
 	public void receiveData(byte data) {
 		boolean newFrame = false;
@@ -202,30 +227,6 @@ public class OnlineDecoder implements ReceiverInterface {
 				// Skip first waste chunk
 				currentRow++;
 			}
-		}	
-	}
-	
-	public void processPacket() {
-		currentData.chop(3); // Cut off the next header
-		
-		if(currentPacket!=null) {
-			currentPacket.setRawData(currentData);
-			decodeContent(currentData);
-			table.updateData(currentPacket); // Moves ownership to main thread
-		}		
-		
-		// Prepare next packet
-		currentRow++;
-		currentPacket = new DataPacket(currentRow);
-		currentData   = new QByteArray();
-		
-		currentData.append(currentStartByte);
-		currentData.append(currentAddressByte);
-		currentData.append(currentTypeByte);	
-		
-		currentType = getType(currentTypeByte);
-		
-		currentPacket.setAddressData(currentAddressByte);
-		currentPacket.setTypeData(currentType);
+		}
 	}
 }
