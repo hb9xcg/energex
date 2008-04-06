@@ -46,6 +46,7 @@ public class OfflineDecoder {
 	Checksum checksumDecoder = new Checksum();
 	Address addressDecoder = new Address();
 	Response responseDecoder = new Response();
+	Message messageDecoder = new Message();
 	DataInterface table;
 	byte currentStartByte;
 	byte currentAddressByte;
@@ -165,11 +166,14 @@ public class OfflineDecoder {
 	}
 
 	private void decodeMessage(QByteArray data) {
+		String description = messageDecoder.decodeMessage(data);
+		
+		QStandardItem messageItem = new QStandardItem(description);
+		model.setItem(currentRow, 4, messageItem);
 		
 		Checksum.EChecksum eChecksum = checksumDecoder.decodeChecksum(data);		
-		addChecksum(eChecksum);		
+		addChecksum(eChecksum);
 	}
-
 	
 	
 	private boolean isStart(byte start) {

@@ -25,8 +25,10 @@ import java.util.Map;
 import com.trolltech.qt.core.QByteArray;
 import com.trolltech.qt.core.QRegExp;
 
+import energex.protocol.DataType.EUnit;
+
 public class Request {
-	Map<Short,String> typeToDesc = new HashMap<Short, String>();
+	static Map<Short,String> typeToDesc = new HashMap<Short, String>();
 	
 	static final	short MODEL_TYPE         = 0x01;
 	static final	short PROGRAM_REV        = 0x02;
@@ -166,8 +168,7 @@ public class Request {
 	static final   int   CMD2_INDEX = 4;
 	static final   int   TYPE_INDEX = 4;
 	
-	
-	public Request() {
+	private static void initMap() {
 		typeToDesc.put(MODEL_TYPE,       "MODEL_TYPE");
 		typeToDesc.put(PROGRAM_REV,      "PROGRAM_REV");
 		typeToDesc.put(PAR_TAB_REV,      "PAR_TAB_REV");
@@ -303,6 +304,13 @@ public class Request {
 		typeToDesc.put(DEBUG_VALUE_ADDR,   "DEBUG_VALUE_ADDR");
 	}
 	
+	
+	public Request() {
+		if(typeToDesc.isEmpty()) {
+			initMap();
+		}
+	}
+	
 	public String decodeRequest(QByteArray data) {
 		short requestType = data.at(TYPE_INDEX);
 		String description = typeToDesc.get(requestType);
@@ -316,10 +324,10 @@ public class Request {
 		return data.at(TYPE_INDEX);
 	}
 	
-	public String getUnit(short type) {
+	public static EUnit getUnit(short type) {
 		String description = typeToDesc.get(type);
 		
-		String unit = "";
+		EUnit eUnit = EUnit.eUnknown;
 		
 		if( description != null) {
 			QRegExp regSpannung   = new QRegExp("(SPG|SPANNUNG|SPNG)");
@@ -328,21 +336,21 @@ public class Request {
 			QRegExp regCharge     = new QRegExp("(KAPAZITAET|Q|AH)");
 			QRegExp regPower     = new QRegExp("(LEISTUNG)");
 			if( regSpannung.indexIn(description) != -1) {
-				unit = "V";
+				eUnit = EUnit.eVoltage;
 			} 
 			else if( regStrom.indexIn(description) != -1) {
-				unit = "A";
+				eUnit = EUnit.eCurrent;
 			}
 			else if( regTemperatur.indexIn(description) != -1) {
-				unit = "°C";
+				eUnit = EUnit.eTemperatur;
 			}
 			else if( regCharge.indexIn(description) != -1) {
-				unit = "Ah";
+				eUnit = EUnit.eCharge;
 			}
 			else if( regPower.indexIn(description) != -1) {
-				unit = "W";
+				eUnit = EUnit.ePower;
 			}
 		}		
-		return unit;
+		return eUnit;
 	}
 }
