@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
+import com.trolltech.qt.core.QByteArray;
 import com.trolltech.qt.core.QCoreApplication;
 import com.trolltech.qt.core.QDataStream;
 import com.trolltech.qt.core.QFile;
@@ -43,6 +44,7 @@ public class TwikeAnalyzer extends QMainWindow implements DataInterface {
     Ui_TwikeAnalyzerClass ui = new Ui_TwikeAnalyzerClass();
     QDataStream binaryStream;
     TwikePort port;
+    String currentPort;
     OnlineDecoder onlineDecoder;
     RawRecorder rawRecorder = new RawRecorder();
     List<String> labels = new ArrayList<String>();
@@ -67,29 +69,34 @@ public class TwikeAnalyzer extends QMainWindow implements DataInterface {
         QStyle style = QStyleFactory.create("Plastique");
         QApplication.setStyle(style);     
         
-        // restore current default
-        QSettings settings = new QSettings();
-		String storedPort = (String) settings.value("Port");
-		
-		if(storedPort!=null) {
-			port = new TwikePort(storedPort);
-			ui.statusBar.showMessage("Using serial port " + storedPort);
-		}
-		
-		ui.actionRecord.setEnabled(!storedPort.isEmpty());
-		ui.actionPlay.setEnabled(false);
-		ui.actionPause.setEnabled(false);
-		ui.actionStop.setEnabled(false);
-		
 		labels.add("Time");
 	    labels.add("Paket");
 	    labels.add("Address");
 	    labels.add("Type");	    
 	    labels.add("Message");
 	    labels.add("Checksum");
-		
-		model = new QStandardItemModel(1, labels.size());
+	    
+		model = new QStandardItemModel(0, labels.size());
 	    model.setHorizontalHeaderLabels(labels);
+	    
+	    ui.logTable.setModel(model);
+        
+        // restore current defaults
+        readSettings();
+		
+		if(currentPort.isEmpty()) {
+			ui.actionRecord.setEnabled(false);
+		} else {
+			port = new TwikePort(currentPort);
+			ui.statusBar.showMessage("Using serial port " + currentPort);
+			ui.actionRecord.setEnabled(true);
+		}
+		
+		ui.actionPlay.setEnabled(false);
+		ui.actionPause.setEnabled(false);
+		ui.actionStop.setEnabled(false);
+		
+
 	    
 	    ui.actionQuit.triggered.connect(QApplication.instance(), "quit()");
     }
@@ -104,6 +111,7 @@ public class TwikeAnalyzer extends QMainWindow implements DataInterface {
     		if(port!=null && port.isOpen()) {
     			port.close();
     		}
+    		writeSettings();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -200,6 +208,7 @@ public class TwikeAnalyzer extends QMainWindow implements DataInterface {
     	QDataStream binaryStream = new QDataStream( file ); // we will serialize the data into the file
     	OfflineDecoder decoder = new OfflineDecoder();
     	ui.logTable.setModel(decoder.decodeOffline(binaryStream));
+    	ui.logTable.resizeColumnsToContents();
     }
     
     public void on_actionSaveAs_triggered() {
@@ -214,6 +223,48 @@ public class TwikeAnalyzer extends QMainWindow implements DataInterface {
     	AboutDialog aboutDialog = new AboutDialog(this);
 		
     	aboutDialog.exec();
+    }
+    
+    private void readSettings() {
+    	QSettings settings = new QSettings();
+
+        settings.beginGroup("TwikeAnalyzer");
+        restoreGeometry( (QByteArray) settings.value("geometry") );
+
+        int idx=0;
+        for( String label : labels) {
+        	Integer width = Integer.parseInt((String) settings.value(label, 55));
+        	ui.logTable.setColumnWidth(idx++, width );	
+        }
+        
+		currentPort = (String) settings.value("Port", "");
+		
+        settings.endGroup();
+    }
+    
+    private void writeSettings()
+    {
+    	QSettings settings = new QSettings();
+    	settings.beginGroup("TwikeAnalyzer");
+        settings.setValue("geometry", saveGeometry());
+        
+        int idx=0;
+        for( String label : labels) {	
+        	settings.setValue(label, ui.logTable.columnWidth(idx++) );	
+        }
+        
+        settings.setValue("Port", currentPort);
+        settings.endGroup();
+    }
+    
+    protected void closeEvent(QCloseEvent event)
+    {
+        if (true) {
+            writeSettings();
+            event.accept();
+        } else {
+            event.ignore();
+        }
     }
 
 	@Override

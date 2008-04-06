@@ -74,6 +74,10 @@
     <addaction name="actionPause" />
     <addaction name="actionPlay" />
     <addaction name="actionStop" />
+    <addaction name="separator" />
+    <addaction name="actionBattery1" />
+    <addaction name="actionBattery2" />
+    <addaction name="actionBattery3" />
    </widget>
    <widget class="QMenu" name="menuHelp" >
     <property name="title" >
@@ -191,6 +195,21 @@
   <action name="actionAbout" >
    <property name="text" >
     <string>About</string>
+   </property>
+  </action>
+  <action name="actionBattery1" >
+   <property name="text" >
+    <string>Battery 1</string>
+   </property>
+  </action>
+  <action name="actionBattery2" >
+   <property name="text" >
+    <string>Battery 2</string>
+   </property>
+  </action>
+  <action name="actionBattery3" >
+   <property name="text" >
+    <string>Battery 3</string>
    </property>
   </action>
  </widget>
