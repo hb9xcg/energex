@@ -25,6 +25,7 @@ import energex.protocol.DataType.EUnit;
 
 public class Response {
 	EUnit eType = EUnit.eUnknown;
+	short type;
 	private final static int STATUS_INDEX    =  3;
 	private final static int CURRENT_INDEX   =  5;
 	private final static int VOLTAGE_INDEX   =  7;
@@ -32,7 +33,7 @@ public class Response {
 
 	public String decodeResponse(short type, QByteArray data) {
 		String response = new String();
-		
+		this.type = type;
 		eType = Request.getUnit(type);
 		
 		response += decodeCurrent(data);
@@ -84,7 +85,10 @@ public class Response {
 			fParameter = DataType.decodeSigned16(data, PARAMETER_INDEX);
 		}
 		
-		fParameter /= 100;
+		if( type != Request.ENTLADENE_AH) {
+			fParameter /= 100;
+		}
+		
 		return Float.toString(fParameter);
 	}
 	
