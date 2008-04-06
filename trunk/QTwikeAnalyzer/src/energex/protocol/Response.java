@@ -21,64 +21,69 @@ package energex.protocol;
 
 import com.trolltech.qt.core.QByteArray;
 
+import energex.protocol.DataType.EUnit;
+
 public class Response {
-	Request request = new Request();
-	private final static int STATUS1_INDEX      =  3;
-	private final static int STATUS2_INDEX      =  4;
-	private final static int CURRENT_HIGH_INDEX =  5;
-	private final static int CURRENT_LOW_INDEX  =  6;
-	private final static int VOLTAGE_HIGH_INDEX =  7;
-	private final static int VOLTAGE_LOW_INDEX  =  8;
-	private final static int PARAM_HIGH_INDEX   =  9;
-	private final static int PARAM_LOW_INDEX    = 10;
+	EUnit eType = EUnit.eUnknown;
+	private final static int STATUS_INDEX    =  3;
+	private final static int CURRENT_INDEX   =  5;
+	private final static int VOLTAGE_INDEX   =  7;
+	private final static int PARAMETER_INDEX =  9;
 
 	public String decodeResponse(short type, QByteArray data) {
 		String response = new String();
+		
+		eType = Request.getUnit(type);
+		
 		response += decodeCurrent(data);
 		response += ", ";
 		response += decodeVoltage(data);
 		response += ", ";
 		response += decodeParameter(data);
-		response += request.getUnit(type);
+		response += DataType.decodeUnit(eType);
 		return response;
 	}
 	
 	public String decodeCurrent(QByteArray data) {
-		int sCurrent;
-
-		sCurrent = data.at(CURRENT_HIGH_INDEX) & 0x000000ff;
-		sCurrent <<= 8;
-		sCurrent += (data.at(CURRENT_LOW_INDEX) & 0x000000ff);
-		float fCurrent;
-		if( sCurrent > 32767) {
-			fCurrent = 65535-sCurrent;
-		} else {
-			fCurrent = sCurrent;
-		}
+		float fCurrent = DataType.decodeSigned16(data, CURRENT_INDEX);
 		fCurrent /= 100;
 		return Float.toString(fCurrent)+"A";
 	}
 	
 	public String decodeVoltage(QByteArray data) {
-		int sVoltage;
-
-		sVoltage = data.at(VOLTAGE_HIGH_INDEX) & 0x000000ff;
-		sVoltage <<= 8;
-		sVoltage += data.at(VOLTAGE_LOW_INDEX) & 0x000000ff;
-		float fVoltage = sVoltage;		 
+		float fVoltage = DataType.decodeUnsigned16(data, VOLTAGE_INDEX); 
 		fVoltage /= 100;
 		return Float.toString(fVoltage)+"V";
 	}
 	
 	public String decodeParameter(QByteArray data) {
-		int sParameter;
+		float fParameter;
 		
-		sParameter = data.at(PARAM_HIGH_INDEX) & 0x000000ff;
-		if(data.length() > PARAM_HIGH_INDEX+2) {
-			sParameter <<= 8;
-			sParameter += data.at(PARAM_LOW_INDEX) & 0x000000ff;
+		int length = data.length();
+		if(length <= PARAMETER_INDEX+2) {
+			return "corrupt";
 		}
-		float fParameter = sParameter;
+
+		switch(eType) {
+		case eVoltage:
+			fParameter = DataType.decodeUnsigned16(data, PARAMETER_INDEX);
+			break;
+		case eCurrent:
+			fParameter = DataType.decodeSigned16(data, PARAMETER_INDEX);
+			break;
+		case ePower:
+			fParameter = DataType.decodeSigned16(data, PARAMETER_INDEX);
+			break;
+		case eCharge:
+			fParameter = DataType.decodeSigned16(data, PARAMETER_INDEX);
+			break;
+		case eTemperatur:
+			fParameter = DataType.decodeSigned16(data, PARAMETER_INDEX);
+			break;
+		default:
+			fParameter = DataType.decodeSigned16(data, PARAMETER_INDEX);
+		}
+		
 		fParameter /= 100;
 		return Float.toString(fParameter);
 	}

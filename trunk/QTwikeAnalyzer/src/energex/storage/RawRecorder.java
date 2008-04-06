@@ -18,29 +18,42 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-package energex.communication;
+package energex.storage;
 
-import java.util.HashSet;
-import java.util.Set;
+import com.trolltech.qt.core.QDataStream;
+import com.trolltech.qt.core.QFile;
 
-public class TwikeReceivable {
-	Set<TwikeReceiver> setReceiver = new HashSet<TwikeReceiver>();
+import energex.communication.TwikeReceiver;
+
+public class RawRecorder implements TwikeReceiver {
+	QDataStream out;
+	QFile.OpenMode mode;
+	QFile file;
 	
-	public void addReceiver(TwikeReceiver receiver) {
-		setReceiver.add(receiver);
+	public RawRecorder() {
+		file = new QFile("QTwikeAnalyzer.tmp");
+        mode = new QFile.OpenMode();
+        mode.set(QFile.OpenModeFlag.WriteOnly);
+        mode.set(QFile.OpenModeFlag.Truncate);
+        file.open(mode);
+        out = new QDataStream(file);
 	}
 	
-	public void deleteReceiver(TwikeReceiver receiver) {
-		setReceiver.remove(receiver);
+	public void saveAs(String name) {
+        file.close();
+        QFile.rename("QTwikeAnalyzer.tmp", name);
+        file.open(mode);
+        out = new QDataStream(file);
 	}
 	
-	public void notifyReceiver(byte data) {
-		for(TwikeReceiver receiver : setReceiver) {
-			receiver.receiveData(data);
-		}
+	public void clear() {
+		file.close();        
+        file.open(mode);
+        out = new QDataStream(file);
 	}
-	
-	public void deleteReceivers() {
-		setReceiver.clear();
+
+	@Override
+	public void receiveData(byte data) {
+		out.writeByte(data);
 	}
 }

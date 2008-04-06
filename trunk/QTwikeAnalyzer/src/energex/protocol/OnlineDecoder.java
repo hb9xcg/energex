@@ -35,6 +35,7 @@ public class OnlineDecoder implements TwikeReceiver {
 	Checksum checksumDecoder = new Checksum();
 	Address addressDecoder = new Address();
 	Response responseDecoder = new Response();
+	Message messageDecoder = new Message();
 	DataInterface table;
 	DataPacket currentPacket;
 	byte currentStartByte;
@@ -78,8 +79,6 @@ public class OnlineDecoder implements TwikeReceiver {
 		currentRow = -1; // Skip first chunk
 		
 		this.table = table;
-		
-		//createTableModel(); 
 	}
 	
 	private void unknowType() {
@@ -109,6 +108,10 @@ public class OnlineDecoder implements TwikeReceiver {
 	}
 
 	private void decodeMessage(QByteArray data) {
+		String description = messageDecoder.decodeMessage(data);
+		
+		currentPacket.setContentData(description);
+		
 		Checksum.EChecksum eChecksum = checksumDecoder.decodeChecksum(data);		
 		currentPacket.setChecksumData(eChecksum);		
 	}
