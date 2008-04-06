@@ -31,9 +31,9 @@ import com.trolltech.qt.gui.QColor;
 import com.trolltech.qt.gui.QStandardItem;
 import com.trolltech.qt.gui.QStandardItemModel;
 
+import energex.exceptions.EndOfFileException;
 import energex.protocol.Checksum.EChecksum;
 import energex.protocol.Address;
-import exceptions.EndOfFileException;
 
 public class OfflineDecoder {
 	List<String> labels = new ArrayList<String>();

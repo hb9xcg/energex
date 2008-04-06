@@ -17,8 +17,17 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-package energex.communication;
+package exceptions;
 
-public interface ReceiverInterface {
-	public void receiveData(byte data);
+public class EndOfFileException extends Exception {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	public EndOfFileException(String string) {
+		super(string);
+	}
+
 }

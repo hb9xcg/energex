@@ -32,13 +32,12 @@ import gnu.io.SerialPortEvent;
 import gnu.io.SerialPortEventListener;
 import gnu.io.UnsupportedCommOperationException;
 
-public class TwikePort implements SerialPortEventListener{
+public class TwikePort extends TwikeReceivable implements SerialPortEventListener {
 	private InputStream inputStream;
 	private OutputStream outputStream;
 	private SerialPort port = null;
 	private CommPortIdentifier portId = null;
 	private boolean opened = false;
-	private ReceiverInterface receiver;
 	
 	
 	public TwikePort(CommPortIdentifier portId) {
@@ -66,7 +65,7 @@ public class TwikePort implements SerialPortEventListener{
 		}
 	}
 
-	public void open(ReceiverInterface receiver) throws IOException, UnsupportedCommOperationException {
+	public void open() throws IOException, UnsupportedCommOperationException {
 		if(portId == null)
 		{
 		    System.err.println("No serial port specifeid");
@@ -121,7 +120,7 @@ public class TwikePort implements SerialPortEventListener{
 		// performReadWriteCode();
 		//
 		opened = true;
-		this.receiver = receiver;
+
 		try {
 			port.addEventListener(this);
 		} catch (TooManyListenersException e) {
@@ -147,7 +146,7 @@ public class TwikePort implements SerialPortEventListener{
 			port.close();
 		}
 		opened = false;
-		receiver = null;
+		deleteReceivers();
 	}
 	
 	public boolean isOpen() {
@@ -211,13 +210,11 @@ public class TwikePort implements SerialPortEventListener{
 	}
 
 	private void dataAvailable(SerialPortEvent event) {
-		byte data = 0;
     	try{
             while (inputStream.available() > 0) {
-            	data = (byte) inputStream.read();
-            	if(receiver!=null) {
-            		receiver.receiveData(data);
-            	}
+            	Integer data = inputStream.read();
+            	byte dataByte = (byte) (data & 0xFF);
+            	notifyReceiver(dataByte);
             }
         }catch(IOException e){
             System.out.print(e);

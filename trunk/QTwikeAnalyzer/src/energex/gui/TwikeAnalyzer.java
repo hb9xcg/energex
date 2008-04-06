@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+
 import com.trolltech.qt.core.QCoreApplication;
 import com.trolltech.qt.core.QDataStream;
 import com.trolltech.qt.core.QFile;
@@ -35,6 +36,7 @@ import energex.protocol.DataInterface;
 import energex.protocol.DataPacket;
 import energex.protocol.OfflineDecoder;
 import energex.protocol.OnlineDecoder;
+import energex.storage.RawRecorder;
 
 public class TwikeAnalyzer extends QMainWindow implements DataInterface {
 
@@ -42,6 +44,7 @@ public class TwikeAnalyzer extends QMainWindow implements DataInterface {
     QDataStream binaryStream;
     TwikePort port;
     OnlineDecoder onlineDecoder;
+    RawRecorder rawRecorder = new RawRecorder();
     List<String> labels = new ArrayList<String>();
     QStandardItemModel model;
     boolean recordingPaused;
@@ -96,7 +99,7 @@ public class TwikeAnalyzer extends QMainWindow implements DataInterface {
         ui.setupUi(this);
     }
 	
-	public void on_actionExit_triggered() {
+	public void on_actionQuit_triggered() {
     	try {
     		if(port!=null && port.isOpen()) {
     			port.close();
@@ -127,8 +130,11 @@ public class TwikeAnalyzer extends QMainWindow implements DataInterface {
 	public void on_actionRecord_triggered() {
     	try {
     		model.clear();
+    		rawRecorder.clear();
     		onlineDecoder = new OnlineDecoder(this);
-			port.open(onlineDecoder);
+			port.open();
+			port.addReceiver(onlineDecoder);
+			port.addReceiver(rawRecorder);
 			ui.actionRecord.setEnabled(false);
 			ui.actionPlay.setEnabled(false);
 			ui.actionPause.setEnabled(true);
@@ -161,6 +167,8 @@ public class TwikeAnalyzer extends QMainWindow implements DataInterface {
     
     public void on_actionStop_triggered() {
     	try {
+    		port.deleteReceiver(onlineDecoder);
+    		port.deleteReceiver(rawRecorder);
 			port.close();
 			ui.actionRecord.setEnabled(true);
 			ui.actionPlay.setEnabled(false);
@@ -174,7 +182,7 @@ public class TwikeAnalyzer extends QMainWindow implements DataInterface {
     
     public void on_actionOpen_triggered() {
     	String fileName = null;
-    	fileName = QFileDialog.getOpenFileName(this, tr("Open Image"), "/home/markus/" );
+    	fileName = QFileDialog.getOpenFileName(this, tr("Open Raw Logfile"), "/home/markus" );
 //    	fileName = QFileDialog.getOpenFileName(this, tr("Open log file"), "~/", tr("Log Files (*.log)"), null);
         if ( fileName.isEmpty()) {
         	return;
@@ -192,6 +200,14 @@ public class TwikeAnalyzer extends QMainWindow implements DataInterface {
     	QDataStream binaryStream = new QDataStream( file ); // we will serialize the data into the file
     	OfflineDecoder decoder = new OfflineDecoder();
     	ui.logTable.setModel(decoder.decodeOffline(binaryStream));
+    }
+    
+    public void on_actionSaveAs_triggered() {
+    	String fileName = null;
+    	fileName = QFileDialog.getSaveFileName(this, tr("Save Raw Logfile"), "/home/markus" );
+        if ( !fileName.isEmpty()) {
+        	rawRecorder.saveAs(fileName);
+        }
     }
     
     public void on_actionAbout_triggered() {

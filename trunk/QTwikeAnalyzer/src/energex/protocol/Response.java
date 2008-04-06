@@ -23,6 +23,14 @@ import com.trolltech.qt.core.QByteArray;
 
 public class Response {
 	Request request = new Request();
+	private final static int STATUS1_INDEX      =  3;
+	private final static int STATUS2_INDEX      =  4;
+	private final static int CURRENT_HIGH_INDEX =  5;
+	private final static int CURRENT_LOW_INDEX  =  6;
+	private final static int VOLTAGE_HIGH_INDEX =  7;
+	private final static int VOLTAGE_LOW_INDEX  =  8;
+	private final static int PARAM_HIGH_INDEX   =  9;
+	private final static int PARAM_LOW_INDEX    = 10;
 
 	public String decodeResponse(short type, QByteArray data) {
 		String response = new String();
@@ -37,15 +45,10 @@ public class Response {
 	
 	public String decodeCurrent(QByteArray data) {
 		int sCurrent;
-		int idx;
-		if(hasStatus(data)) {
-			idx = 4;
-		} else {
-			idx = 3;
-		}
-		sCurrent = data.at(idx) & 0x000000ff;
+
+		sCurrent = data.at(CURRENT_HIGH_INDEX) & 0x000000ff;
 		sCurrent <<= 8;
-		sCurrent += (data.at(idx+1) & 0x000000ff);
+		sCurrent += (data.at(CURRENT_LOW_INDEX) & 0x000000ff);
 		float fCurrent;
 		if( sCurrent > 32767) {
 			fCurrent = 65535-sCurrent;
@@ -58,15 +61,10 @@ public class Response {
 	
 	public String decodeVoltage(QByteArray data) {
 		int sVoltage;
-		int idx;
-		if(hasStatus(data)) {
-			idx = 6;
-		} else {
-			idx = 5;
-		}
-		sVoltage = data.at(idx) & 0x000000ff;
+
+		sVoltage = data.at(VOLTAGE_HIGH_INDEX) & 0x000000ff;
 		sVoltage <<= 8;
-		sVoltage += data.at(idx+1) & 0x000000ff;
+		sVoltage += data.at(VOLTAGE_LOW_INDEX) & 0x000000ff;
 		float fVoltage = sVoltage;		 
 		fVoltage /= 100;
 		return Float.toString(fVoltage)+"V";
@@ -74,19 +72,11 @@ public class Response {
 	
 	public String decodeParameter(QByteArray data) {
 		int sParameter;
-		int idx;
 		
-		if(hasStatus(data)) {
-			idx = 8;
-			
-		} else {
-			idx = 7;
-		}
-		
-		sParameter = data.at(idx) & 0x000000ff;
-		if(data.length() > idx+2) {
+		sParameter = data.at(PARAM_HIGH_INDEX) & 0x000000ff;
+		if(data.length() > PARAM_HIGH_INDEX+2) {
 			sParameter <<= 8;
-			sParameter += data.at(idx+1) & 0x000000ff;
+			sParameter += data.at(PARAM_LOW_INDEX) & 0x000000ff;
 		}
 		float fParameter = sParameter;
 		fParameter /= 100;
