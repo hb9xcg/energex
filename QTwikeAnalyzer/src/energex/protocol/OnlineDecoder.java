@@ -22,6 +22,7 @@ package energex.protocol;
 import java.util.ArrayList;
 import java.util.List;
 import com.trolltech.qt.core.QByteArray;
+import com.trolltech.qt.core.QTime;
 
 import energex.communication.TwikeReceiver;
 
@@ -31,6 +32,7 @@ public class OnlineDecoder implements TwikeReceiver {
 	short currentRequest;
 	EType currentType = EType.UNKNOWN;
 	QByteArray currentData;
+	private QTime time = new QTime();
 	Request requestDecoder = new Request();
 	Checksum checksumDecoder = new Checksum();
 	Address addressDecoder = new Address();
@@ -161,12 +163,16 @@ public class OnlineDecoder implements TwikeReceiver {
 		}
 		return eType;
 	}
-
+	
+	public void start() {
+		time.start();
+	}
 	
 	public void processPacket() {
 		currentData.chop(3); // Cut off the next header
 		
 		if(currentPacket!=null) {
+			currentPacket.setTimeData(time);
 			currentPacket.setRawData(currentData);
 			decodeContent(currentData);
 			table.updateData(currentPacket); // Moves ownership to main thread
