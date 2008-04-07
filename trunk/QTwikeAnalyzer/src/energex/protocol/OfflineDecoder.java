@@ -42,6 +42,7 @@ public class OfflineDecoder {
 	EType currentType = EType.UNKNOWN;
 	short currentRequest;
 	QByteArray currentData;
+	QTime time = new QTime();
 	Request requestDecoder = new Request();
 	Checksum checksumDecoder = new Checksum();
 	Address addressDecoder = new Address();
@@ -86,6 +87,7 @@ public class OfflineDecoder {
 	    eState = EState.eUnknown;
 	    eHeaderState = EHeaderState.eStart;
 	    this.table = table;
+	    time.start();
 	}
 	
 	public OfflineDecoder() {
@@ -97,6 +99,7 @@ public class OfflineDecoder {
 	    labels.add("Checksum");
 	    
 	    eState = EState.eUnknown;
+	    time.start();
 	}
 	
 	public QStandardItemModel decodeOffline(QDataStream input) {
@@ -225,7 +228,7 @@ public class OfflineDecoder {
 		currentData.append(address);
 		currentData.append(type);
 		
-		QStandardItem timeItem   = new QStandardItem(QTime.currentTime().toString());
+		QStandardItem timeItem   = new QStandardItem(time.elapsed() + "ms");
 		QStandardItem addrItem   = new QStandardItem(addressDecoder.decodeAddress(address));
 
 		model.setItem(currentRow, 0, timeItem);	

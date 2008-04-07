@@ -43,7 +43,10 @@ public class DataPacket {
 	
 	public DataPacket(int row) {
 		this.row = row;
-		timeItem = new QStandardItem(QTime.currentTime().toString());
+	}
+	
+	public void setTimeData(QTime time) {
+		timeItem = new QStandardItem( time.elapsed() + "ms");
 	}
 	
 	public void setRawData(QByteArray raw) {

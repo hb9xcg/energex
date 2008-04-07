@@ -24,6 +24,7 @@ import java.util.Map;
 
 import com.trolltech.qt.core.QByteArray;
 import com.trolltech.qt.core.QRegExp;
+import com.trolltech.qt.core.Qt;
 
 import energex.protocol.DataType.EUnit;
 
@@ -168,140 +169,152 @@ public class Request {
 	static final   int   CMD2_INDEX = 4;
 	static final   int   TYPE_INDEX = 4;
 	
+	static final QRegExp regSpannung   = new QRegExp("(SPG|SPANNUNG|SPNG)");
+	static final QRegExp regStrom      = new QRegExp("(STROM|STRM)");
+	static final QRegExp regTemperatur = new QRegExp("(TEMPERATUR|TEMP)");
+	static final QRegExp regCharge     = new QRegExp("(KAPAZITÄT|Q|AH)");
+	static final QRegExp regPower      = new QRegExp("(LEISTUNG)");
+	
 	private static void initMap() {
-		typeToDesc.put(MODEL_TYPE,       "MODEL_TYPE");
-		typeToDesc.put(PROGRAM_REV,      "PROGRAM_REV");
-		typeToDesc.put(PAR_TAB_REV,      "PAR_TAB_REV");
-		typeToDesc.put(NENNSPNG,         "NENNSPNG");
-		typeToDesc.put(NENNSTROM,        "NENNSTROM");
-		typeToDesc.put(SERIE_NUMMER,     "SERIE_NUMMER");
-		typeToDesc.put(REP_DATUM,        "REP_DATUM");
-		typeToDesc.put(STANDZEIT,        "STANDZEIT");
-		typeToDesc.put(FAHR_LADE_ZEIT,   "FAHR_LADE_ZEIT");
+		regSpannung.setCaseSensitivity  (Qt.CaseSensitivity.CaseInsensitive);
+		regStrom.setCaseSensitivity     (Qt.CaseSensitivity.CaseInsensitive);
+		regTemperatur.setCaseSensitivity(Qt.CaseSensitivity.CaseInsensitive);
+		regCharge.setCaseSensitivity    (Qt.CaseSensitivity.CaseInsensitive);
+		regPower.setCaseSensitivity     (Qt.CaseSensitivity.CaseInsensitive);
 		
-		typeToDesc.put(BUS_ADRESSE,      "BUS_ADRESSE");
-		typeToDesc.put(COMMAND1,         "COMMAND1");
-		typeToDesc.put(D_STATE,          "D_STATE");
-		typeToDesc.put(COMMAND2,         "COMMAND2");
+		typeToDesc.put(MODEL_TYPE,       "Model Type");
+		typeToDesc.put(PROGRAM_REV,      "Program Rev");
+		typeToDesc.put(PAR_TAB_REV,      "Par Tab Rev");
+		typeToDesc.put(NENNSPNG,         "Nennspannung");
+		typeToDesc.put(NENNSTROM,        "Nennstrom");
+		typeToDesc.put(SERIE_NUMMER,     "Serie Nummer");
+		typeToDesc.put(REP_DATUM,        "Rep Datum");
+		typeToDesc.put(STANDZEIT,        "Standzeit");
+		typeToDesc.put(FAHR_LADE_ZEIT,   "Fahr Lade Zeit");
+		
+		typeToDesc.put(BUS_ADRESSE,      "Bus Adresse");
+		typeToDesc.put(COMMAND1,         "Command 1");
+		typeToDesc.put(D_STATE,          "d-State");
+		typeToDesc.put(COMMAND2,         "Command 2");
 		typeToDesc.put(PARAM_PROT,       "PARAM_PROT");
 		
 		typeToDesc.put(BINFO,            "BINFO");
 
-		typeToDesc.put(LADESTROM,        "LADESTROM");
-		typeToDesc.put(FAHRSTROM,        "FAHRSTROM");
-		typeToDesc.put(TOTAL_SPANNUNG,   "TOTAL_SPANNUNG");
-		typeToDesc.put(SOLL_LADESPG,     "SOLL_LADESPG");
-		typeToDesc.put(AH_ZAEHLER,       "AH_ZAEHLER");
+		typeToDesc.put(LADESTROM,        "Ladestrom");
+		typeToDesc.put(FAHRSTROM,        "Fahrstrom");
+		typeToDesc.put(TOTAL_SPANNUNG,   "Total Spannung");
+		typeToDesc.put(SOLL_LADESPG,     "Soll Ladespannung");
+		typeToDesc.put(AH_ZAEHLER,       "Ah Zähler");
 		typeToDesc.put(Q,                "Q");
-		typeToDesc.put(LEISTUNG,         "LEISTUNG");
-		typeToDesc.put(BATTERIE_TEMP,    "BATTERIE_TEMP");
+		typeToDesc.put(LEISTUNG,         "Leistung");
+		typeToDesc.put(BATTERIE_TEMP,    "Batterie Temp");
 		typeToDesc.put(FINFO,            "FINFO");
-		typeToDesc.put(SYM_SPANNUNG,     "SYM_SPANNUNG");		
+		typeToDesc.put(SYM_SPANNUNG,     "Sym Spannung");		
 				
-		typeToDesc.put(TEILSPANNUNG1,    "TEILSPANNUNG1");
-		typeToDesc.put(TEILSPANNUNG2,    "TEILSPANNUNG1");
-		typeToDesc.put(TEILSPANNUNG3,    "TEILSPANNUNG3"); 
-		typeToDesc.put(TEILSPANNUNG4,    "TEILSPANNUNG4"); 
-		typeToDesc.put(TEILSPANNUNG5,    "TEILSPANNUNG5"); 
-		typeToDesc.put(TEILSPANNUNG6,    "TEILSPANNUNG6"); 
-		typeToDesc.put(TEILSPANNUNG7,    "TEILSPANNUNG7"); 
+		typeToDesc.put(TEILSPANNUNG1,    "Teilspannung 1");
+		typeToDesc.put(TEILSPANNUNG2,    "Teilspannung 2");
+		typeToDesc.put(TEILSPANNUNG3,    "Teilspannung 3"); 
+		typeToDesc.put(TEILSPANNUNG4,    "Teilspannung 4"); 
+		typeToDesc.put(TEILSPANNUNG5,    "Teilspannung 5"); 
+		typeToDesc.put(TEILSPANNUNG6,    "Teilspannung 6"); 
+		typeToDesc.put(TEILSPANNUNG7,    "Teilspannung 7"); 
 			
-		typeToDesc.put(TEMPERATUR1,      "TEMPERATUR1"); 
-		typeToDesc.put(TEMPERATUR2,      "TEMPERATUR2"); 
-		typeToDesc.put(TEMPERATUR3,      "TEMPERATUR3"); 
-		typeToDesc.put(TEMPERATUR4,      "TEMPERATUR4"); 
-		typeToDesc.put(TEMPERATUR5,      "TEMPERATUR5"); 
-		typeToDesc.put(TEMPERATUR6,      "TEMPERATUR6"); 
-		typeToDesc.put(TEMPERATUR7,      "TEMPERATUR7"); 
-		typeToDesc.put(TEMPERATUR8,      "TEMPERATUR8"); 
-		typeToDesc.put(TEMPERATUR9,        "TEMPERATUR9");
-		typeToDesc.put(TEMPERATUR10,       "TEMPERATUR10");
-		typeToDesc.put(TEMPERATUR11,       "TEMPERATUR11");
-		typeToDesc.put(TEMPERATUR12,       "TEMPERATUR12");
-		typeToDesc.put(TEMPERATUR13,       "TEMPERATUR13");
-		typeToDesc.put(TEMPERATUR14,       "TEMPERATUR14");
+		typeToDesc.put(TEMPERATUR1,      "Temperatur 1"); 
+		typeToDesc.put(TEMPERATUR2,      "Temperatur 2"); 
+		typeToDesc.put(TEMPERATUR3,      "Temperatur 3"); 
+		typeToDesc.put(TEMPERATUR4,      "Temperatur 4"); 
+		typeToDesc.put(TEMPERATUR5,      "Temperatur 5"); 
+		typeToDesc.put(TEMPERATUR6,      "Temperatur 6"); 
+		typeToDesc.put(TEMPERATUR7,      "Temperatur 7"); 
+		typeToDesc.put(TEMPERATUR8,      "Temperatur 8"); 
+		typeToDesc.put(TEMPERATUR9,        "Temperatur 9");
+		typeToDesc.put(TEMPERATUR10,       "Temperatur 10");
+		typeToDesc.put(TEMPERATUR11,       "Temperatur 11");
+		typeToDesc.put(TEMPERATUR12,       "Temperatur 12");
+		typeToDesc.put(TEMPERATUR13,       "Temperatur 13");
+		typeToDesc.put(TEMPERATUR14,       "Temperatur 14");
 				
-		typeToDesc.put(MAX_BAT_TEMP,       "MAX_BAT_TEMP");
-		typeToDesc.put(UMGEBUNGS_TEMP,     "UMGEBUNGS_TEMP");
-		typeToDesc.put(MAX_LADE_TEMP,      "MAX_LADE_TEMP");
-		typeToDesc.put(MIN_LADE_TEMP,      "MIN_LADE_TEMP");
-		typeToDesc.put(MAX_FAHR_TEMP,      "MAX_FAHR_TEMP");
-		typeToDesc.put(MIN_FAHR_TEMP,      "MIN_FAHR_TEMP");
-		typeToDesc.put(MAX_LAGER_TEMP,     "MAX_LAGER_TEMP");
-		typeToDesc.put(MIN_LAGER_TEMP,     "MIN_LAGER_TEMP");
+		typeToDesc.put(MAX_BAT_TEMP,       "Max Bat Temp");
+		typeToDesc.put(UMGEBUNGS_TEMP,     "Umgebungs Temp");
+		typeToDesc.put(MAX_LADE_TEMP,      "Max Lade Temp");
+		typeToDesc.put(MIN_LADE_TEMP,      "Min Lade Temp");
+		typeToDesc.put(MAX_FAHR_TEMP,      "Max Fahr Temp");
+		typeToDesc.put(MIN_FAHR_TEMP,      "Min Fahr Temp");
+		typeToDesc.put(MAX_LAGER_TEMP,     "Max Lager Temp");
+		typeToDesc.put(MIN_LAGER_TEMP,     "Min Lager Temp");
 
-		typeToDesc.put(MAX_KAPAZITAET,     "MAX_KAPAZITAET");
-		typeToDesc.put(MIN_KAPAZITAET,      "MIN_KAPAZITAET");
-		typeToDesc.put(GELADENE_AH,        "GELADENE_AH");
-		typeToDesc.put(ENTLADENE_AH,       "ENTLADENE_AH");
-		typeToDesc.put(LADEZYKLEN,         "LADEZYKLEN");
-		typeToDesc.put(TIEFENTLADE_ZYKLEN, "TIEFENTLADE_ZYKLEN");
-		typeToDesc.put(MAX_ENTLADE_STROM,  "MAX_ENTLADE_STROM");
+		typeToDesc.put(MAX_KAPAZITAET,     "Max Kapazität");
+		typeToDesc.put(MIN_KAPAZITAET,     "Min Kapazität");
+		typeToDesc.put(GELADENE_AH,        "Geladene Ah");
+		typeToDesc.put(ENTLADENE_AH,       "Entladene Ah");
+		typeToDesc.put(LADEZYKLEN,         "Ladezyklen");
+		typeToDesc.put(TIEFENTLADE_ZYKLEN, "Tiefentladene Zyklen");
+		typeToDesc.put(MAX_ENTLADE_STROM,  "Max Entlade Strom");
 				
-		typeToDesc.put(ZYKLUS_UEBER_110,   "ZYKLUS_UEBER_110");
-		typeToDesc.put(ZYKLUS_UEBER_100,   "ZYKLUS_UEBER_100");
-		typeToDesc.put(ZYKLUS_UEBER_90,    "ZYKLUS_UEBER_90");
-		typeToDesc.put(ZYKLUS_UEBER_80,    "ZYKLUS_UEBER_80");
-		typeToDesc.put(ZYKLUS_UEBER_70,    "ZYKLUS_UEBER_70");
-		typeToDesc.put(ZYKLUS_UEBER_60,    "ZYKLUS_UEBER_60");
-		typeToDesc.put(ZYKLUS_UEBER_50,    "ZYKLUS_UEBER_50");
-		typeToDesc.put(ZYKLUS_UEBER_40,    "ZYKLUS_UEBER_40");
-		typeToDesc.put(ZYKLUS_UEBER_30,    "ZYKLUS_UEBER_30");
-		typeToDesc.put(ZYKLUS_UEBER_20,    "ZYKLUS_UEBER_20");
-		typeToDesc.put(ZYKLUS_UEBER_10,    "ZYKLUS_UEBER_10");
-		typeToDesc.put(ZYKLUS_UNTER_10,    "ZYKLUS_UNTER_10");
+		typeToDesc.put(ZYKLUS_UEBER_110,   "Zyklus > 110%");
+		typeToDesc.put(ZYKLUS_UEBER_100,   "Zyklus > 100%");
+		typeToDesc.put(ZYKLUS_UEBER_90,    "Zyklus > 90%");
+		typeToDesc.put(ZYKLUS_UEBER_80,    "Zyklus > 80%");
+		typeToDesc.put(ZYKLUS_UEBER_70,    "Zyklus > 70%");
+		typeToDesc.put(ZYKLUS_UEBER_60,    "Zyklus > 60%");
+		typeToDesc.put(ZYKLUS_UEBER_50,    "Zyklus > 50%");
+		typeToDesc.put(ZYKLUS_UEBER_40,    "Zyklus > 40%");
+		typeToDesc.put(ZYKLUS_UEBER_30,    "Zyklus > 30%");
+		typeToDesc.put(ZYKLUS_UEBER_20,    "Zyklus > 20%");
+		typeToDesc.put(ZYKLUS_UEBER_10,    "Zyklus > 10%");
+		typeToDesc.put(ZYKLUS_UNTER_10,    "Zyklus <= 10%");
 
-		typeToDesc.put(LADE_STR_UNTER_M10, "LADE_STR_UNTER_M10");
-		typeToDesc.put(LADE_STR_UEBER_M10, "LADE_STR_UEBER_M10");
-		typeToDesc.put(LADE_STR_UEBER_P00, "LADE_STR_UEBER_P00");
-		typeToDesc.put(LADE_STR_UEBER_P10, "LADE_STR_UEBER_P10");
-		typeToDesc.put(LADE_STR_UEBER_P20, "LADE_STR_UEBER_P20");
-		typeToDesc.put(LADE_STR_UEBER_P30, "LADE_STR_UEBER_P30");
-		typeToDesc.put(LADE_STR_UEBER_P40, "LADE_STR_UEBER_P40");
-		typeToDesc.put(LADE_STR_UEBER_P45, "LADE_STR_UEBER_P45");
-		typeToDesc.put(LADE_STR_UEBER_P50, "LADE_STR_UEBER_P50");
+		typeToDesc.put(LADE_STR_UNTER_M10, "Lade Strom < -10°C");
+		typeToDesc.put(LADE_STR_UEBER_M10, "Lade Strom > -10°C");
+		typeToDesc.put(LADE_STR_UEBER_P00, "Lade Strom > 0°C");
+		typeToDesc.put(LADE_STR_UEBER_P10, "Lade Strom > 10°C");
+		typeToDesc.put(LADE_STR_UEBER_P20, "Lade Strom > 20°C");
+		typeToDesc.put(LADE_STR_UEBER_P30, "Lade Strom > 30°C");
+		typeToDesc.put(LADE_STR_UEBER_P40, "Lade Strom > 40°C");
+		typeToDesc.put(LADE_STR_UEBER_P45, "Lade Strom > 45°C");
+		typeToDesc.put(LADE_STR_UEBER_P50, "Lade Strom > 50°C");
 			
-		typeToDesc.put(LADE_SPG_UNTER_M10, "LADE_SPG_UNTER_M10");
-		typeToDesc.put(LADE_SPG_UEBER_M10, "LADE_SPG_UEBER_M10");
-		typeToDesc.put(LADE_SPG_UEBER_P00, "LADE_SPG_UEBER_P00");
-		typeToDesc.put(LADE_SPG_UEBER_P10, "LADE_SPG_UEBER_P10");
-		typeToDesc.put(LADE_SPG_UEBER_P20, "LADE_SPG_UEBER_P20");
-		typeToDesc.put(LADE_SPG_UEBER_P30, "LADE_SPG_UEBER_P30");
-		typeToDesc.put(LADE_SPG_UEBER_P40, "LADE_SPG_UEBER_P40");
-		typeToDesc.put(LADE_SPG_UEBER_P45, "LADE_SPG_UEBER_P45");
-		typeToDesc.put(LADE_SPG_UEBER_P50, "LADE_SPG_UEBER_P50");
+		typeToDesc.put(LADE_SPG_UNTER_M10, "Lade Spg < -10°C");
+		typeToDesc.put(LADE_SPG_UEBER_M10, "Lade Spg > -10°C");
+		typeToDesc.put(LADE_SPG_UEBER_P00, "Lade Spg > 0°C");
+		typeToDesc.put(LADE_SPG_UEBER_P10, "Lade Spg > 10°C");
+		typeToDesc.put(LADE_SPG_UEBER_P20, "Lade Spg > 20°C");
+		typeToDesc.put(LADE_SPG_UEBER_P30, "Lade Spg > 30°C");
+		typeToDesc.put(LADE_SPG_UEBER_P40, "Lade Spg > 40°C");
+		typeToDesc.put(LADE_SPG_UEBER_P45, "Lade Spg > 45°C");
+		typeToDesc.put(LADE_SPG_UEBER_P50, "Lade Spg > 50°C");
 			
-		typeToDesc.put(NOM_KAPAZITAET,     "NOM_KAPAZITAET");
-		typeToDesc.put(MIN_FAHR_SPANNUNG,  "MIN_FAHR_SPANNUNG");
-		typeToDesc.put(SELBST_ENTL_STROM,  "SELBST_ENTL_STROM");
-		typeToDesc.put(TIEFENTLADE_SPG,    "TIEFENTLADE_SPG");
-		typeToDesc.put(MAX_SPANNUNG_DIFF,  "MAX_SPANNUNG_DIFF");
-		typeToDesc.put(MIN_FAHR_TEMP_B,    "MIN_FAHR_TEMP_B");
-		typeToDesc.put(MAX_FAHR_TEMP_B,    "MAX_FAHR_TEMP_B");
-		typeToDesc.put(MAX_FAHR_STROM,     "MAX_FAHR_STROM");
+		typeToDesc.put(NOM_KAPAZITAET,     "Nom Kapazität");
+		typeToDesc.put(MIN_FAHR_SPANNUNG,  "Min Fahr Spannung");
+		typeToDesc.put(SELBST_ENTL_STROM,  "Selbst Entl Strom");
+		typeToDesc.put(TIEFENTLADE_SPG,    "Tiefentlade Spg");
+		typeToDesc.put(MAX_SPANNUNG_DIFF,  "Max Spannung Diff");
+		typeToDesc.put(MIN_FAHR_TEMP_B,    "Min Fahr Temp B");
+		typeToDesc.put(MAX_FAHR_TEMP_B,    "Max Fahr Temp B");
+		typeToDesc.put(MAX_FAHR_STROM,     "Max Fahr Strom");
 				
-		typeToDesc.put(KAL_TEMP_7_6,       "KAL_TEMP_7_6");
-		typeToDesc.put(KAL_TEMP_5_4,       "KAL_TEMP_5_4");
-		typeToDesc.put(KAL_TEMP_3_2,       "KAL_TEMP_3_2");
-		typeToDesc.put(KAL_TEMP_1_AMB,     "KAL_TEMP_1_AMB");
-		typeToDesc.put(KAL_TEMP_GD_14,     "KAL_TEMP_GD_14");
-		typeToDesc.put(KAL_TEMP_13_12,     "KAL_TEMP_13_12");
-		typeToDesc.put(KAL_TEMP_11_10,     "KAL_TEMP_11_10");
-		typeToDesc.put(KAL_TEMP_9_8,       "KAL_TEMP_9_8");
+		typeToDesc.put(KAL_TEMP_7_6,       "Kal Temp 7 6");
+		typeToDesc.put(KAL_TEMP_5_4,       "Kal Temp 5 4");
+		typeToDesc.put(KAL_TEMP_3_2,       "Kal Temp 3 2");
+		typeToDesc.put(KAL_TEMP_1_AMB,     "Kal Temp 1 AMB");
+		typeToDesc.put(KAL_TEMP_GD_14,     "Kal Temp GD 14");
+		typeToDesc.put(KAL_TEMP_13_12,     "Kal Temp 13 12");
+		typeToDesc.put(KAL_TEMP_11_10,     "Kal Temp 11 10");
+		typeToDesc.put(KAL_TEMP_9_8,       "Kal Temp 9 8");
 			
-		typeToDesc.put(OFFS_KLEIN_STL,     "OFFS_KLEIN_STL");
-		typeToDesc.put(OFFS_GROSS_STL,     "OFFS_GROSS_STL");
-		typeToDesc.put(KALIB_SPG_1,        "KALIB_SPG_1");
-		typeToDesc.put(KALIB_SPG_2,        "KALIB_SPG_2");
-		typeToDesc.put(KALIB_SPG_3,        "KALIB_SPG_3");
-		typeToDesc.put(KALIB_SPG_4,        "KALIB_SPG_4");
-		typeToDesc.put(KALIB_SPG_5,        "KALIB_SPG_5");
-		typeToDesc.put(KALIB_SPG_6,        "KALIB_SPG_6");
-		typeToDesc.put(KALIB_SPG_9,        "KALIB_SPG_9");
+		typeToDesc.put(OFFS_KLEIN_STL,     "Offs klein Stl");
+		typeToDesc.put(OFFS_GROSS_STL,     "Offs gross Stl");
+		typeToDesc.put(KALIB_SPG_1,        "Kalib Spg 1");
+		typeToDesc.put(KALIB_SPG_2,        "Kalib Spg 2");
+		typeToDesc.put(KALIB_SPG_3,        "Kalib Spg 3");
+		typeToDesc.put(KALIB_SPG_4,        "Kalib Spg 4");
+		typeToDesc.put(KALIB_SPG_5,        "Kalib Spg 5");
+		typeToDesc.put(KALIB_SPG_6,        "Kalib Spg 6");
+		typeToDesc.put(KALIB_SPG_9,        "Kalib Spg 9");
 			
-		typeToDesc.put(DEBUG_VALUE_C,      "DEBUG_VALUE_C");
-		typeToDesc.put(DEBUG_VALUE_H,      "DEBUG_VALUE_H");
-		typeToDesc.put(DEBUG_VALUE_ADDR,   "DEBUG_VALUE_ADDR");
+		typeToDesc.put(DEBUG_VALUE_C,      "Debug Value C");
+		typeToDesc.put(DEBUG_VALUE_H,      "Debug Value H");
+		typeToDesc.put(DEBUG_VALUE_ADDR,   "Debug Value Addr");
 	}
 	
 	
@@ -330,11 +343,7 @@ public class Request {
 		EUnit eUnit = EUnit.eUnknown;
 		
 		if( description != null) {
-			QRegExp regSpannung   = new QRegExp("(SPG|SPANNUNG|SPNG)");
-			QRegExp regStrom      = new QRegExp("(STROM|STRM)");
-			QRegExp regTemperatur = new QRegExp("(TEMPERATUR|TEMP)");
-			QRegExp regCharge     = new QRegExp("(KAPAZITAET|Q|AH)");
-			QRegExp regPower     = new QRegExp("(LEISTUNG)");
+
 			if( regSpannung.indexIn(description) != -1) {
 				eUnit = EUnit.eVoltage;
 			} 

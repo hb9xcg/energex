@@ -96,8 +96,6 @@ public class TwikeAnalyzer extends QMainWindow implements DataInterface {
 		ui.actionPause.setEnabled(false);
 		ui.actionStop.setEnabled(false);
 		
-
-	    
 	    ui.actionQuit.triggered.connect(QApplication.instance(), "quit()");
     }
     
@@ -108,10 +106,10 @@ public class TwikeAnalyzer extends QMainWindow implements DataInterface {
 	
 	public void on_actionQuit_triggered() {
     	try {
+    		writeSettings();
     		if(port!=null && port.isOpen()) {
     			port.close();
-    		}
-    		writeSettings();
+    		}    		
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -141,6 +139,7 @@ public class TwikeAnalyzer extends QMainWindow implements DataInterface {
     		rawRecorder.clear();
     		onlineDecoder = new OnlineDecoder(this);
 			port.open();
+			onlineDecoder.start();
 			port.addReceiver(onlineDecoder);
 			port.addReceiver(rawRecorder);
 			ui.actionRecord.setEnabled(false);
@@ -208,7 +207,7 @@ public class TwikeAnalyzer extends QMainWindow implements DataInterface {
     	QDataStream binaryStream = new QDataStream( file ); // we will serialize the data into the file
     	OfflineDecoder decoder = new OfflineDecoder();
     	ui.logTable.setModel(decoder.decodeOffline(binaryStream));
-    	ui.logTable.resizeColumnsToContents();
+    	//ui.logTable.resizeColumnsToContents();
     }
     
     public void on_actionSaveAs_triggered() {
