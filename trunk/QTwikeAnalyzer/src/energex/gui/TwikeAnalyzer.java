@@ -97,6 +97,8 @@ public class TwikeAnalyzer extends QMainWindow implements DataInterface {
 		ui.actionStop.setEnabled(false);
 		
 	    ui.actionQuit.triggered.connect(QApplication.instance(), "quit()");
+	    
+	    setWindowIcon(new QIcon(new QPixmap("classpath:energex/gui/icons/media-record.png")));
     }
     
 	public TwikeAnalyzer(QWidget parent){
