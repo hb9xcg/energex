@@ -232,7 +232,7 @@ public class TwikeAnalyzer extends QMainWindow implements DataInterface {
 
         int idx=0;
         for( String label : labels) {
-        	Integer width = Integer.parseInt((String) settings.value(label, 55));
+        	Integer width = (Integer) settings.value(label, 55);
         	ui.logTable.setColumnWidth(idx++, width );	
         }
         

@@ -16,9 +16,9 @@
    <property name="geometry" >
     <rect>
      <x>0</x>
-     <y>71</y>
+     <y>55</y>
      <width>739</width>
-     <height>596</height>
+     <height>618</height>
     </rect>
    </property>
    <layout class="QGridLayout" name="gridLayout" >
@@ -49,7 +49,7 @@
      <x>0</x>
      <y>0</y>
      <width>739</width>
-     <height>32</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile" >
@@ -94,9 +94,9 @@
    <property name="geometry" >
     <rect>
      <x>0</x>
-     <y>32</y>
+     <y>21</y>
      <width>739</width>
-     <height>39</height>
+     <height>34</height>
     </rect>
    </property>
    <property name="windowTitle" >
@@ -118,16 +118,16 @@
    <property name="geometry" >
     <rect>
      <x>0</x>
-     <y>667</y>
+     <y>673</y>
      <width>739</width>
-     <height>25</height>
+     <height>19</height>
     </rect>
    </property>
   </widget>
   <action name="actionOpen" >
    <property name="icon" >
     <iconset>
-     <normaloff>../../../../../../../usr/share/icons/oxygen/32x32/actions/document-open.png</normaloff>../../../../../../../usr/share/icons/oxygen/32x32/actions/document-open.png</iconset>
+     <normaloff>classpath:energex/gui/icons/document-open.png</normaloff>classpath:energex/gui/icons/document-open.png</iconset>
    </property>
    <property name="text" >
     <string>&amp;Open</string>
@@ -136,7 +136,7 @@
   <action name="actionRecord" >
    <property name="icon" >
     <iconset>
-     <normaloff>../../../../../../../usr/share/icons/oxygen/32x32/actions/media-record.png</normaloff>../../../../../../../usr/share/icons/oxygen/32x32/actions/media-record.png</iconset>
+     <normaloff>classpath:energex/gui/icons/media-record.png</normaloff>classpath:energex/gui/icons/media-record.png</iconset>
    </property>
    <property name="text" >
     <string>&amp;Record</string>
@@ -145,7 +145,7 @@
   <action name="actionPause" >
    <property name="icon" >
     <iconset>
-     <normaloff>../../../../../../../usr/share/icons/oxygen/32x32/actions/media-playback-pause.png</normaloff>../../../../../../../usr/share/icons/oxygen/32x32/actions/media-playback-pause.png</iconset>
+     <normaloff>classpath:energex/gui/icons/media-playback-pause.png</normaloff>classpath:energex/gui/icons/media-playback-pause.png</iconset>
    </property>
    <property name="text" >
     <string>&amp;Pause</string>
@@ -154,7 +154,7 @@
   <action name="actionPlay" >
    <property name="icon" >
     <iconset>
-     <normaloff>../../../../../../../usr/share/icons/oxygen/32x32/actions/media-playback-start.png</normaloff>../../../../../../../usr/share/icons/oxygen/32x32/actions/media-playback-start.png</iconset>
+     <normaloff>classpath:energex/gui/icons/media-playback-start.png</normaloff>classpath:energex/gui/icons/media-playback-start.png</iconset>
    </property>
    <property name="text" >
     <string>P&amp;lay</string>
@@ -163,7 +163,7 @@
   <action name="actionStop" >
    <property name="icon" >
     <iconset>
-     <normaloff>../../../../../../../usr/share/icons/oxygen/32x32/actions/media-playback-stop.png</normaloff>../../../../../../../usr/share/icons/oxygen/32x32/actions/media-playback-stop.png</iconset>
+     <normaloff>classpath:energex/gui/icons/media-playback-stop.png</normaloff>classpath:energex/gui/icons/media-playback-stop.png</iconset>
    </property>
    <property name="text" >
     <string>S&amp;top</string>
@@ -177,7 +177,7 @@
   <action name="actionSaveAs" >
    <property name="icon" >
     <iconset>
-     <normaloff>../../../../../../../usr/share/icons/oxygen/32x32/actions/document-save-as.png</normaloff>../../../../../../../usr/share/icons/oxygen/32x32/actions/document-save-as.png</iconset>
+     <normaloff>classpath:energex/gui/icons/document-save-as.png</normaloff>classpath:energex/gui/icons/document-save-as.png</iconset>
    </property>
    <property name="text" >
     <string>&amp;Save As</string>
@@ -186,7 +186,7 @@
   <action name="actionSettings" >
    <property name="icon" >
     <iconset>
-     <normaloff>../../../../../../../usr/share/icons/oxygen/32x32/actions/configure.png</normaloff>../../../../../../../usr/share/icons/oxygen/32x32/actions/configure.png</iconset>
+     <normaloff>classpath:energex/gui/icons/configure.png</normaloff>classpath:energex/gui/icons/configure.png</iconset>
    </property>
    <property name="text" >
     <string>Settings</string>
