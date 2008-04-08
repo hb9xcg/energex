@@ -27,6 +27,7 @@ import java.util.List;
 import com.trolltech.qt.core.QByteArray;
 import com.trolltech.qt.core.QCoreApplication;
 import com.trolltech.qt.core.QDataStream;
+import com.trolltech.qt.core.QDir;
 import com.trolltech.qt.core.QFile;
 import com.trolltech.qt.core.QIODevice;
 import com.trolltech.qt.core.QSettings;
@@ -191,7 +192,7 @@ public class TwikeAnalyzer extends QMainWindow implements DataInterface {
     
     public void on_actionOpen_triggered() {
     	String fileName = null;
-    	fileName = QFileDialog.getOpenFileName(this, tr("Open Raw Logfile"), "/home/markus" );
+    	fileName = QFileDialog.getOpenFileName(this, tr("Open Raw Logfile"), QDir.homePath() );
 //    	fileName = QFileDialog.getOpenFileName(this, tr("Open log file"), "~/", tr("Log Files (*.log)"), null);
         if ( fileName.isEmpty()) {
         	return;
@@ -214,7 +215,7 @@ public class TwikeAnalyzer extends QMainWindow implements DataInterface {
     
     public void on_actionSaveAs_triggered() {
     	String fileName = null;
-    	fileName = QFileDialog.getSaveFileName(this, tr("Save Raw Logfile"), "/home/markus" );
+    	fileName = QFileDialog.getSaveFileName(this, tr("Save Raw Logfile"), QDir.homePath() );
         if ( !fileName.isEmpty()) {
         	rawRecorder.saveAs(fileName);
         }
