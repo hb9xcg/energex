@@ -1,0 +1,60 @@
+Partlist
+
+Exported from cell-supervisor.sch at 15.04.2008 17:51:51 
+
+EAGLE Version 4.16r2 Copyright (c) 1988-2006 CadSoft
+
+Part     Value          Device         Package     Library        Sheet
+
+C1       100nF          C-EUC0504      C0504       rcl            1
+C2       100nF          C-EUC0504      C0504       rcl            1
+C3       100nF          C-EUC0504      C0504       rcl            1
+C4       3u3            CPOL-EUSMCP    SMC_P       rcl            1
+C6       100nF          C-EUC0504      C0504       rcl            1
+C7       100nF          C-EUC0504      C0504       rcl            1
+C8       2u2            CPOL-EUSMCP    SMC_P       rcl            1
+C9       10nF           C-EUC0504      C0504       rcl            1
+D1       5V6            ZENER-DIODESMB SMB         diode          1
+IC1      TINY26LS       TINY26LS       SO20L       atmel          1
+IC2                     MIC5219XX      SOT23-5     v-reg-micrel   1
+L2       10uH           L-EUL3225M     L3225M      rcl            1
+LD1      PL006-WCR12    PL006-WCR12    SOT23       led            1
+LD3      PL006-WCR12    PL006-WCR12    SOT23       led            1
+R1       100k           R-EU_M0805     M0805       rcl            1
+R2       150            R-EU_R1206     R1206       rcl            1
+R3       150            R-EU_R1206     R1206       rcl            1
+R4       150            R-EU_R1206     R1206       rcl            1
+R5       150            R-EU_R1206     R1206       rcl            1
+R6       100k           R-EU_M0805     M0805       rcl            1
+R7       100k           R-EU_M0805     M0805       rcl            1
+R8       150            R-EU_R1206     R1206       rcl            1
+R9       150            R-EU_R1206     R1206       rcl            1
+R10      150            R-EU_R1206     R1206       rcl            1
+R11      150            R-EU_R1206     R1206       rcl            1
+R12      100k           R-EU_M0805     M0805       rcl            1
+R13      100k           R-EU_M0805     M0805       rcl            1
+R14      150            R-EU_R1206     R1206       rcl            1
+R15      150            R-EU_R1206     R1206       rcl            1
+R16      150            R-EU_R1206     R1206       rcl            1
+R17      150            R-EU_R1206     R1206       rcl            1
+R18      150            R-EU_R1206     R1206       rcl            1
+R19      150            R-EU_R1206     R1206       rcl            1
+R20      150            R-EU_R1206     R1206       rcl            1
+R21      150            R-EU_R1206     R1206       rcl            1
+R22      150            R-EU_R1206     R1206       rcl            1
+R23      150            R-EU_R1206     R1206       rcl            1
+R24      150            R-EU_R1206     R1206       rcl            1
+R25      180            R-EU_M0805     M0805       rcl            1
+R35      150            R-EU_R1206     R1206       rcl            1
+R45      2.5A           SMR-WAV        SMS-WAV     resistor-shunt 1
+R46      180            R-EU_M0805     M0805       rcl            1
+R49      180            R-EU_M0805     M0805       rcl            1
+R50      180            R-EU_M0805     M0805       rcl            1
+R51      680            R-EU_M0805     M0805       rcl            1
+SV1                     MA03-2         MA03-2      con-lstb       1
+T1       FDN337N        FDN337N        SOT23       transistor-fet 1
+U$1      HCPL-181       HCPL-181       MINI-FLAT-4 optocoupler    1
+U$2      WAGO2-233-102  WAGO2-233-102  233-102     con-wago       1
+U$3      ADUM1250       ADUM1250       SO8         analog-devices 1
+U$4      LM61SOT23      LM61SOT23      SOT23       linear         1
+X2                      FSIDE-8        FSIDE-8     con-amp        1
