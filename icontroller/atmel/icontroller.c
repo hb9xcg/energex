@@ -36,6 +36,7 @@
 #include "os_thread.h"
 #include "command.h"
 #include "supervisor.h"
+#include "simulator.h"
 #include "delay.h"
 
 EPowerState ePowerIst;
@@ -81,6 +82,7 @@ int main(void)
 
 	i2c_init(100000); // 100kHz Speed
 
+	simulator_init();
 	supervisor_init();
 
 	ePowerIst = ePowerOff;
