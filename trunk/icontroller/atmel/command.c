@@ -33,6 +33,7 @@
 #include "adc.h"
 #include "charge.h"
 #include "supervisor.h"
+#include "simulator.h"
 
 #define COMMAND_STACK_SIZE 256
 #define CMD_LINE   128
@@ -53,6 +54,7 @@ static void cmd_capacity(void);
 static void cmd_reset(void);
 static void cmd_power(const char* cmd);
 static void cmd_supervisor(const char* cmd);
+static void cmd_comm_simulator(const char* cmd);
 
 void cmd_init(void)
 {
@@ -104,6 +106,9 @@ void cmd_process( const char* cmd )
 {
 	switch( cmd[0] )
 	{
+		case 'c':
+			cmd_comm_simulator(cmd);
+			break;
 		case 'i':
 			cmd_current();
 		break;
@@ -144,7 +149,22 @@ void cmd_help(void)
 	strcat(cmd_answer, "s:\tSupervisor {on|off|info}\n\r");
 	strcat(cmd_answer, "t:\tTemperatur\n\r");
 	strcat(cmd_answer, "u:\tVoltage\n\r");
+	strcat(cmd_answer, "c:\tCommunication simulation {start|stop}\n\r");
 	strcat(cmd_answer, "?:\tHelp\n\r");
+}
+
+void cmd_comm_simulator(const char* cmd)
+{
+	if( strstr( cmd, "start") )
+	{
+		simulator_activate();
+		strcpy(cmd_answer, "Activated communication simulator.");
+	}
+	else if( strstr( cmd, "stop") )
+	{
+		simulator_deactivate();
+		strcpy(cmd_answer, "Deactivated communication simulator.");
+	}
 }
 
 void cmd_temperatur(void)

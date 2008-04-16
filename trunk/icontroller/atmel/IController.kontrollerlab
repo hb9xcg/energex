@@ -1,8 +1,8 @@
 <!DOCTYPE KontrollerLab>
-<PROJECT VERSION="0.1" >
+<PROJECT VERSION="0.8.0-beta1" >
   <FILES>
-    <FILE SHOWN="TRUE" NAME="icontroller.c" />
-    <FILE SHOWN="TRUE" NAME="icontroller.h" />
+    <FILE VIEWS="2,2,1071,661,0," SHOWN="TRUE" NAME="icontroller.c" />
+    <FILE VIEWS="2,2,1057,692,0," SHOWN="TRUE" NAME="icontroller.h" />
     <FILE SHOWN="FALSE" NAME="adc.c" />
     <FILE SHOWN="FALSE" NAME="adc.h" />
     <FILE SHOWN="FALSE" NAME="delay.h" />
@@ -13,7 +13,7 @@
     <FILE SHOWN="FALSE" NAME="os_scheduler.h" />
     <FILE SHOWN="FALSE" NAME="os_scheduler.c" />
     <FILE SHOWN="FALSE" NAME="timer.h" />
-    <FILE SHOWN="FALSE" NAME="timer.c" />
+    <FILE VIEWS="2,2,1057,692,0," SHOWN="TRUE" NAME="timer.c" />
     <FILE SHOWN="FALSE" NAME="global.h" />
     <FILE SHOWN="FALSE" NAME="i2c.h" />
     <FILE SHOWN="FALSE" NAME="i2c.c" />
@@ -22,14 +22,16 @@
     <FILE SHOWN="FALSE" NAME="uart.h" />
     <FILE SHOWN="FALSE" NAME="fifo.c" />
     <FILE SHOWN="FALSE" NAME="fifo.h" />
-    <FILE SHOWN="TRUE" NAME="command.c" />
-    <FILE SHOWN="TRUE" NAME="command.h" />
-    <FILE SHOWN="TRUE" NAME="supervisor.c" />
-    <FILE SHOWN="TRUE" NAME="supervisor.h" />
+    <FILE VIEWS="2,2,1057,692,0," SHOWN="TRUE" NAME="command.c" />
+    <FILE VIEWS="2,2,1057,692,0," SHOWN="TRUE" NAME="command.h" />
+    <FILE VIEWS="2,2,1057,692,0," SHOWN="TRUE" NAME="supervisor.c" />
+    <FILE VIEWS="2,2,1057,692,0," SHOWN="TRUE" NAME="supervisor.h" />
     <FILE SHOWN="FALSE" NAME="charge.c" />
-    <FILE SHOWN="TRUE" NAME="charge.h" />
-    <FILE SHOWN="TRUE" NAME="balancer.c" />
-    <FILE SHOWN="TRUE" NAME="balancer.h" />
+    <FILE SHOWN="FALSE" NAME="charge.h" />
+    <FILE SHOWN="FALSE" NAME="balancer.c" />
+    <FILE SHOWN="FALSE" NAME="balancer.h" />
+    <FILE VIEWS="2,2,1071,661,0," SHOWN="TRUE" NAME="simulator.c" />
+    <FILE VIEWS="2,2,1071,686,0," SHOWN="TRUE" NAME="simulator.h" />
   </FILES>
   <SETTINGS>
     <ASSEMBLER_COMMAND VALUE="avr-gcc" />
