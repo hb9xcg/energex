@@ -33,6 +33,7 @@ import com.trolltech.qt.gui.QStandardItemModel;
 
 import energex.exceptions.EndOfFileException;
 import energex.protocol.Checksum.EChecksum;
+import energex.protocol.Type.EType;
 import energex.protocol.Address;
 
 public class OfflineDecoder {
@@ -66,12 +67,6 @@ public class OfflineDecoder {
 		eAddress
 	}
 	
-	enum EType {
-		MESSAGE,
-		REQUEST,
-		RESPONSE,
-		UNKNOWN
-	}
 	
 	EState eState;
 	EHeaderState eHeaderState;
@@ -177,15 +172,6 @@ public class OfflineDecoder {
 		Checksum.EChecksum eChecksum = checksumDecoder.decodeChecksum(data);		
 		addChecksum(eChecksum);
 	}
-	
-	
-	private boolean isStart(byte start) {
-		return (start==0x10);
-	}
-	
-	private boolean isType(byte type) {
-		return type==0x42 || type==0x48 || type==0x24;
-	}
 
 	private EType decodeHeader(QDataStream input) throws Exception {
 		Byte start, address, type;
@@ -199,30 +185,33 @@ public class OfflineDecoder {
 					currentData.append(start);					
 					if(input.atEnd())
 						throw new EndOfFileException("Reached input stream end");
-				} while( !isStart(start) );
+				} while( !Frame.matches(start) );
 				address = input.readByte();
 				currentData.append(address);
-			} while(!addressDecoder.isAddress(address));
+			} while(!Address.matches(address));
 			type = input.readByte();
 			currentData.append(start);
-		} while(!isType(type));
+		} while(!Type.matches(type));
 		
 		// Ignore first chunk
 		if(currentRow>=0) {
+			currentData.chop(3);
+			
 			String rawPacket = new String();
-			for(int idx=0; idx<currentData.size()-3; idx++) {
+			for(int idx=0; idx<currentData.size(); idx++) {
 				rawPacket += byteToHexString(currentData.at(idx)) + " ";
 			}
 			// Dump last raw packet...
 			QStandardItem packetItem = new QStandardItem(rawPacket);
 			model.setItem(currentRow, 1, packetItem);
-			currentData.chop(3);
+			
+			currentData = Frame.unstuffing(currentData);
 			decodeContent(currentData);
 		}
 		currentData = new QByteArray();
 		
 		currentRow++;
-		currentType = getType(type);
+		currentType = Type.getType(type);
 		
 		currentData.append(start);
 		currentData.append(address);
@@ -234,7 +223,7 @@ public class OfflineDecoder {
 		model.setItem(currentRow, 0, timeItem);	
 		model.setItem(currentRow, 2, addrItem);
 	
-		QStandardItem typeItem   = new QStandardItem(currentType.toString());
+		QStandardItem typeItem   = new QStandardItem(Type.decodeType(currentType));
 		model.setItem(currentRow, 3, typeItem);
 		
 		return currentType;
@@ -269,25 +258,5 @@ public class OfflineDecoder {
 			}
 		}
 		return hexString;
-	}
-	
-	private EType getType(byte byteType) {
-		EType eType;
-
-		switch(byteType) {
-		case 0x42:
-			eType = EType.REQUEST;
-			break;
-		case 0x48:
-			eType = EType.RESPONSE;
-			break;
-		case 0x24:
-			eType = EType.MESSAGE;
-			break;
-		default:
-			eType = EType.UNKNOWN;
-			break;
-		}
-		return eType;
 	}
 }

@@ -28,7 +28,7 @@ import com.trolltech.qt.gui.QStandardItem;
 import com.trolltech.qt.gui.QStandardItemModel;
 
 import energex.protocol.Checksum.EChecksum;
-import energex.protocol.OnlineDecoder.EType;
+import energex.protocol.Type.EType;
 
 public class DataPacket {
 	QStandardItem timeItem;
@@ -62,8 +62,8 @@ public class DataPacket {
 		addressItem = new QStandardItem(addressDecoder.decodeAddress(address));
 	}
 
-	public void setTypeData(EType type) {
-		typeItem = new QStandardItem(type.toString());
+	public void setTypeData(EType currentType) {
+		typeItem = new QStandardItem(Type.decodeType(currentType));
 	}
 
 	public void setContentData(String content) {

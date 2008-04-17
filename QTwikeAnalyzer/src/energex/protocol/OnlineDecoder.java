@@ -25,6 +25,7 @@ import com.trolltech.qt.core.QByteArray;
 import com.trolltech.qt.core.QTime;
 
 import energex.communication.TwikeReceiver;
+import energex.protocol.Type.EType;
 
 public class OnlineDecoder implements TwikeReceiver {
 	List<String> labels = new ArrayList<String>();
@@ -44,27 +45,12 @@ public class OnlineDecoder implements TwikeReceiver {
 	byte currentAddressByte;
 	byte currentTypeByte;
 	
-	enum EState {
-		eMessage,
-		eRequest,
-		eResponse,
-		eUnknown
-	}
-	
 	enum EHeaderState {
 		eStart,
 		eType,
 		eAddress
 	}
-	
-	enum EType {
-		MESSAGE,
-		REQUEST,
-		RESPONSE,
-		UNKNOWN
-	}
-	
-	EState eState;
+
 	EHeaderState eHeaderState;
 	
 	public OnlineDecoder(DataInterface table) {
@@ -75,7 +61,6 @@ public class OnlineDecoder implements TwikeReceiver {
 	    labels.add("Message");
 	    labels.add("Checksum");
 	    
-	    eState = EState.eUnknown;
 	    eHeaderState = EHeaderState.eStart;
 	    
 		currentRow = -1; // Skip first chunk
@@ -118,14 +103,6 @@ public class OnlineDecoder implements TwikeReceiver {
 		currentPacket.setChecksumData(eChecksum);		
 	}
 	
-	private boolean isStart(byte start) {
-		return (start==0x10);
-	}
-	
-	private boolean isType(byte type) {
-		return type==0x42 || type==0x48 || type==0x24;
-	}
-	
 	private void decodeContent(QByteArray data) {
 		switch(currentType)
 		{
@@ -143,26 +120,6 @@ public class OnlineDecoder implements TwikeReceiver {
 			break;
 		}
 	}
-
-	private EType getType(byte byteType) {
-		EType eType;
-
-		switch(byteType) {
-		case 0x42:
-			eType = EType.REQUEST;
-			break;
-		case 0x48:
-			eType = EType.RESPONSE;
-			break;
-		case 0x24:
-			eType = EType.MESSAGE;
-			break;
-		default:
-			eType = EType.UNKNOWN;
-			break;
-		}
-		return eType;
-	}
 	
 	public void start() {
 		time.start();
@@ -174,6 +131,7 @@ public class OnlineDecoder implements TwikeReceiver {
 		if(currentPacket!=null) {
 			currentPacket.setTimeData(time);
 			currentPacket.setRawData(currentData);
+			currentData = Frame.unstuffing(currentData);
 			decodeContent(currentData);
 			table.updateData(currentPacket); // Moves ownership to main thread
 		}		
@@ -187,11 +145,12 @@ public class OnlineDecoder implements TwikeReceiver {
 		currentData.append(currentAddressByte);
 		currentData.append(currentTypeByte);	
 		
-		currentType = getType(currentTypeByte);
+		currentType = Type.getType(currentTypeByte);
 		
 		currentPacket.setAddressData(currentAddressByte);
 		currentPacket.setTypeData(currentType);
 	}
+	
 
 	@Override
 	public void receiveData(byte data) {
@@ -205,13 +164,13 @@ public class OnlineDecoder implements TwikeReceiver {
 		switch(eHeaderState) 
 		{
 		case eStart:
-			if( isStart(data) ) {
+			if( Frame.matches(data) ) {
 				eHeaderState = EHeaderState.eAddress;
 				currentStartByte = data;
 			}
 			break;
 		case eAddress:
-			if( addressDecoder.isAddress(data) ) {
+			if( Address.matches(data) ) {
 				eHeaderState = EHeaderState.eType;
 				currentAddressByte = data;
 			} else {
@@ -219,7 +178,7 @@ public class OnlineDecoder implements TwikeReceiver {
 			}
 			break;
 		case eType:
-			if( isType(data) ) {
+			if( Type.matches(data) ) {
 				eHeaderState = EHeaderState.eStart;
 				currentTypeByte = data;
 				newFrame = true;
