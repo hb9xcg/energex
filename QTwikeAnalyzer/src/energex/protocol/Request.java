@@ -112,6 +112,8 @@ public class Request {
 	static final	short ZYKLUS_UEBER_20    = 0x8a;
 	static final	short ZYKLUS_UEBER_10    = 0x8b;
 	static final	short ZYKLUS_UNTER_10    = 0x8c;
+	
+	static final	short SYMMETRIER_STROM   = 0x99;
 
 	static final	short LADE_STR_UNTER_M10 = 0xa1;
 	static final	short LADE_STR_UEBER_M10 = 0xa2;
@@ -194,7 +196,7 @@ public class Request {
 		
 		typeToDesc.put(BUS_ADRESSE,      "Bus Adresse");
 		typeToDesc.put(COMMAND1,         "Command 1");
-		typeToDesc.put(D_STATE,          "d-State");
+		typeToDesc.put(D_STATE,          "Drive State");
 		typeToDesc.put(COMMAND2,         "Command 2");
 		typeToDesc.put(PARAM_PROT,       "PARAM_PROT");
 		
@@ -263,6 +265,8 @@ public class Request {
 		typeToDesc.put(ZYKLUS_UEBER_20,    "Zyklus > 20%");
 		typeToDesc.put(ZYKLUS_UEBER_10,    "Zyklus > 10%");
 		typeToDesc.put(ZYKLUS_UNTER_10,    "Zyklus <= 10%");
+		
+		typeToDesc.put(SYMMETRIER_STROM,   "Symmetrierstrom");
 
 		typeToDesc.put(LADE_STR_UNTER_M10, "Lade Strom < -10°C");
 		typeToDesc.put(LADE_STR_UEBER_M10, "Lade Strom > -10°C");
@@ -325,16 +329,19 @@ public class Request {
 	}
 	
 	public String decodeRequest(QByteArray data) {
-		short requestType = data.at(TYPE_INDEX);
-		String description = typeToDesc.get(requestType);
+		Short type = requestType(data);
+		
+		String description = typeToDesc.get(type);
 		if( description == null) {
 			description = "UNKNOWN";
 		}
 		return description;		
 	}
 
-	public short requestType(QByteArray data) {
-		return data.at(TYPE_INDEX);
+	public Short requestType(QByteArray data) {
+		Short type = new Short( data.at(TYPE_INDEX) );
+		type &= 0xFF;
+		return type;
 	}
 	
 	public static EUnit getUnit(short type) {
