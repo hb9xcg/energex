@@ -96,6 +96,9 @@ public class TwikeAnalyzer extends QMainWindow implements DataInterface {
 		ui.actionPlay.setEnabled(false);
 		ui.actionPause.setEnabled(false);
 		ui.actionStop.setEnabled(false);
+		ui.actionBattery1.setEnabled(false);
+		ui.actionBattery2.setEnabled(false);
+		ui.actionBattery3.setEnabled(false);
 		
 	    ui.actionQuit.triggered.connect(QApplication.instance(), "quit()");
 	    
@@ -244,7 +247,7 @@ public class TwikeAnalyzer extends QMainWindow implements DataInterface {
 
         int idx=0;
         for( String label : labels) {
-        	Integer width = Integer.parseInt((String) settings.value(label, 55));
+        	Integer width = Integer.parseInt((String) settings.value(label, "55"));
         	ui.logTable.setColumnWidth(idx++, width );	
         }
         
@@ -290,7 +293,6 @@ public class TwikeAnalyzer extends QMainWindow implements DataInterface {
 		
 		public UpdateTable(DataPacket data) {
 			this.data = data;
-//			this.data.moveToThread(QApplication.instance().thread());
 		}
 		
 		@Override
