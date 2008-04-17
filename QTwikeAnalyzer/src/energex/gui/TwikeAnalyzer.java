@@ -138,7 +138,16 @@ public class TwikeAnalyzer extends QMainWindow implements DataInterface {
 	
 	public void on_actionRecord_triggered() {
     	try {
+    		ArrayList<Integer> dimensions = new ArrayList<Integer>();
+    		int idx=0;
+            for( idx=0; idx < labels.size(); idx++ ) {	
+            	dimensions.add(idx, ui.logTable.columnWidth(idx) );	
+            }
     		model.clear();
+    		model.setHorizontalHeaderLabels(labels);
+    		for( idx=0; idx < labels.size(); idx++ ) {	
+    			ui.logTable.setColumnWidth(idx, dimensions.get(idx));	
+            }
     		rawRecorder.clear();
     		onlineDecoder = new OnlineDecoder(this);
 			port.open();
@@ -235,7 +244,7 @@ public class TwikeAnalyzer extends QMainWindow implements DataInterface {
 
         int idx=0;
         for( String label : labels) {
-        	Integer width = (Integer) settings.value(label, 55);
+        	Integer width = Integer.parseInt((String) settings.value(label, 55));
         	ui.logTable.setColumnWidth(idx++, width );	
         }
         
@@ -252,7 +261,8 @@ public class TwikeAnalyzer extends QMainWindow implements DataInterface {
         
         int idx=0;
         for( String label : labels) {	
-        	settings.setValue(label, ui.logTable.columnWidth(idx++) );	
+        	Integer width = ui.logTable.columnWidth(idx++);
+        	settings.setValue(label, width.toString() );	
         }
         
         settings.setValue("Port", currentPort);
