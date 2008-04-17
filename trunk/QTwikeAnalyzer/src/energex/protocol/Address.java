@@ -38,7 +38,7 @@ public class Address {
 		address2Desc.put(BROADCAST, "Broadcast");
 	}
 	
-	public boolean isAddress(byte address) {
+	public static boolean matches(byte address) {
 		return (address==BROADCAST) || 
 				 (address==BATTERIE1) || 
 				 (address==BATTERIE2) ||
