@@ -16,9 +16,9 @@
    <property name="geometry" >
     <rect>
      <x>0</x>
-     <y>55</y>
+     <y>71</y>
      <width>739</width>
-     <height>618</height>
+     <height>596</height>
     </rect>
    </property>
    <layout class="QGridLayout" name="gridLayout" >
@@ -49,26 +49,28 @@
      <x>0</x>
      <y>0</y>
      <width>739</width>
-     <height>21</height>
+     <height>32</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile" >
     <property name="title" >
-     <string>File</string>
+     <string>&amp;File</string>
     </property>
     <addaction name="actionOpen" />
     <addaction name="actionSaveAs" />
+    <addaction name="separator" />
     <addaction name="actionQuit" />
    </widget>
    <widget class="QMenu" name="menuEdit" >
     <property name="title" >
-     <string>Edit</string>
+     <string>&amp;Edit</string>
     </property>
+    <addaction name="actionFind" />
     <addaction name="actionSettings" />
    </widget>
    <widget class="QMenu" name="menuAnalyze" >
     <property name="title" >
-     <string>Analyze</string>
+     <string>&amp;Analyze</string>
     </property>
     <addaction name="actionRecord" />
     <addaction name="actionPause" />
@@ -81,7 +83,7 @@
    </widget>
    <widget class="QMenu" name="menuHelp" >
     <property name="title" >
-     <string>Help</string>
+     <string>&amp;Help</string>
     </property>
     <addaction name="actionAbout" />
    </widget>
@@ -94,9 +96,9 @@
    <property name="geometry" >
     <rect>
      <x>0</x>
-     <y>21</y>
+     <y>32</y>
      <width>739</width>
-     <height>34</height>
+     <height>39</height>
     </rect>
    </property>
    <property name="windowTitle" >
@@ -118,16 +120,16 @@
    <property name="geometry" >
     <rect>
      <x>0</x>
-     <y>673</y>
+     <y>667</y>
      <width>739</width>
-     <height>19</height>
+     <height>25</height>
     </rect>
    </property>
   </widget>
   <action name="actionOpen" >
    <property name="icon" >
     <iconset>
-     <normaloff>classpath:energex/gui/icons/document-open.png</normaloff>classpath:energex/gui/icons/document-open.png</iconset>
+     <normaloff>../../../../../../../usr/share/icons/oxygen/48x48/actions/document-open.png</normaloff>../../../../../../../usr/share/icons/oxygen/48x48/actions/document-open.png</iconset>
    </property>
    <property name="text" >
     <string>&amp;Open</string>
@@ -136,7 +138,7 @@
   <action name="actionRecord" >
    <property name="icon" >
     <iconset>
-     <normaloff>classpath:energex/gui/icons/media-record.png</normaloff>classpath:energex/gui/icons/media-record.png</iconset>
+     <normaloff>../../../../../../../usr/share/icons/oxygen/48x48/actions/media-record.png</normaloff>../../../../../../../usr/share/icons/oxygen/48x48/actions/media-record.png</iconset>
    </property>
    <property name="text" >
     <string>&amp;Record</string>
@@ -145,7 +147,7 @@
   <action name="actionPause" >
    <property name="icon" >
     <iconset>
-     <normaloff>classpath:energex/gui/icons/media-playback-pause.png</normaloff>classpath:energex/gui/icons/media-playback-pause.png</iconset>
+     <normaloff>../../../../../../../usr/share/icons/oxygen/48x48/actions/media-playback-pause.png</normaloff>../../../../../../../usr/share/icons/oxygen/48x48/actions/media-playback-pause.png</iconset>
    </property>
    <property name="text" >
     <string>&amp;Pause</string>
@@ -154,7 +156,7 @@
   <action name="actionPlay" >
    <property name="icon" >
     <iconset>
-     <normaloff>classpath:energex/gui/icons/media-playback-start.png</normaloff>classpath:energex/gui/icons/media-playback-start.png</iconset>
+     <normaloff>../../../../../../../usr/share/icons/oxygen/48x48/actions/media-playback-start.png</normaloff>../../../../../../../usr/share/icons/oxygen/48x48/actions/media-playback-start.png</iconset>
    </property>
    <property name="text" >
     <string>P&amp;lay</string>
@@ -163,7 +165,7 @@
   <action name="actionStop" >
    <property name="icon" >
     <iconset>
-     <normaloff>classpath:energex/gui/icons/media-playback-stop.png</normaloff>classpath:energex/gui/icons/media-playback-stop.png</iconset>
+     <normaloff>../../../../../../../usr/share/icons/oxygen/48x48/actions/media-playback-stop.png</normaloff>../../../../../../../usr/share/icons/oxygen/48x48/actions/media-playback-stop.png</iconset>
    </property>
    <property name="text" >
     <string>S&amp;top</string>
@@ -177,7 +179,7 @@
   <action name="actionSaveAs" >
    <property name="icon" >
     <iconset>
-     <normaloff>classpath:energex/gui/icons/document-save-as.png</normaloff>classpath:energex/gui/icons/document-save-as.png</iconset>
+     <normaloff>../../../../../../../usr/share/icons/oxygen/48x48/actions/document-save-as.png</normaloff>../../../../../../../usr/share/icons/oxygen/48x48/actions/document-save-as.png</iconset>
    </property>
    <property name="text" >
     <string>&amp;Save As</string>
@@ -186,7 +188,7 @@
   <action name="actionSettings" >
    <property name="icon" >
     <iconset>
-     <normaloff>classpath:energex/gui/icons/configure.png</normaloff>classpath:energex/gui/icons/configure.png</iconset>
+     <normaloff>../../../../../../../usr/share/icons/oxygen/48x48/actions/configure.png</normaloff>../../../../../../../usr/share/icons/oxygen/48x48/actions/configure.png</iconset>
    </property>
    <property name="text" >
     <string>Settings</string>
@@ -210,6 +212,15 @@
   <action name="actionBattery3" >
    <property name="text" >
     <string>Battery 3</string>
+   </property>
+  </action>
+  <action name="actionFind" >
+   <property name="icon" >
+    <iconset>
+     <normaloff>../../../../../../../usr/share/icons/oxygen/48x48/actions/file-find.png</normaloff>../../../../../../../usr/share/icons/oxygen/48x48/actions/file-find.png</iconset>
+   </property>
+   <property name="text" >
+    <string>&amp;Find</string>
    </property>
   </action>
  </widget>
