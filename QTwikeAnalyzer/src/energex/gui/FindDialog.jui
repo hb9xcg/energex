@@ -1,6 +1,6 @@
 <ui version="4.0" language="jambi" >
- <class>Find</class>
- <widget class="QDialog" name="Find" >
+ <class>FindDialogClass</class>
+ <widget class="QDialog" name="FindDialogClass" >
   <property name="geometry" >
    <rect>
     <x>0</x>
@@ -189,7 +189,7 @@
   <connection>
    <sender>button_close</sender>
    <signal>clicked&lt;java.lang.Boolean></signal>
-   <receiver>Find</receiver>
+   <receiver>FindDialogClass</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel" >

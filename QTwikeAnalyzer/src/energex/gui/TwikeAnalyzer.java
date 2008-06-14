@@ -42,7 +42,7 @@ import energex.storage.RawRecorder;
 
 public class TwikeAnalyzer extends QMainWindow implements DataInterface {
 
-    Ui_TwikeAnalyzerClass ui = new Ui_TwikeAnalyzerClass();
+    TwikeAnalyzerClass ui = new TwikeAnalyzerClass();
     QDataStream binaryStream;
     TwikePort port;
     String currentPort;

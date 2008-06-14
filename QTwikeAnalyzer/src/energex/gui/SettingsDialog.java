@@ -24,12 +24,12 @@ import com.trolltech.qt.core.QSettings;
 import com.trolltech.qt.gui.QComboBox;
 import com.trolltech.qt.gui.QDialog;
 
-import energex.gui.Ui_Settings;
+import energex.gui.SettingsDialogClass;
 import gnu.io.CommPortIdentifier;
 
 public class SettingsDialog extends QDialog {
 	
-	Ui_Settings ui = new Ui_Settings();
+	SettingsDialogClass ui = new SettingsDialogClass();
 	QSettings settings = null;
 	
 	public SettingsDialog() {

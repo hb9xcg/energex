@@ -4,7 +4,7 @@ import com.trolltech.qt.core.QSettings;
 import com.trolltech.qt.gui.QDialog;
 
 public class AboutDialog extends QDialog {
-	Ui_AboutDialog ui = new Ui_AboutDialog();
+	AboutDialogClass ui = new AboutDialogClass();
 	QSettings settings = null;
 	
 	

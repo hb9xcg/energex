@@ -30,7 +30,7 @@ import energex.protocol.DataPacket;
 
 
 public class FindDialog extends QDialog {
-	Ui_Find ui = new Ui_Find();
+	FindDialogClass ui = new FindDialogClass();
 	List<QStandardItem> foundItems;
 	QTableView logTable;
 	QStandardItemModel model;
