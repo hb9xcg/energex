@@ -139,6 +139,11 @@ public class TwikeAnalyzer extends QMainWindow implements DataInterface {
     	}
 	}
 	
+	public void on_actionFind_triggered() {
+		FindDialog findDialog = new FindDialog(this);
+		findDialog.exec();
+	}
+	
 	public void on_actionRecord_triggered() {
     	try {
     		ArrayList<Integer> dimensions = new ArrayList<Integer>();
@@ -204,8 +209,9 @@ public class TwikeAnalyzer extends QMainWindow implements DataInterface {
     
     public void on_actionOpen_triggered() {
     	String fileName = null;
-    	fileName = QFileDialog.getOpenFileName(this, tr("Open Raw Logfile"), QDir.homePath() );
-//    	fileName = QFileDialog.getOpenFileName(this, tr("Open log file"), "~/", tr("Log Files (*.log)"), null);
+    	QFileDialog.Filter filter = new QFileDialog.Filter(tr("Log Files (*.log *.bin)"));
+    	fileName = QFileDialog.getOpenFileName(this, tr("Open Raw Logfile"), QDir.homePath(), filter );
+
         if ( fileName.isEmpty()) {
         	return;
         }
@@ -219,15 +225,20 @@ public class TwikeAnalyzer extends QMainWindow implements DataInterface {
             return;
     	}
     	
+    	ui.statusBar.showMessage(fileName);
+    	
     	QDataStream binaryStream = new QDataStream( file ); // we will serialize the data into the file
     	OfflineDecoder decoder = new OfflineDecoder();
-    	ui.logTable.setModel(decoder.decodeOffline(binaryStream));
+    	model = decoder.decodeOffline(binaryStream);
+    	ui.logTable.setModel(model);
     	//ui.logTable.resizeColumnsToContents();
     }
     
     public void on_actionSaveAs_triggered() {
     	String fileName = null;
-    	fileName = QFileDialog.getSaveFileName(this, tr("Save Raw Logfile"), QDir.homePath() );
+    	QFileDialog.Filter filter = new QFileDialog.Filter(tr("Log Files (*.log)"));
+    	
+    	fileName = QFileDialog.getSaveFileName(this, tr("Save Raw Logfile"), QDir.homePath(), filter);
         if ( !fileName.isEmpty()) {
         	rawRecorder.saveAs(fileName);
         }

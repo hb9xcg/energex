@@ -26,7 +26,7 @@ import energex.protocol.DataType.EUnit;
 public class Response {
 	EUnit eType = EUnit.eUnknown;
 	short type;
-	private final static int STATUS_INDEX    =  3;
+	// private final static int STATUS_INDEX    =  3; What is byte @ idx 3 used for?
 	private final static int CURRENT_INDEX   =  5;
 	private final static int VOLTAGE_INDEX   =  7;
 	private final static int PARAMETER_INDEX =  9;
@@ -58,6 +58,12 @@ public class Response {
 	}
 	
 	public String decodeParameter(QByteArray data) {
+		
+		if( type == Request.D_STATE) {
+			int driveState = data.at(PARAMETER_INDEX+1) & 0xff;
+			return DriveState.decodeDriveState(driveState);
+		} 
+			
 		float fParameter;
 		
 		int length = data.length();
@@ -90,16 +96,5 @@ public class Response {
 		}
 		
 		return Float.toString(fParameter);
-	}
-	
-	
-	private boolean hasStatus(QByteArray data) {
-		short status = data.at(3);
-		status &= 0xff;
-		if(status == 0x80) {
-			return true;
-		} else {
-			return false;
-		}
 	}
 }

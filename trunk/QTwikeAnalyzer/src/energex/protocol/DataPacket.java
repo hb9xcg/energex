@@ -31,6 +31,13 @@ import energex.protocol.Checksum.EChecksum;
 import energex.protocol.Type.EType;
 
 public class DataPacket {
+	public static int COL_TIME     = 0;
+	public static int COL_RAW      = 1;
+	public static int COL_ADDRESS  = 2;
+	public static int COL_TYPE     = 3;
+	public static int COL_CONTENT  = 4;
+	public static int COL_CHECKSUM = 5;
+	
 	QStandardItem timeItem;
 	QStandardItem rawItem;
 	QStandardItem addressItem;
@@ -88,12 +95,12 @@ public class DataPacket {
 	}
 	
 	public void updateModel(QStandardItemModel model) {
-		model.setItem(row, 0, timeItem);
-		model.setItem(row, 1, rawItem);
-		model.setItem(row, 2, addressItem);
-		model.setItem(row, 3, typeItem);
-		model.setItem(row, 4, contentItem);
-		model.setItem(row, 5, checksumItem);
+		model.setItem(row, COL_TIME,     timeItem);
+		model.setItem(row, COL_RAW,      rawItem);
+		model.setItem(row, COL_ADDRESS,  addressItem);
+		model.setItem(row, COL_TYPE,     typeItem);
+		model.setItem(row, COL_CONTENT,  contentItem);
+		model.setItem(row, COL_CHECKSUM, checksumItem);
 	}
 	
 	private String byteToHexString(byte input) {
