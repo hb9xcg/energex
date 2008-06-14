@@ -1,6 +1,6 @@
 <ui version="4.0" language="jambi" >
- <class>Settings</class>
- <widget class="QDialog" name="Settings" >
+ <class>SettingsDialogClass</class>
+ <widget class="QDialog" name="SettingsDialogClass" >
   <property name="geometry" >
    <rect>
     <x>0</x>
@@ -61,7 +61,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>clicked&lt;com.trolltech.qt.gui.QAbstractButton></signal>
-   <receiver>Settings</receiver>
+   <receiver>SettingsDialogClass</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel" >
