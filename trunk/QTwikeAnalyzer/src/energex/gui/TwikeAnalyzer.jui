@@ -129,7 +129,7 @@
   <action name="actionOpen" >
    <property name="icon" >
     <iconset>
-     <normaloff>../../../../../../../usr/share/icons/oxygen/48x48/actions/document-open.png</normaloff>../../../../../../../usr/share/icons/oxygen/48x48/actions/document-open.png</iconset>
+     <normaloff>classpath:energex/gui/icons/document-open.png</normaloff>classpath:energex/gui/icons/document-open.png</iconset>
    </property>
    <property name="text" >
     <string>&amp;Open</string>
@@ -138,7 +138,7 @@
   <action name="actionRecord" >
    <property name="icon" >
     <iconset>
-     <normaloff>../../../../../../../usr/share/icons/oxygen/48x48/actions/media-record.png</normaloff>../../../../../../../usr/share/icons/oxygen/48x48/actions/media-record.png</iconset>
+     <normaloff>classpath:energex/gui/icons/media-record.png</normaloff>classpath:energex/gui/icons/media-record.png</iconset>
    </property>
    <property name="text" >
     <string>&amp;Record</string>
@@ -147,7 +147,7 @@
   <action name="actionPause" >
    <property name="icon" >
     <iconset>
-     <normaloff>../../../../../../../usr/share/icons/oxygen/48x48/actions/media-playback-pause.png</normaloff>../../../../../../../usr/share/icons/oxygen/48x48/actions/media-playback-pause.png</iconset>
+     <normaloff>classpath:energex/gui/icons/media-playback-pause.png</normaloff>classpath:energex/gui/icons/media-playback-pause.png</iconset>
    </property>
    <property name="text" >
     <string>&amp;Pause</string>
@@ -156,7 +156,7 @@
   <action name="actionPlay" >
    <property name="icon" >
     <iconset>
-     <normaloff>../../../../../../../usr/share/icons/oxygen/48x48/actions/media-playback-start.png</normaloff>../../../../../../../usr/share/icons/oxygen/48x48/actions/media-playback-start.png</iconset>
+     <normaloff>classpath:energex/gui/icons/media-playback-start.png</normaloff>classpath:energex/gui/icons/media-playback-start.png</iconset>
    </property>
    <property name="text" >
     <string>P&amp;lay</string>
@@ -165,7 +165,7 @@
   <action name="actionStop" >
    <property name="icon" >
     <iconset>
-     <normaloff>../../../../../../../usr/share/icons/oxygen/48x48/actions/media-playback-stop.png</normaloff>../../../../../../../usr/share/icons/oxygen/48x48/actions/media-playback-stop.png</iconset>
+     <normaloff>classpath:energex/gui/icons/media-playback-stop.png</normaloff>classpath:energex/gui/icons/media-playback-stop.png</iconset>
    </property>
    <property name="text" >
     <string>S&amp;top</string>
@@ -179,7 +179,7 @@
   <action name="actionSaveAs" >
    <property name="icon" >
     <iconset>
-     <normaloff>../../../../../../../usr/share/icons/oxygen/48x48/actions/document-save-as.png</normaloff>../../../../../../../usr/share/icons/oxygen/48x48/actions/document-save-as.png</iconset>
+     <normaloff>classpath:energex/gui/icons/document-save-as.png</normaloff>classpath:energex/gui/icons/document-save-as.png</iconset>
    </property>
    <property name="text" >
     <string>&amp;Save As</string>
@@ -188,7 +188,7 @@
   <action name="actionSettings" >
    <property name="icon" >
     <iconset>
-     <normaloff>../../../../../../../usr/share/icons/oxygen/48x48/actions/configure.png</normaloff>../../../../../../../usr/share/icons/oxygen/48x48/actions/configure.png</iconset>
+     <normaloff>classpath:energex/gui/icons/configure.png</normaloff>classpath:energex/gui/icons/configure.png</iconset>
    </property>
    <property name="text" >
     <string>Settings</string>
@@ -217,7 +217,7 @@
   <action name="actionFind" >
    <property name="icon" >
     <iconset>
-     <normaloff>../../../../../../../usr/share/icons/oxygen/48x48/actions/file-find.png</normaloff>../../../../../../../usr/share/icons/oxygen/48x48/actions/file-find.png</iconset>
+     <normaloff>classpath:energex/gui/icons/find.png</normaloff>classpath:energex/gui/icons/find.png</iconset>
    </property>
    <property name="text" >
     <string>&amp;Find</string>
