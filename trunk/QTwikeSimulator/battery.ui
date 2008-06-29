@@ -1,0 +1,19 @@
+<ui version="4.0" >
+ <class>BatteryClass</class>
+ <widget class="QWidget" name="BatteryClass" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>500</width>
+    <height>200</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>Battery</string>
+  </property>
+ </widget>
+ <layoutdefault spacing="6" margin="11" />
+ <resources/>
+ <connections/>
+</ui>
