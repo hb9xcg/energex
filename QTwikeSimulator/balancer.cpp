@@ -42,7 +42,7 @@ void Balancer::on_radio_off_toggled(bool state)
 	if (state)
 	{
 		on = false;
-		for (int addr=0; addr<nbrOfCells; addr++)
+		for (int addr=0; addr<battery.getNbrOfCells(); addr++)
 		{
 			battery.switchCellBalancer(addr, 0);
 		}
@@ -54,6 +54,7 @@ void Balancer::on_radio_on_toggled(bool state)
 	if (state)
 	{
 		on = true;
+		time = 10000;
 	}
 }
 
