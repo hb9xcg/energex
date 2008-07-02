@@ -62,7 +62,13 @@ public class Response {
 		if( type == Request.D_STATE) {
 			int driveState = data.at(PARAMETER_INDEX+1) & 0xff;
 			return DriveState.decodeDriveState(driveState);
-		} 
+		} else if (type == Request.CMD2) {
+			if (data.at(PARAMETER_INDEX+1) != 0) {
+				return "closed";
+			} else {
+				return "open";
+			}			
+		}
 			
 		float fParameter;
 		

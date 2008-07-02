@@ -44,7 +44,7 @@ public class Request {
 	static final	short BUS_ADRESSE        = 0x0b;
 	static final	short COMMAND1           = 0x10; // hex?
 	static final	short D_STATE            = 0x11;
-	static final	short COMMAND2           = 0x12;
+	static final	short CMD2               = 0x12;
 	static final	short PARAM_PROT         = 0x13;
 			
 	static final	short BINFO              = 0x21;
@@ -58,7 +58,7 @@ public class Request {
 	static final	short LEISTUNG           = 0x29;
 	static final	short BATTERIE_TEMP      = 0x2a;
 	static final	short FINFO              = 0x2b;
-	static final short SYM_SPANNUNG       = 0x31;
+	static final   short SYM_SPANNUNG       = 0x31;
 			
 	static final	short TEILSPANNUNG1      = 0x32;
 	static final	short TEILSPANNUNG2      = 0x33;
@@ -152,6 +152,8 @@ public class Request {
 	static final	short KAL_TEMP_13_12     = 0xd6;
 	static final	short KAL_TEMP_11_10     = 0xd7;
 	static final	short KAL_TEMP_9_8       = 0xd8;
+	
+	static final	short SENSOR_MASK        = 0xd9;
 		
 	static final	short OFFS_KLEIN_STL     = 0xe1;
 	static final	short OFFS_GROSS_STL     = 0xe2;
@@ -197,7 +199,7 @@ public class Request {
 		typeToDesc.put(BUS_ADRESSE,      "Bus Adresse");
 		typeToDesc.put(COMMAND1,         "Command 1");
 		typeToDesc.put(D_STATE,          "Drive State");
-		typeToDesc.put(COMMAND2,         "Command 2");
+		typeToDesc.put(CMD2,             "Relais State");
 		typeToDesc.put(PARAM_PROT,       "PARAM_PROT");
 		
 		typeToDesc.put(BINFO,            "BINFO");
@@ -235,6 +237,8 @@ public class Request {
 		typeToDesc.put(TEMPERATUR12,       "Temperatur 12");
 		typeToDesc.put(TEMPERATUR13,       "Temperatur 13");
 		typeToDesc.put(TEMPERATUR14,       "Temperatur 14");
+		
+		typeToDesc.put(SENSOR_MASK,       "Sensor Mask");		
 				
 		typeToDesc.put(MAX_BAT_TEMP,       "Max Bat Temp");
 		typeToDesc.put(UMGEBUNGS_TEMP,     "Umgebungs Temp");
