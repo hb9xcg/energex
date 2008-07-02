@@ -29,6 +29,7 @@ public class Message {
 	static Map<Short,String> typeToDesc = new HashMap<Short, String>();
 	
 	private static final short DRIVE_STATE     = 0x0011;
+	private static final short RELAIS_STATE    = 0x0012;
 	private static final short GESCHWINDIGKEIT = 0x00FE;
 	private static final short TAGESKILOMETER  = 0x00FF;
 	
@@ -45,6 +46,7 @@ public class Message {
 		typeToDesc.put(GESCHWINDIGKEIT, "Geschwindigkeit");
 		typeToDesc.put(TAGESKILOMETER,  "Tageskilometer");
 		typeToDesc.put(DRIVE_STATE,     "Drive State");
+		typeToDesc.put(RELAIS_STATE,    "Relais State");
 	}
 	
 	public String decodeMessage(QByteArray data) {
@@ -65,6 +67,9 @@ public class Message {
 			break;
 		case DRIVE_STATE:
 			description += decodeDriveState(data);
+			break;
+		case RELAIS_STATE:
+			description += decodeRelaisState(data);
 			break;
 		default:
 			break;
@@ -98,4 +103,13 @@ public class Message {
 		int driveState = data.at(PARAMETER_INDEX+1) & 0xff;
 		return DriveState.decodeDriveState(driveState);
 	}
+	
+	private String decodeRelaisState(QByteArray data) {
+		if (data.at(PARAMETER_INDEX+1) != 0) {
+			return "close";
+		} else {
+			return "open";
+		}
+	}
+
 }
