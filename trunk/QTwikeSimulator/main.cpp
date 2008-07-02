@@ -26,6 +26,10 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
+    
+    QCoreApplication::setOrganizationName("Energex");
+    QCoreApplication::setApplicationName("QTwikeSimulator");
+    
     QTwikeSimulator w;
     w.show();
     return a.exec();

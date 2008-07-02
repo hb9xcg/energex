@@ -5,15 +5,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>200</width>
-    <height>188</height>
+    <width>338</width>
+    <height>203</height>
    </rect>
   </property>
   <property name="windowTitle" >
    <string>PowerSupply</string>
   </property>
   <layout class="QGridLayout" name="gridLayout" >
-   <item row="0" column="0" colspan="3" >
+   <item row="0" column="0" colspan="6" >
     <widget class="QLabel" name="label_2" >
      <property name="text" >
       <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
@@ -42,7 +42,7 @@ p, li { white-space: pre-wrap; }
      </item>
     </layout>
    </item>
-   <item row="1" column="2" >
+   <item row="1" column="2" colspan="4" >
     <spacer name="horizontalSpacer_4" >
      <property name="orientation" >
       <enum>Qt::Horizontal</enum>
@@ -67,6 +67,86 @@ p, li { white-space: pre-wrap; }
       </size>
      </property>
     </spacer>
+   </item>
+   <item rowspan="4" row="2" column="3" >
+    <layout class="QVBoxLayout" name="verticalLayout_3" >
+     <item>
+      <widget class="QLabel" name="label_6" >
+       <property name="text" >
+        <string>Vorladen</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_7" >
+       <property name="text" >
+        <string>Normal</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_8" >
+       <property name="text" >
+        <string>Schnell</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_12" >
+       <property name="text" >
+        <string>Sym</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item rowspan="4" row="2" column="4" >
+    <layout class="QVBoxLayout" name="verticalLayout_2" >
+     <item>
+      <widget class="QDoubleSpinBox" name="spinboxPreCharge" />
+     </item>
+     <item>
+      <widget class="QDoubleSpinBox" name="spinboxNormalCharge" />
+     </item>
+     <item>
+      <widget class="QDoubleSpinBox" name="spinboxQuickCharge" />
+     </item>
+     <item>
+      <widget class="QDoubleSpinBox" name="spinboxSymCharge" />
+     </item>
+    </layout>
+   </item>
+   <item rowspan="4" row="2" column="5" >
+    <layout class="QVBoxLayout" name="verticalLayout" >
+     <item>
+      <widget class="QLabel" name="label_13" >
+       <property name="text" >
+        <string>A</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_11" >
+       <property name="text" >
+        <string>A</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_10" >
+       <property name="text" >
+        <string>A</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_9" >
+       <property name="text" >
+        <string>A</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
    <item row="3" column="0" >
     <layout class="QHBoxLayout" name="horizontalLayout_2" >

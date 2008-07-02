@@ -20,6 +20,7 @@
 
 #include <QtGui>
 #include "battery.h"
+#include <QSettings>
 
 const int Battery::yOffset = 25;
 
@@ -38,10 +39,20 @@ Battery::Battery(QWidget *parent)
 		m_vecCells.push_back( new Cell(50+i*6, yOffset, i, this) );
 		voltage += m_vecCells[i]->getVoltage();
 	}
+	
+	QSettings settings;
+    settings.beginGroup("Battery");
+    restoreGeometry( settings.value("geometry").toByteArray() );
+    settings.endGroup();
 }
 
 Battery::~Battery()
 {
+	QSettings settings;
+	settings.beginGroup("Battery");
+	settings.setValue("geometry",         saveGeometry());    
+    settings.endGroup();
+    
 	for (int i=0; i<100; i++)
 	{
 		delete m_vecCells[i];
@@ -55,7 +66,20 @@ int Battery::getNbrOfCells(void)
 
 double Battery::getCellVoltage(int address)
 {
-	return m_vecCells[address]->getVoltage();
+	double doubleVoltage = m_vecCells[address]->getVoltage();
+	doubleVoltage *= 1000.0;
+
+	// Simulate 10bit ADC
+	for(int mV=0; mV<4300; mV+=5)
+	{
+		if (mV >= doubleVoltage)
+		{
+			doubleVoltage = mV;
+			break;
+		}
+	}
+	
+	return doubleVoltage/1000.0;
 }
 
 void Battery::switchCellBalancer(int address, int percentage)

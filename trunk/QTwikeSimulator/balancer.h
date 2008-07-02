@@ -24,6 +24,7 @@
 #include <QtGui/QWidget>
 #include "ui_balancer.h"
 
+class QTimer;
 class Battery;
 class PowerSupply;
 
@@ -34,20 +35,22 @@ class Balancer : public QWidget
 public:
     Balancer(Battery& battery, PowerSupply& powerSupply, QWidget *parent = 0);
     ~Balancer();
-    
-    void sample(int ms);
 
 private:
     Ui::BalancerClass ui;
     
+    QTimer *timer;
     Battery& battery;
     PowerSupply& powerSupply;
     int time;
     bool on;
+    static const double upperVoltage;
+    static const double underVoltage;
     
 private slots:
     void on_radio_off_toggled(bool state);
     void on_radio_on_toggled(bool state);
+    void timeout(void);
 };
 
 #endif // BALANCER_H

@@ -42,12 +42,11 @@ public:
 private:
     Ui::PowerSupplyClass ui;
     double current;
-    static const double prechargeCurrent;
-    static const double fastCurrent;
-    static const double normalCurrent;
-    static const double symCurrent;
-    long long ticks;
-    long long startSym;
+    static double prechargeCurrent;
+    static double fastCurrent;
+    static double normalCurrent;
+    static double symCurrent;
+    long long symTime;
     
     enum EState
     {
@@ -63,6 +62,13 @@ private:
     } eState;
     
     void switchState(EState eState);
+    
+private slots:
+	void on_spinboxPreCharge_valueChanged(void);
+	void on_spinboxNormalCharge_valueChanged(void);
+	void on_spinboxQuickCharge_valueChanged(void);
+	void on_spinboxSymCharge_valueChanged(void);
+	
 };
 
 #endif // POWERSUPPLY_H
