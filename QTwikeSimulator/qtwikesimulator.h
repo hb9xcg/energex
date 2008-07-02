@@ -51,13 +51,16 @@ private:
     Load* load;
     PowerSupply* powerSupply;
     Balancer* balancer;
+    int speed;
+    int elapsed;
     
 private slots:
      void on_button_start_clicked(void);
      void on_button_stop_clicked(void);
      void on_radio_charge_toggled(bool state);
      void on_radio_off_toggled(bool state);
-     void on_radio_drive_toggled(bool state);     
+     void on_radio_drive_toggled(bool state); 
+     void on_slider_speed_valueChanged(int value);
 
      void timeout(void);
 };

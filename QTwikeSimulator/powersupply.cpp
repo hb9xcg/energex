@@ -20,28 +20,88 @@
 
 #include "powersupply.h"
 
-const double PowerSupply::prechargeCurrent = 0.7;
-const double PowerSupply::fastCurrent      = 5.0;
-const double PowerSupply::normalCurrent    = 2.0;
-const double PowerSupply::symCurrent       = 0.6;
+#include <QSettings>
+
+double PowerSupply::prechargeCurrent = 0.7;
+double PowerSupply::fastCurrent      = 5.0;
+double PowerSupply::normalCurrent    = 2.0;
+double PowerSupply::symCurrent       = 0.6;
 
 PowerSupply::PowerSupply(QWidget *parent)
     : QWidget(parent)
 {
 	ui.setupUi(this);
-	ticks = 0;
+
 	eState = eInvalid;
 	
 	ui.lcdVoltage->setSegmentStyle(QLCDNumber::Flat);
 	ui.lcdCurrent->setSegmentStyle(QLCDNumber::Flat);
 	ui.lcdPower->setSegmentStyle(QLCDNumber::Flat);
 	
+	QSettings settings;
+
+    settings.beginGroup("PowerSupply");
+    restoreGeometry( settings.value("geometry").toByteArray() );
+    
+    prechargeCurrent = settings.value("prechargeCurrent", 0.7).toDouble();    
+    normalCurrent    = settings.value("normalCurrent",    5.0).toDouble();
+    fastCurrent      = settings.value("fastCurrent",     10.0).toDouble();
+    symCurrent       = settings.value("symCurrent",       2.0).toDouble();
+	
+    settings.endGroup();
+	
+	ui.spinboxPreCharge->setMinimum(0.0);
+	ui.spinboxPreCharge->setMaximum(2.0);
+	ui.spinboxPreCharge->setValue(prechargeCurrent);
+	
+	ui.spinboxNormalCharge->setMinimum(0.0);
+	ui.spinboxNormalCharge->setMaximum(10.0);
+	ui.spinboxNormalCharge->setValue(normalCurrent);
+	
+	ui.spinboxQuickCharge->setMinimum(0.0);
+	ui.spinboxQuickCharge->setMaximum(16.0);
+	ui.spinboxQuickCharge->setValue(fastCurrent);
+	
+	ui.spinboxSymCharge->setMinimum(0.0);
+	ui.spinboxSymCharge->setMaximum(2.0);
+	ui.spinboxSymCharge->setValue(symCurrent);
+	
 	switchState(eOff);
 }
 
 PowerSupply::~PowerSupply()
 {
+	QSettings settings;
 
+	settings.beginGroup("PowerSupply");
+    
+	settings.setValue("prechargeCurrent", prechargeCurrent);
+	settings.setValue("normalCurrent",    normalCurrent);
+	settings.setValue("fastCurrent",      fastCurrent);
+	settings.setValue("symCurrent",       symCurrent);
+	settings.setValue("geometry",         saveGeometry());
+    
+    settings.endGroup();
+}
+
+void PowerSupply::on_spinboxPreCharge_valueChanged(void)
+{
+	prechargeCurrent = ui.spinboxPreCharge->value();
+}
+
+void PowerSupply::on_spinboxNormalCharge_valueChanged(void)
+{
+	normalCurrent = ui.spinboxNormalCharge->value();
+}
+
+void PowerSupply::on_spinboxQuickCharge_valueChanged(void)
+{
+	fastCurrent = ui.spinboxQuickCharge->value();
+}
+
+void PowerSupply::on_spinboxSymCharge_valueChanged(void)
+{
+	symCurrent = ui.spinboxSymCharge->value();
 }
 
 void PowerSupply::on(void)
@@ -57,12 +117,16 @@ void PowerSupply::off(void)
 void PowerSupply::battFull(void)
 {
 	switchState(eSym_Ladung);
-	startSym = ticks;
+	symTime = 30*60*1000;
 }
 
 void PowerSupply::voltageToHigh(void)
 {
-	current -= 0.1;
+	if (current > 0)
+	{
+		current -= 0.1;
+		switchState(eU_Ladung);
+	}
 }
 
 void PowerSupply::switchState(EState eState)
@@ -159,17 +223,18 @@ double PowerSupply::getCurrent(double voltage)
 		}
 		else
 		{
-			current += 0.1;
+			//current += 0.1;
 		}
 		break;
 	case eSym_Ladung:
 		current = symCurrent;
-		if (ticks-startSym > 30*60*1000)
+		if (symTime < 0)
 		{
 			switchState(eErh_Ladung);
 		}
 		break;
 	case eErh_Ladung:
+		current = 0.0;
 		break;
 	case eInvalid:
 		break;
@@ -184,6 +249,9 @@ double PowerSupply::getCurrent(double voltage)
 
 void PowerSupply::sample(int ms)
 {
-	ticks += ms;
+	if (eState == eSym_Ladung)
+	{
+		symTime -= ms;
+	}
 }
 

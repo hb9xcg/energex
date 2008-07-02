@@ -21,6 +21,11 @@
 #include "balancer.h"
 #include "battery.h"
 #include "powersupply.h"
+#include <QTimer>
+#include <QSettings>
+
+const double Balancer::upperVoltage = 4.200;
+const double Balancer::underVoltage = 4.175;
 
 Balancer::Balancer(Battery& pBattery, PowerSupply& ppowerSupply, QWidget *parent)
     : QWidget(parent),
@@ -30,18 +35,32 @@ Balancer::Balancer(Battery& pBattery, PowerSupply& ppowerSupply, QWidget *parent
 	ui.setupUi(this);
 	time = 0;
 	on = false;
+	
+	timer = new QTimer(this);
+	timer->setInterval(10000);
+	connect(timer, SIGNAL(timeout()), this, SLOT(timeout()));
+	
+	QSettings settings;
+    settings.beginGroup("Balancer");
+    restoreGeometry( settings.value("geometry").toByteArray() );
+    settings.endGroup();
 }
 
 Balancer::~Balancer()
 {
-
+	delete timer;
+	
+	QSettings settings;
+	settings.beginGroup("Balancer");
+	settings.setValue("geometry",         saveGeometry());    
+    settings.endGroup();
 }
 
 void Balancer::on_radio_off_toggled(bool state)
 {
 	if (state)
 	{
-		on = false;
+		timer->stop();
 		for (int addr=0; addr<battery.getNbrOfCells(); addr++)
 		{
 			battery.switchCellBalancer(addr, 0);
@@ -53,43 +72,41 @@ void Balancer::on_radio_on_toggled(bool state)
 {
 	if (state)
 	{
-		on = true;
-		time = 10000;
+		timer->start();
+		timeout();
 	}
 }
 
-void Balancer::sample(int ms)
+void Balancer::timeout(void)
 {
-	time += ms;
-	if (time > 10000 && on)
+	double minVoltage=9.0, maxVoltage=0.0;
+	int nbrOfCells = battery.getNbrOfCells();
+	for (int addr=0; addr<nbrOfCells; addr++)
 	{
-		time = 0;
-		double minVoltage=9.0, maxVoltage=0.0;
-		int nbrOfCells = battery.getNbrOfCells();
-		for (int addr=0; addr<nbrOfCells; addr++)
+		double voltage = battery.getCellVoltage(addr);
+		if (voltage < minVoltage)
 		{
-			double voltage = battery.getCellVoltage(addr);
-			if (voltage < minVoltage)
-			{
-				minVoltage = voltage;
-			}
-			if (voltage > maxVoltage)
-			{
-				maxVoltage = voltage;
-			}
-			if (voltage > 4.175)
-			{
-				powerSupply.voltageToHigh();
-			}
+			minVoltage = voltage;
 		}
-		
-		if (minVoltage>4.175)
+		if (voltage > maxVoltage)
 		{
-			powerSupply.battFull();
+			maxVoltage = voltage;
 		}
-		
-		double gap = (maxVoltage - minVoltage) / 10.0;
-		for (int addr=0; addr<nbrOfCells; addr++)
+	}
+	if (maxVoltage > upperVoltage)
+	{
+		powerSupply.voltageToHigh();
+	}
+	if (minVoltage > underVoltage)
+	{
+		powerSupply.battFull();
+	}
+	
+	double gap = (maxVoltage - minVoltage) / 11.0;
+	
+	for (int addr=0; addr<nbrOfCells; addr++)
+	{
+		if (gap > 0)
 		{
 			double voltage;
 			int percentage = 0;
@@ -99,9 +116,14 @@ void Balancer::sample(int ms)
 					battery.getCellVoltage(addr) <  voltage+gap	)
 				{
 					battery.switchCellBalancer(addr, percentage);
+					break;
 				}
 				percentage += 10;
 			}
+		}
+		else
+		{
+			battery.switchCellBalancer(addr, 0);
 		}
 	}
 }

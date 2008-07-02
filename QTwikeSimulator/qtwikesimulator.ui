@@ -5,8 +5,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>300</height>
+    <width>402</width>
+    <height>342</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -29,7 +29,7 @@
        </item>
       </layout>
      </item>
-     <item row="0" column="1" >
+     <item row="0" column="3" >
       <layout class="QHBoxLayout" name="horizontalLayout_5" >
        <item>
         <widget class="QLabel" name="label" >
@@ -64,6 +64,27 @@
        </item>
       </layout>
      </item>
+     <item row="1" column="3" >
+      <layout class="QHBoxLayout" name="horizontalLayout_7" >
+       <item>
+        <widget class="QLabel" name="label_3" >
+         <property name="text" >
+          <string>Time</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLCDNumber" name="lcdTime" />
+       </item>
+       <item>
+        <widget class="QLabel" name="label_4" >
+         <property name="text" >
+          <string>s</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
      <item row="2" column="0" >
       <layout class="QHBoxLayout" name="horizontalLayout_3" >
        <item>
@@ -92,35 +113,55 @@
        </item>
       </layout>
      </item>
+     <item row="1" column="2" >
+      <spacer name="horizontalSpacer_2" >
+       <property name="orientation" >
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0" >
+        <size>
+         <width>198</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
     </layout>
    </item>
-   <item row="0" column="3" >
-    <spacer name="horizontalSpacer_2" >
-     <property name="orientation" >
-      <enum>Qt::Horizontal</enum>
+   <item row="1" column="0" colspan="3" >
+    <widget class="QGroupBox" name="groupBox_2" >
+     <property name="title" >
+      <string>Speed</string>
      </property>
-     <property name="sizeHint" stdset="0" >
-      <size>
-       <width>198</width>
-       <height>20</height>
-      </size>
-     </property>
-    </spacer>
+     <widget class="QWidget" name="layoutWidget" >
+      <property name="geometry" >
+       <rect>
+        <x>10</x>
+        <y>20</y>
+        <width>361</width>
+        <height>24</height>
+       </rect>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout_6" >
+       <item>
+        <widget class="QSlider" name="slider_speed" >
+         <property name="orientation" >
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="labelSpeed" >
+         <property name="text" >
+          <string>100x</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </widget>
    </item>
-   <item row="1" column="1" >
-    <spacer name="verticalSpacer_2" >
-     <property name="orientation" >
-      <enum>Qt::Vertical</enum>
-     </property>
-     <property name="sizeHint" stdset="0" >
-      <size>
-       <width>20</width>
-       <height>41</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
-   <item row="2" column="0" colspan="4" >
+   <item row="2" column="0" colspan="3" >
     <widget class="QGroupBox" name="groupBox" >
      <property name="title" >
       <string>dState</string>
@@ -173,7 +214,7 @@
      </property>
     </spacer>
    </item>
-   <item row="3" column="2" colspan="2" >
+   <item row="3" column="2" >
     <widget class="QPushButton" name="button_stop" >
      <property name="text" >
       <string>Stop</string>

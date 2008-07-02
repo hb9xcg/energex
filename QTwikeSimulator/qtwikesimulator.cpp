@@ -21,6 +21,7 @@
 #include "qtwikesimulator.h"
 #include <QTimer>
 #include <QCloseEvent>
+#include <QSettings>
 
 #include "load.h"
 #include "powersupply.h"
@@ -32,6 +33,9 @@ QTwikeSimulator::QTwikeSimulator(QWidget *parent)
     : QWidget(parent)
 {
 	ui.setupUi(this);
+	
+	speed   = 1;
+	elapsed = 0;
 	
 	load = new Load();
 	load->show();
@@ -63,12 +67,28 @@ QTwikeSimulator::QTwikeSimulator(QWidget *parent)
 	ui.lcdTemperature->setSegmentStyle(QLCDNumber::Flat);
 	//ui.lcdTemperature->setNumDigits(3);
 	
+	ui.lcdTime->setSegmentStyle(QLCDNumber::Flat);
+	
 	ui.lcdSym->setSegmentStyle(QLCDNumber::Flat);
 	
+	QSettings settings;
+    settings.beginGroup("TwikeSimulator");
+    restoreGeometry( settings.value("geometry").toByteArray() );
+    settings.endGroup();	
+    
+    ui.labelSpeed->setText("1x");
+    ui.slider_speed->setValue(1);
+    ui.slider_speed->setMinimum(1);
+    ui.slider_speed->setMaximum(100);
 }
 
 QTwikeSimulator::~QTwikeSimulator()
 {
+	QSettings settings;
+	settings.beginGroup("TwikeSimulator");
+	settings.setValue("geometry",         saveGeometry());    
+    settings.endGroup();
+    
 	delete timer;
 	delete balancer;
 	delete load;
@@ -101,6 +121,7 @@ void QTwikeSimulator::on_radio_drive_toggled(bool state)
 		powerSupply->off();
 		load->on();
 		load->show();
+		elapsed = 0;
 	}
 }
 void QTwikeSimulator::on_radio_off_toggled(bool state)
@@ -111,6 +132,7 @@ void QTwikeSimulator::on_radio_off_toggled(bool state)
 		load->off();
 	}
 }
+
 void QTwikeSimulator::on_radio_charge_toggled(bool state)
 {
 	if (state)
@@ -118,14 +140,26 @@ void QTwikeSimulator::on_radio_charge_toggled(bool state)
 		load->off();
 		powerSupply->on();
 		powerSupply->show();
+		elapsed = 0;
 	}
 }
 
+void QTwikeSimulator::on_slider_speed_valueChanged(int value)
+{
+	speed = value;
+	
+	ui.labelSpeed->setText( QString("%1x").arg(speed) );
+}
 
 void QTwikeSimulator::timeout(void)
 {
-	battery->sample( timer->interval() );
-	balancer->sample( timer->interval() );
+	int interval = timer->interval() * speed;
+	if (!ui.radio_off->isChecked())
+	{
+		elapsed += interval;
+	}
+	battery->sample( interval );
+	powerSupply->sample( interval );
 	
 	double voltage = battery->getVoltage();
 	
@@ -140,11 +174,18 @@ void QTwikeSimulator::timeout(void)
 	ui.lcdCurrent->display(totalCurrent);
 	ui.lcdCharge->display( battery->getCapacity());
 	ui.lcdSym->display(battery->getSymVoltage());
+	ui.lcdTime->display(elapsed/1000);
 }
 
 void QTwikeSimulator::closeEvent(QCloseEvent *event)
 {
 	event->accept();
+	
+	QSettings settings;
+	settings.beginGroup("TwikeSimulator");
+	settings.setValue("geometry",         saveGeometry());    
+    settings.endGroup();
+    
 	delete balancer;
 	delete load;
 	delete powerSupply;

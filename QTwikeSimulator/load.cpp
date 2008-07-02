@@ -19,6 +19,7 @@
  ***************************************************************************/
 
 #include "load.h"
+#include <QSettings>
 
 Load::Load(QWidget *parent)
     : QWidget(parent)
@@ -32,11 +33,19 @@ Load::Load(QWidget *parent)
 	ui.lcdPower->setSegmentStyle(QLCDNumber::Flat);
 	
 	switchState(eOff);
+	
+	QSettings settings;
+    settings.beginGroup("Load");
+    restoreGeometry( settings.value("geometry").toByteArray() );
+    settings.endGroup();
 }
 
 Load::~Load()
 {
-
+	QSettings settings;
+	settings.beginGroup("Load");
+	settings.setValue("geometry", saveGeometry());    
+    settings.endGroup();
 }
 
 void Load::switchState(EState eState)
