@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?fileVersion 4.0.0?>
+
+<cproject>
+<storageModule moduleId="org.eclipse.cdt.core.settings">
+<cconfiguration id="org.eclipse.cdt.core.default.config.2126052596">
+<storageModule buildSystemId="org.eclipse.cdt.core.defaultConfigDataProvider" id="org.eclipse.cdt.core.default.config.2126052596" moduleId="org.eclipse.cdt.core.settings" name="Configuration">
+<externalSettings/>
+<extensions>
+<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
+</extensions>
+</storageModule>
+<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets">
+<buildTargets>
+<target name="Qt Release Build" path="" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
+<buildCommand>make</buildCommand>
+<buildArguments/>
+<buildTarget>release</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>false</useDefaultCommand>
+</target>
+<target name="Qt Debug Build" path="" targetID="org.eclipse.cdt.make.MakeTargetBuilder">
+<buildCommand>make</buildCommand>
+<buildArguments/>
+<buildTarget>debug</buildTarget>
+<stopOnError>false</stopOnError>
+<useDefaultCommand>false</useDefaultCommand>
+</target>
+</buildTargets>
+</storageModule>
+<storageModule moduleId="org.eclipse.cdt.core.pathentry">
+<pathentry base-path="/usr/lib/qt4/include" include="" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="QtDesigner" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="jack" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="cairo" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="dbus-1.0" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="asm-x86_64" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="digikam" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="vorbis" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="QtSql" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="avahi-core" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="rpc" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="ogg" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="netpacket" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="QtSvg" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="sys" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="KDE" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="libxml" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="sound" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="alsa" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="xcb" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="neteconet" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="bits" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="asm-powerpc" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="avahi-ui" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="gnu" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="avahi-qt3" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="netax25" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="rpcsecgss" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="resolv" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="cups" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="rpcsvc" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="c++" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="arpa" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="libxml2" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="QtDBus" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="GL" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="netrom" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="net" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="QtScript" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="libbtcore" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="python2.5" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="netash" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="QtOpenGL" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="a52dec" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="openssl" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="scsi" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="QtNetwork" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="avahi-common" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="sane" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="QtTest" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="asm-ia64" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="Qt3Support" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="X11" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="rdma" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="libexslt" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="mtd" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="QtAssistant" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="QtUiTools" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="ssl" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="protocols" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="QtXml" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="netinet" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="freetype" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="Qt" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="asm-generic" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="asm-parisc" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="glib-2.0" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="sensors" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="video" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="asm-s390" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="asm-arm" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="avahi-compat-libdns_sd" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="readline" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="QtCore" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="QtGui" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="libxslt" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="drm" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="netrose" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="freetype2" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="acl" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="nfs" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="bluetooth" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="sysfs" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="attr" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="linux" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="asm-i386" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="avahi-qt4" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="netatalk" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="atk-1.0" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="QtHelp" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="nvidia" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="asm-bi-x86_64" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="avahi-client" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="asm" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="gtk-unix-print-2.0" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="libart-2.0" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="libqtpod" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="libpng12" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="gtk-2.0" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="fontconfig" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="pango-1.0" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="netipx" kind="inc" path="" system="true"/>
+<pathentry base-path="/usr/lib/qt4/include" include="avahi-glib" kind="inc" path="" system="true"/>
+</storageModule>
+</cconfiguration>
+</storageModule>
+</cproject>
