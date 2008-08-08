@@ -1,8 +1,8 @@
 <!DOCTYPE KontrollerLab>
 <PROJECT VERSION="0.8.0-beta1" >
   <FILES>
-    <FILE VIEWS="2,2,1071,661,0," SHOWN="TRUE" NAME="icontroller.c" />
-    <FILE VIEWS="2,2,1057,692,0," SHOWN="TRUE" NAME="icontroller.h" />
+    <FILE VIEWS="211,232,921,682,4," SHOWN="TRUE" NAME="icontroller.c" />
+    <FILE VIEWS="142,163,1024,682,4," SHOWN="TRUE" NAME="icontroller.h" />
     <FILE SHOWN="FALSE" NAME="adc.c" />
     <FILE SHOWN="FALSE" NAME="adc.h" />
     <FILE SHOWN="FALSE" NAME="delay.h" />
@@ -13,8 +13,8 @@
     <FILE SHOWN="FALSE" NAME="os_scheduler.h" />
     <FILE SHOWN="FALSE" NAME="os_scheduler.c" />
     <FILE SHOWN="FALSE" NAME="timer.h" />
-    <FILE VIEWS="2,2,1057,692,0," SHOWN="TRUE" NAME="timer.c" />
-    <FILE SHOWN="FALSE" NAME="global.h" />
+    <FILE SHOWN="FALSE" NAME="timer.c" />
+    <FILE VIEWS="165,186,1024,682,4," SHOWN="TRUE" NAME="global.h" />
     <FILE SHOWN="FALSE" NAME="i2c.h" />
     <FILE SHOWN="FALSE" NAME="i2c.c" />
     <FILE SHOWN="FALSE" NAME="timer-low.c" />
@@ -22,16 +22,20 @@
     <FILE SHOWN="FALSE" NAME="uart.h" />
     <FILE SHOWN="FALSE" NAME="fifo.c" />
     <FILE SHOWN="FALSE" NAME="fifo.h" />
-    <FILE VIEWS="2,2,1057,692,0," SHOWN="TRUE" NAME="command.c" />
-    <FILE VIEWS="2,2,1057,692,0," SHOWN="TRUE" NAME="command.h" />
-    <FILE VIEWS="2,2,1057,692,0," SHOWN="TRUE" NAME="supervisor.c" />
-    <FILE VIEWS="2,2,1057,692,0," SHOWN="TRUE" NAME="supervisor.h" />
-    <FILE SHOWN="FALSE" NAME="charge.c" />
+    <FILE VIEWS="0,0,921,682,5," SHOWN="TRUE" NAME="command.c" />
+    <FILE SHOWN="FALSE" NAME="command.h" />
+    <FILE VIEWS="234,255,921,682,4," SHOWN="TRUE" NAME="supervisor.c" />
+    <FILE SHOWN="FALSE" NAME="supervisor.h" />
+    <FILE VIEWS="119,140,1024,682,4," SHOWN="TRUE" NAME="charge.c" />
     <FILE SHOWN="FALSE" NAME="charge.h" />
-    <FILE SHOWN="FALSE" NAME="balancer.c" />
+    <FILE VIEWS="27,48,1024,682,4," SHOWN="TRUE" NAME="balancer.c" />
     <FILE SHOWN="FALSE" NAME="balancer.h" />
-    <FILE VIEWS="2,2,1071,661,0," SHOWN="TRUE" NAME="simulator.c" />
-    <FILE VIEWS="2,2,1071,686,0," SHOWN="TRUE" NAME="simulator.h" />
+    <FILE VIEWS="257,278,921,682,4," SHOWN="TRUE" NAME="simulator.c" />
+    <FILE SHOWN="FALSE" NAME="simulator.h" />
+    <FILE VIEWS="4,25,400,300,4," SHOWN="TRUE" NAME="protocol.c" />
+    <FILE VIEWS="50,71,1024,682,4," SHOWN="TRUE" NAME="protocol.h" />
+    <FILE VIEWS="73,94,1024,682,4," SHOWN="TRUE" NAME="battery.c" />
+    <FILE VIEWS="96,117,1024,682,4," SHOWN="TRUE" NAME="battery.h" />
   </FILES>
   <SETTINGS>
     <ASSEMBLER_COMMAND VALUE="avr-gcc" />
