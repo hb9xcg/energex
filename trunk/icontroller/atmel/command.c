@@ -34,15 +34,26 @@
 #include "charge.h"
 #include "supervisor.h"
 #include "simulator.h"
+#include "protocol.h"
 
 #define COMMAND_STACK_SIZE 256
 #define CMD_LINE   128
 #define DEBUG(str)  uart_write((uint8_t*)(str), sizeof(str) );
 
+#define FRAME 		0x10
+
+typedef enum
+{
+	eDebug,
+	eTwike
+} EMode;
+
 uint8_t cmd_stack[COMMAND_STACK_SIZE];
 static Tcb_t * cmd_thread;
 static char cmd_answer[CMD_LINE];
 static uint8_t cmd_line[CMD_LINE];
+
+static EMode eMode = eTwike;
 
 static void cmd_dispatcher(void);
 static void cmd_process( const char* cmd);
@@ -65,37 +76,58 @@ void cmd_init(void)
 void cmd_dispatcher(void)
 {
 	uint8_t lineIdx=0;
-	uint8_t character;
+	uint8_t lastCharacter=0, character;
+	
 
 	os_thread_sleep(100);
+
+	switch(character)
+	{
+	case FRAME:
+		break;
+	}
 	
 	for(;;)
 	{
 		if( uart_data_available() > 0)
 		{
 			uart_read( &character, 1 );
-			uart_write( &character, 1 );
-
-			switch( character )
+			
+			// Check debug escape sequence
+			if (character=='d' && lastCharacter==0x10)
 			{
-			case 0x8:
-				lineIdx--;
-				break;
-//			case '\n':
-			case '\r':
-			{
-				// Line completed
-				DEBUG("\r\n");
-				cmd_line[lineIdx] = '\0';
-				cmd_process((char*)cmd_line);
-				DEBUG("\r\n>");
-				lineIdx=0;
-				cmd_line[lineIdx] = '\0';
+				eMode = eDebug;
 			}
-			break;
-			default:
-				cmd_line[lineIdx] = character;
-				lineIdx++;	
+			if( eMode == eTwike)
+			{
+				receiveTwikeByte(character);
+				lastCharacter = character;
+			}
+			else
+			{
+				uart_write( &character, 1 );
+
+				switch( character )
+				{
+				case 0x8:
+					lineIdx--;
+					break;
+	//			case '\n':
+				case '\r':
+				{
+					// Line completed
+					DEBUG("\r\n");
+					cmd_line[lineIdx] = '\0';
+					cmd_process((char*)cmd_line);
+					DEBUG("\r\n>");
+					lineIdx=0;
+					cmd_line[lineIdx] = '\0';
+				}
+				break;
+				default:
+					cmd_line[lineIdx] = character;
+					lineIdx++;	
+				}
 			}
 		}
 		os_thread_sleep(50);
@@ -133,6 +165,9 @@ void cmd_process( const char* cmd )
 		case '?':
 			cmd_help();
 		break;
+		case 'x':
+			eMode = eTwike;
+		break;
 		default:
 			strcpy(cmd_answer, "Unknown command, try ? for help.");
 	}
@@ -150,6 +185,7 @@ void cmd_help(void)
 	strcat(cmd_answer, "t:\tTemperatur\n\r");
 	strcat(cmd_answer, "u:\tVoltage\n\r");
 	strcat(cmd_answer, "c:\tCommunication simulation {start|stop}\n\r");
+	strcat(cmd_answer, "x:\tExit\n\r");
 	strcat(cmd_answer, "?:\tHelp\n\r");
 }
 
