@@ -46,10 +46,8 @@ ReceiverThread::ReceiverThread()
 {
 	uart_init();
 	
-	setParameterValue(&battery1, TOTAL_SPANNUNG, 0x1010);
-	setParameterValue(&battery1, BUS_ADRESSE, 0x31);
-	setParameterValue(&battery2, BUS_ADRESSE, 0x32);
-	setParameterValue(&battery3, BUS_ADRESSE, 0x34);
+	setParameterValue(TOTAL_SPANNUNG, 0x1010);
+	setParameterValue(BUS_ADRESSE, 0x31);
 }
 
 ReceiverThread::~ReceiverThread()
@@ -74,7 +72,7 @@ void ReceiverThread::os_thread_sleep(uint32_t sleep)
 void ReceiverThread::run ()
 {
 	EPacketState eState = eExpectStart;
-	uint8_t character, idx, frameDetection=ON;
+	uint8_t character, idx=0, frameDetection=ON;
 	
 	running = true;
 	while(running)
@@ -218,41 +216,16 @@ void ReceiverThread::receiveData()
 	
 	value = data[3] | (data[2]<<8);
 	
-	if(address==BROADCAST)
-	{
-		setParameterValue(&battery1, parameter, value);
-		setParameterValue(&battery2, parameter, value);
-		setParameterValue(&battery3, parameter, value);
-	}
-	else
-	{
-		switch(address)
-		{
-		case BATTERY_1:	setParameterValue(&battery1, parameter, value);
-			break;
-		case BATTERY_2:	setParameterValue(&battery2, parameter, value);
-			break;
-		case BATTERY_3:	setParameterValue(&battery3, parameter, value); 
-			break;
-		}
-	}
+	setParameterValue(parameter, value);
 }
 
 void ReceiverThread::transmitData()
 {
 	uint8_t packet[11];
-	battery_t* pBattery;
 	int16_t value;
 	int8_t checksum=0, i;
 	
-	switch(address)
-	{
-	case BATTERY_1:	pBattery = &battery1; break;
-	case BATTERY_2:	pBattery = &battery2; break;
-	case BATTERY_3:	pBattery = &battery3; break;
-	}
-	
-	value = getParameterValue(parameter, pBattery);
+	value = getParameterValue(parameter);
 	
 	packet[ 0] = FRAME;
 	packet[ 1] = address;
@@ -277,28 +250,22 @@ void ReceiverThread::transmitData()
 void ReceiverThread::transmitGroup()
 {
 	uint8_t packet[18];
-	battery_t* pBattery;
-	int16_t value;
+	int16_t value, current, voltage;
 	int8_t checksum=0, i;
 	
-	switch(address)
-	{
-	case BATTERY_1:	pBattery = &battery1; break;
-	case BATTERY_2:	pBattery = &battery2; break;
-	case BATTERY_3:	pBattery = &battery3; break;
-	}
-	
-	value = getParameterValue(parameter, pBattery);
+	value   = getParameterValue(parameter);
+	voltage = getParameterValue(TOTAL_SPANNUNG);
+	current = getParameterValue(IST_STROM);
 	
 	packet[ 0] = FRAME;
 	packet[ 1] = address;
 	packet[ 2] = TRM_DATA;
 	packet[ 3] = 0;
 	packet[ 4] = 0;
-	packet[ 5] = pBattery->current >> 8;
-	packet[ 6] = pBattery->current & 0xff;
-	packet[ 7] = pBattery->voltage >> 8;
-	packet[ 8] = pBattery->voltage & 0xff;
+	packet[ 5] = current >> 8;
+	packet[ 6] = current & 0xff;
+	packet[ 7] = voltage >> 8;
+	packet[ 8] = voltage & 0xff;
 	packet[ 9] = value >> 8;
 	packet[10] = value & 0xff;
 	

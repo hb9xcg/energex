@@ -38,12 +38,10 @@ typedef struct
 	uint8_t  relais_state;
 } battery_t;
 
-extern battery_t battery1;
-extern battery_t battery2;
-extern battery_t battery3;
+extern battery_t battery;
 
-void setParameterValue(battery_t* pBattery, uint8_t parameter, uint16_t value);
-int16_t getParameterValue(uint8_t parameter, battery_t* pBattery);
+void setParameterValue(uint8_t parameter, uint16_t value);
+int16_t getParameterValue(uint8_t parameter);
 
 #ifdef __cplusplus
  }
