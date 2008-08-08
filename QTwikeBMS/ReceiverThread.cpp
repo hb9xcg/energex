@@ -23,6 +23,8 @@
 #include "protocol.h"
 #include "battery.h"
 
+#define OFF	0
+#define ON		1
 
 uint8_t address;
 uint8_t command;
@@ -44,6 +46,7 @@ ReceiverThread::ReceiverThread()
 {
 	uart_init();
 	
+	setParameterValue(&battery1, TOTAL_SPANNUNG, 0x1010);
 	setParameterValue(&battery1, BUS_ADRESSE, 0x31);
 	setParameterValue(&battery2, BUS_ADRESSE, 0x32);
 	setParameterValue(&battery3, BUS_ADRESSE, 0x34);
@@ -71,7 +74,7 @@ void ReceiverThread::os_thread_sleep(uint32_t sleep)
 void ReceiverThread::run ()
 {
 	EPacketState eState = eExpectStart;
-	uint8_t character, idx;
+	uint8_t character, idx, frameDetection=ON;
 	
 	running = true;
 	while(running)
@@ -132,12 +135,29 @@ void ReceiverThread::run ()
 				
 			case eExpectData:
 				checksum ^= character;
-				if(  idx == 0 || 
-					  data[idx-1] != FRAME || 
-					  character != FRAME )
+				if( frameDetection && idx>0 && data[idx-1] == FRAME)
 				{
+					if(character == FRAME)
+					{
+						// FRAME character was doubled:
+						// -> add one frame character to the data buffer.
+						frameDetection = OFF;						
+					}
+					else
+					{
+						// A single FRAME character detected:
+						// -> Reset state machine to start condition.
+						address = character;
+						eState = eExpectCommand;
+						break;
+					}
+				}
+				else
+				{				
+					frameDetection = ON;
 					data[idx++] = character;
 				}
+				
 				if(idx >= length)
 				{
 					eState = eExpectChecksum;
@@ -220,7 +240,7 @@ void ReceiverThread::receiveData()
 
 void ReceiverThread::transmitData()
 {
-	char packet[16];
+	uint8_t packet[11];
 	battery_t* pBattery;
 	int16_t value;
 	int8_t checksum=0, i;
@@ -247,14 +267,16 @@ void ReceiverThread::transmitData()
 	
 	packet[7] = checksum;
 	
-	uart_write( (uint8_t*)packet, 8);
+	length = frame_stuffing(packet, 8);
 	
-	logTransmit((uint8_t*)packet, 8);
+	uart_write( packet, length);
+	
+	logTransmit( packet, length);
 }
 
 void ReceiverThread::transmitGroup()
 {
-	char packet[16];
+	uint8_t packet[18];
 	battery_t* pBattery;
 	int16_t value;
 	int8_t checksum=0, i;
@@ -283,34 +305,37 @@ void ReceiverThread::transmitGroup()
 	for(i=2; i<=10; i++)
 		checksum ^= packet[i];
 	
-	packet[10] = checksum;
+	packet[11] = checksum;
 	
-	uart_write( (uint8_t*)packet, 11);
+	length = frame_stuffing(packet, 12);
 	
-	logTransmit((uint8_t*)packet, 11);
+	uart_write( packet, length);
+	
+	logTransmit( packet, length);
 }
 
 void ReceiverThread::logTransmit(uint8_t packet[], uint8_t length)
 {
-	updateLog("Transmitting: ");
+	QString text("Transmitted: ");
 	for(int i=0; i<length; i++) {
 		uint8_t character = packet[i];
-		updateLog(QString("%1 ").arg(character, 0, 16));
+		text += QString("%1 ").arg(character, 0, 16);
 	}
-	updateLog(QString("%1").arg('\n'));
+
+	updateLog(text);
 }
 
 void ReceiverThread::logReceive()
 {
-	uint8_t idx;
-	updateLog("Received: ");
-	updateLog(QString("%1 ").arg(0x10, 0, 16));
-	updateLog(QString("%1 ").arg(address, 0, 16));
-	updateLog(QString("%1 ").arg(command, 0, 16));
-	for(idx=0; idx<length; idx++) {
+	QString text("Received: ");
+	text += QString("%1 ").arg(0x10, 0, 16);
+	text += QString("%1 ").arg(address, 0, 16);
+	text += QString("%1 ").arg(command, 0, 16);
+	for(int idx=0; idx<length; idx++) {
 		uint8_t character = data[idx];
-		updateLog(QString("%1 ").arg(character, 0, 16));
+		text += QString("%1 ").arg(character, 0, 16);
 	}
-	updateLog(QString("%1 ").arg(checksum, 0, 16));
-	updateLog(QString("%1").arg('\n'));
+	text += QString("%1").arg(checksum, 0, 16);
+	
+	updateLog(text);
 }

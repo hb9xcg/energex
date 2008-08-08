@@ -22,6 +22,11 @@
 
 #include "types.h"
 
+#ifdef __cplusplus
+ extern "C"
+ {
+#endif
+
 // Protocol
 #define FRAME               0x10
 #define LENGTH_MASK		  0x0F
@@ -192,4 +197,10 @@
 #define GESCHWINDIGKEIT     0xFE
 #define TAGESKILOMETER      0xFF
 
+uint8_t frame_stuffing(uint8_t packet[], uint8_t length);
+
+#ifdef __cplusplus
+ }
+#endif
+ 
 #endif /*PROTOCOL_H_*/

@@ -32,7 +32,7 @@ QTwikeBMS::QTwikeBMS(QWidget *parent)
 	connect(ui.radio_on,  SIGNAL(clicked()), receiver, SLOT(start()));
 	connect(ui.radio_off, SIGNAL(clicked()), receiver, SLOT(stop()));
 	
-	connect(receiver, SIGNAL(updateLog(const QString&)), ui.textField, SLOT(insertPlainText(const QString&)));
+	connect(receiver, SIGNAL(updateLog(const QString&)), ui.textField, SLOT(appendPlainText(const QString&)));
 }
 
 QTwikeBMS::~QTwikeBMS()

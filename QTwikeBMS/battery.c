@@ -33,6 +33,7 @@ void setParameterValue(battery_t* pBattery, uint8_t parameter, uint16_t value)
 	case DRIVE_STATE:		pBattery->drive_state  	= value;	break;
 	case RELAIS_STATE:		pBattery->relais_state 	= value;	break;
 	case BUS_ADRESSE:		pBattery->address 		= value;	break;
+	case TOTAL_SPANNUNG:	pBattery->voltage 		= value;	break;
 	default:
 		fprintf(stderr, "Writing unknown parameter %#x\n", parameter);
 	}	

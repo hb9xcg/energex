@@ -19,3 +19,24 @@
  ***************************************************************************/
 #include "protocol.h"
 
+#define START_DATA_IDX		5
+
+uint8_t temp[16];
+
+uint8_t frame_stuffing(uint8_t packet[], uint8_t length)
+{
+	int8_t idxFrom, idxTo;
+	for(idxFrom=START_DATA_IDX; idxFrom<length; idxFrom++)
+	{
+		if(packet[idxFrom] == FRAME)
+		{
+			for(idxTo=length; idxTo>idxFrom; idxTo--)
+			{
+				packet[idxTo] = packet[idxTo-1];
+			}
+			length++;
+			idxFrom++;
+		}
+	}
+	return length;
+}
