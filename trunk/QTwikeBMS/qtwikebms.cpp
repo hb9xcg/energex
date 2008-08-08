@@ -43,24 +43,18 @@ QTwikeBMS::~QTwikeBMS()
 void QTwikeBMS::on_spinVoltage_valueChanged(double floatValue)
 {
 	uint16_t fixedValue = (uint16_t)(floatValue * 100.0);
-	battery1.voltage = fixedValue;
-	battery2.voltage = fixedValue;
-	battery3.voltage = fixedValue;
+	battery.voltage = fixedValue;
 }
 
 void QTwikeBMS::on_spinCurrent_valueChanged(double floatValue)
 {
 	uint16_t fixedValue = (uint16_t)(floatValue * 100.0);
-	battery1.current = fixedValue;
-	battery2.current = fixedValue;
-	battery3.current = fixedValue;
+	battery.current = fixedValue;
 }
 
 void QTwikeBMS::on_spinCharge_valueChanged(double floatValue)
 {
 	uint16_t fixedValue = (uint16_t)(floatValue * 100.0);
-	battery1.ah_counter = fixedValue;
-	battery2.ah_counter = fixedValue;
-	battery3.ah_counter = fixedValue;
+	battery.ah_counter = fixedValue;
 }
 

@@ -22,24 +22,22 @@
 #include <assert.h>
 #include <stdio.h>
 
-battery_t battery1;
-battery_t battery2;
-battery_t battery3;
+battery_t battery;
 
-void setParameterValue(battery_t* pBattery, uint8_t parameter, uint16_t value)
+void setParameterValue(uint8_t parameter, uint16_t value)
 {
 	switch(parameter)
 	{
-	case DRIVE_STATE:		pBattery->drive_state  	= value;	break;
-	case RELAIS_STATE:		pBattery->relais_state 	= value;	break;
-	case BUS_ADRESSE:		pBattery->address 		= value;	break;
-	case TOTAL_SPANNUNG:	pBattery->voltage 		= value;	break;
+	case DRIVE_STATE:		battery.drive_state  	= value;	break;
+	case RELAIS_STATE:		battery.relais_state 	= value;	break;
+	case BUS_ADRESSE:		battery.address 		= value;	break;
+	case TOTAL_SPANNUNG:	battery.voltage 		= value;	break;
 	default:
 		fprintf(stderr, "Writing unknown parameter %#x\n", parameter);
 	}	
 }
 
-int16_t getParameterValue(uint8_t parameter, battery_t* pBattery)
+int16_t getParameterValue(uint8_t parameter)
 {
 	switch(parameter)
 	{						
@@ -54,24 +52,28 @@ int16_t getParameterValue(uint8_t parameter, battery_t* pBattery)
 	case STANDZEIT:		return 64;
 	case FAHR_LADE_ZEIT:	return 9;
 	case LAST_ERROR:		return 0;
-	case BUS_ADRESSE:		return pBattery->address;
+	case BUS_ADRESSE:		return battery.address;
 
-	case DRIVE_STATE:		return pBattery->drive_state;
-	case RELAIS_STATE:		return pBattery->relais_state;
+	case DRIVE_STATE:		return battery.drive_state;
+	case RELAIS_STATE:		return battery.relais_state;
 	case PARAM_PROT:		return 0;
 
 	case BINFO:			return 0;
-	case IST_STROM:		return pBattery->current;			
+	
+	// We simulate 3 batteries. Thus each of them reports one third of the real value.
+	case IST_STROM:		return battery.current/3; 			
 	case LADESTROM:		return 280;
 	case FAHRSTROM:		return -1000;
-	case TOTAL_SPANNUNG:	return pBattery->voltage;
-	case SOLL_LADESPG:		return	420;
-	case AH_ZAEHLER:		return pBattery->ah_counter;
-	case Q:				return 1000;
-	case LEISTUNG:			return pBattery->current*(pBattery->voltage/100);
-	case BATTERIE_TEMP:	return 20;
+	case TOTAL_SPANNUNG:	return battery.voltage;
+	case SOLL_LADESPG:		return	44000;
+	
+	 // We simulate 3 batteries. Thus each of them reports one third of the real value.
+	case AH_ZAEHLER:		return battery.ah_counter/3;
+	case Q:				return -1400;
+	case LEISTUNG:			return (battery.current/100)*(battery.voltage/100);
+	case BATTERIE_TEMP:	return 2000;
 	case FINFO:			return 0;
-	case SYM_SPANNUNG:		return 0;
+	case SYM_SPANNUNG:		return 26;
 				
 	case TEILSPANNUNG1:	return 5100;
 	case TEILSPANNUNG2:	return 5100;
@@ -128,71 +130,71 @@ int16_t getParameterValue(uint8_t parameter, battery_t* pBattery)
 	case ZYKLUS_UEBER_10:		return 0;
 	case ZYKLUS_UNTER_10:		return 0;
 
-	case MAX_UEBERLADUNG:		return 1;
-	case MIN_LDG_F_VOLL:		return 2;
-	case STROM_ZUNAHME:		return 3;
-	case MAX_LADE_SPG:			return 4;
-	case MIN_LADE_TEMP:		return 5;
-	case MAX_LADE_TEMP:		return 6;
-	case MAX_TEMP_ZUNAHME:		return 7;
-	case MAX_LADEZEIT:			return 8;
-	case SYMMETRIER_STROM:		return 70;
+	case MAX_UEBERLADUNG:		return 5000;
+	case MIN_LDG_F_VOLL:		return -500;
+	case STROM_ZUNAHME:		return 40;
+	case MAX_LADE_SPG:			return 44000;
+	case MIN_LADE_TEMP:		return 0;
+	case MAX_LADE_TEMP:		return 4500;
+	case MAX_TEMP_ZUNAHME:		return 100;
+	case MAX_LADEZEIT:			return 800;
+	case SYMMETRIER_STROM:		return 28;
 
-	case LADE_STR_UNTER_M10:	return 70;
-	case LADE_STR_UEBER_M10:	return 70;
-	case LADE_STR_UEBER_P00:	return 500;
-	case LADE_STR_UEBER_P10:	return 500;
-	case LADE_STR_UEBER_P20:	return 500;
-	case LADE_STR_UEBER_P30:	return 500;
-	case LADE_STR_UEBER_P40:	return 500;
-	case LADE_STR_UEBER_P45:	return 70;
-	case LADE_STR_UEBER_P50:	return 0;
+	case LADE_STR_UNTER_M10:	return 56;
+	case LADE_STR_UEBER_M10:	return 56;
+	case LADE_STR_UEBER_P00:	return 280;
+	case LADE_STR_UEBER_P10:	return 280;
+	case LADE_STR_UEBER_P20:	return 280;
+	case LADE_STR_UEBER_P30:	return 280;
+	case LADE_STR_UEBER_P40:	return 79;
+	case LADE_STR_UEBER_P45:	return 28;
+	case LADE_STR_UEBER_P50:	return 28;
 			
-	case LADE_SPG_UNTER_M10:	return 420;
-	case LADE_SPG_UEBER_M10:	return 420;
-	case LADE_SPG_UEBER_P00:	return 420;
-	case LADE_SPG_UEBER_P10:	return 420;
-	case LADE_SPG_UEBER_P20:	return 420;
-	case LADE_SPG_UEBER_P30:	return 420;
-	case LADE_SPG_UEBER_P40:	return 420;
-	case LADE_SPG_UEBER_P45:	return 420;
-	case LADE_SPG_UEBER_P50:	return 420;
+	case LADE_SPG_UNTER_M10:	return 44000;
+	case LADE_SPG_UEBER_M10:	return 44000;
+	case LADE_SPG_UEBER_P00:	return 44000;
+	case LADE_SPG_UEBER_P10:	return 44000;
+	case LADE_SPG_UEBER_P20:	return 44000;
+	case LADE_SPG_UEBER_P30:	return 42000;
+	case LADE_SPG_UEBER_P40:	return 40000;
+	case LADE_SPG_UEBER_P45:	return 38000;
+	case LADE_SPG_UEBER_P50:	return 36000;
 			
-	case NOM_KAPAZITAET:		return 5;
-	case MIN_FAHR_SPANNUNG:	return 290;
-	case SELBST_ENTL_STROM:	return 0;
-	case TIEFENTLADE_SPG:		return 270;
-	case MAX_SPANNUNG_DIFF:	return 5;
-	case MIN_FAHR_TEMP_B:		return -20;
-	case MAX_FAHR_TEMP_B:		return 50;
-	case MAX_FAHR_STROM:		return 20;
+	case NOM_KAPAZITAET:		return 280;
+	case MIN_FAHR_SPANNUNG:	return 31000;
+	case SELBST_ENTL_STROM:	return 28000;
+	case TIEFENTLADE_SPG:		return 25000;
+	case MAX_SPANNUNG_DIFF:	return 500;
+	case MIN_FAHR_TEMP_B:		return -2500;
+	case MAX_FAHR_TEMP_B:		return 6000;
+	case MAX_FAHR_STROM:		return -1000;
 	
-	case AD_STROM:				return 0x1234;
+	case AD_STROM:				return 0x817F;
 	
-	case KAL_TEMP_7_6:			return 0;
-	case KAL_TEMP_5_4:			return 0;
-	case KAL_TEMP_3_2:			return 0;
-	case KAL_TEMP_1_AMB:		return 0;
-	case KAL_TEMP_GD_14:		return 0;
-	case KAL_TEMP_13_12:		return 0;
-	case KAL_TEMP_11_10:		return 0;
-	case KAL_TEMP_9_8:			return 0;
+	case KAL_TEMP_7_6:			return 0xFFFF;
+	case KAL_TEMP_5_4:			return 0xFEFD;
+	case KAL_TEMP_3_2:			return 0xFCFD;
+	case KAL_TEMP_1_AMB:		return 0x00FE;
+	case KAL_TEMP_GD_14:		return 0x7C00;
+	case KAL_TEMP_13_12:		return 0x00FF;
+	case KAL_TEMP_11_10:		return 0xFE00;
+	case KAL_TEMP_9_8:			return 0x0002;
 
-	case SENSOR_MASK:			return 0;
+	case SENSOR_MASK:			return 0x0000;
 			
-	case OFFS_KLEIN_STL:		return 0;
-	case OFFS_GROSS_STL:		return 0;
-	case KALIB_SPG_1:			return 0;
-	case KALIB_SPG_2:			return 0;
-	case KALIB_SPG_3:			return 0;
-	case KALIB_SPG_4:			return 0;
-	case KALIB_SPG_5:			return 0;
-	case KALIB_SPG_6:			return 0;
-	case KALIB_SPG_9:			return 0;
+	case OFFS_KLEIN_STL:		return 1508;
+	case OFFS_GROSS_STL:		return 12523;
+	case KALIB_SPG_1:			return 0x00A3;
+	case KALIB_SPG_2:			return 0x009F;
+	case KALIB_SPG_3:			return 0x00A6;
+	case KALIB_SPG_4:			return 0x00B1;
+	case KALIB_SPG_5:			return 0x007C;
+	case KALIB_SPG_6:			return 0x00A7;
+	case KALIB_SPG_9:			return 0x00A7;
 			
-	case DEBUG_VALUE_C:		return 0;
-	case DEBUG_VALUE_H:		return 0;
-	case DEBUG_VALUE_ADDR:		return 0;
+	case DEBUG_VALUE_C:		return 22498;
+	case DEBUG_VALUE_H:		return 0x57E2;
+	case DEBUG_VALUE_ADDR:		return 0xFFFF;
 
 	case GESCHWINDIGKEIT:		return 0;
 	case TAGESKILOMETER:		return 0;

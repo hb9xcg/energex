@@ -20,7 +20,7 @@
 #include "os_thread.h"
 #include <QThread>
 
-void os_thread_sleep(uint32_t sleep)
+void os_thread_sleep(uint32_t /*sleep*/)
 {
 	//QThread::msleep(sleep);
 }

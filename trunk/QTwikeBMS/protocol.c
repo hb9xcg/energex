@@ -21,7 +21,6 @@
 
 #define START_DATA_IDX		5
 
-uint8_t temp[16];
 
 uint8_t frame_stuffing(uint8_t packet[], uint8_t length)
 {
