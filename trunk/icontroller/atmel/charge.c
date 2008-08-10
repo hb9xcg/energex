@@ -27,8 +27,6 @@
 #include "charge.h"
 #include "adc.h"
 
-#define CH_CHARGE    6
-#define CH_DISCHARGE 7
 
 static int16_t charge_current;
 static int64_t charge_capacity;
@@ -45,17 +43,17 @@ enum EState
 // gets called each 400us from the timer interrupt
 void charge_sample(void)
 {
-	static enum EState eState;
+	static enum EState eState = eCharging;
 
 	if( charge_charging_sample > charge_discharging_sample )
 	{
-		charge_current = charge_charging_sample;
+		charge_current = charge_charging_sample; // save by ISR completed result
 		adc_read_int( CH_CHARGE, &charge_charging_sample);
 		charge_discharging_sample = 0;
 	}
 	else if( charge_charging_sample < charge_discharging_sample )
 	{
-		charge_current = -charge_discharging_sample;
+		charge_current = -charge_discharging_sample; // save by ISR completed result
 		adc_read_int( CH_DISCHARGE, &charge_discharging_sample);
 		charge_charging_sample = 0;	
 	}

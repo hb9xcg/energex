@@ -36,7 +36,7 @@
 
 
 #include "timer.h"
-#include "charge.h"
+#include "battery.h"
 // MW #include "sensor-low.h"
 // MW #include "bot-local.h"
 #include "os_scheduler.h"
@@ -63,7 +63,8 @@ ISR(SIG_OUTPUT_COMPARE2) {
 	sei(); 	// Interrupts wieder an, z.B. UART-Kommunikation kann parallel zu RC5 und Encoderauswertung laufen   
 	/* - FERNBEDIENUNG - */
 	
-	charge_sample();
+
+	battery_sample();
 	
 	/* --- RADENCODER --- */
 	// MW bot_encoder_isr();

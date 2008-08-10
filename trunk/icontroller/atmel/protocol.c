@@ -63,6 +63,8 @@ void receiveTwikeByte(uint8_t character)
 		case FRAME:
 			eState = eExpectAddress;
 			break;
+		default:
+			break;
 		}
 		break;
 		

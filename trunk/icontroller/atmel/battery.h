@@ -42,6 +42,9 @@ extern battery_t battery;
 
 void setParameterValue(uint8_t parameter, uint16_t value);
 int16_t getParameterValue(uint8_t parameter);
+void battery_sample(void);
+int16_t getTemperature(void);
+uint16_t getVoltage(void);
 
 #ifdef __cplusplus
  }
