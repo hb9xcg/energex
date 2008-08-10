@@ -73,10 +73,10 @@ int main(void)
 
 	uart_init();
 
-	adc_init(4); // Temperatur sensor
-	adc_init(5); // Voltage
-	adc_init(6); // Current +
-	adc_init(7); // Current -
+	adc_init(CH_TEMPERATURE); // Temperatur sensor
+	adc_init(CH_VOLTAGE);     // Voltage
+	adc_init(CH_CHARGE);      // Current +
+	adc_init(CH_DISCHARGE);   // Current -
 
 	cmd_init();
 

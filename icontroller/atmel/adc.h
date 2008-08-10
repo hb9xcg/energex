@@ -28,6 +28,11 @@
 
 #include "global.h"
 
+#define CH_CHARGE      6
+#define CH_DISCHARGE   7
+#define CH_VOLTAGE     5
+#define CH_TEMPERATURE 4
+
 ///*!
 // * Liest einen analogen Kanal aus
 // * @param channel Kanal - hex-Wertigkeit des Pins (0x01 fuer PA0; 0x02 fuer PA1, ..)

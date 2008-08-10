@@ -128,8 +128,8 @@ SIGNAL (SIG_ADC)
 		ADMUX = _BV(REFS0) | _BV(REFS1);	//|(0<<ADLAR);	// interne 2.5V Refernzspannung, rechts Ausrichtung		
 		ADMUX |= channels[act_channel].channel;
 		ADCSRA = (1 << ADPS2)	|
-		         (1 << ADPS1)	|	// prescale faktor = 128 ADC laeuft
-// 64		         (1 << ADPS0)	|	// mit 8MHz / 128 = 62.5kHz 
+		         (1 << ADPS1)	|	// prescale faktor = 64 ADC laeuft
+// 		         (1 << ADPS0)	|	// mit 8MHz / 64 = 125kHz -> Conversion time ~ 104us
 		         (1 << ADEN) 	|	// ADC an
 		         (1 << ADSC) 	|	// Beginne mit der Konvertierung
 		         (1 << ADIE);		// Interrupt an

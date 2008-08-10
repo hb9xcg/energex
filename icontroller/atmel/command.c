@@ -32,6 +32,7 @@
 #include "uart.h"
 #include "adc.h"
 #include "charge.h"
+#include "battery.h"
 #include "supervisor.h"
 #include "simulator.h"
 #include "protocol.h"
@@ -56,6 +57,7 @@ static uint8_t cmd_line[CMD_LINE];
 static EMode eMode = eTwike;
 
 static void cmd_dispatcher(void);
+static void cmd_receive_byte(uint8_t character);
 static void cmd_process( const char* cmd);
 static void cmd_help(void);
 static void cmd_temperatur(void);
@@ -67,70 +69,84 @@ static void cmd_power(const char* cmd);
 static void cmd_supervisor(const char* cmd);
 static void cmd_comm_simulator(const char* cmd);
 
+
 void cmd_init(void)
 {
 	cmd_thread = os_create_thread((uint8_t *)&cmd_stack[COMMAND_STACK_SIZE-1], cmd_dispatcher );	// Command thread anlegen
 }
 
-
 void cmd_dispatcher(void)
 {
-	uint8_t lineIdx=0;
-	uint8_t lastCharacter=0, character;
-	
+	uint8_t lastCharacter=0, character;	
 
 	os_thread_sleep(100);
-
-	switch(character)
-	{
-	case FRAME:
-		break;
-	}
 	
 	for(;;)
 	{
-		if( uart_data_available() > 0)
+		if (uart_data_available() > 0)
 		{
-			uart_read( &character, 1 );
+			uart_read( &character, sizeof(character) );
 			
-			// Check debug escape sequence
-			if (character=='d' && lastCharacter==0x10)
+			// Check debug escape sequence "^pd"
+			if (lastCharacter==FRAME)
 			{
-				eMode = eDebug;
-			}
-			if( eMode == eTwike)
-			{
-				receiveTwikeByte(character);
-				lastCharacter = character;
+				if (character=='d') 
+				{
+					eMode = eDebug;
+					character = '?';
+				}
+				else if(character==FRAME)
+				{
+					lastCharacter = 0;
+				}
+				else
+				{
+					lastCharacter = character;
+				}
 			}
 			else
 			{
-				uart_write( &character, 1 );
-
-				switch( character )
-				{
-				case 0x8:
-					lineIdx--;
-					break;
-	//			case '\n':
-				case '\r':
-				{
-					// Line completed
-					DEBUG("\r\n");
-					cmd_line[lineIdx] = '\0';
-					cmd_process((char*)cmd_line);
-					DEBUG("\r\n>");
-					lineIdx=0;
-					cmd_line[lineIdx] = '\0';
-				}
-				break;
-				default:
-					cmd_line[lineIdx] = character;
-					lineIdx++;	
-				}
+				lastCharacter = character;
+			}
+			if (eMode == eTwike)
+			{
+				receiveTwikeByte(character);				
+			}
+			else
+			{
+				cmd_receive_byte(character);
 			}
 		}
 		os_thread_sleep(50);
+	}
+}
+
+void cmd_receive_byte(uint8_t character)
+{
+	static uint8_t lineIdx;
+
+	uart_write( &character, sizeof(character) );
+
+	switch (character)
+	{
+	case 0x8:
+		lineIdx--;
+		break;
+//	case '\n':
+	case '\r':
+	{
+		// Line completed
+		DEBUG("\r\n");
+		cmd_line[lineIdx] = '\0';
+		cmd_process((char*)cmd_line);
+		DEBUG("\r\n>");
+		lineIdx=0;
+		cmd_line[lineIdx] = '\0';
+	}
+	break;
+	default:
+		cmd_line[lineIdx] = character;
+		lineIdx++;	
 	}
 }
 
@@ -184,7 +200,7 @@ void cmd_help(void)
 	strcat(cmd_answer, "s:\tSupervisor {on|off|info}\n\r");
 	strcat(cmd_answer, "t:\tTemperatur\n\r");
 	strcat(cmd_answer, "u:\tVoltage\n\r");
-	strcat(cmd_answer, "c:\tCommunication simulation {start|stop}\n\r");
+//	strcat(cmd_answer, "c:\tCommunication simulation {start|stop}\n\r");
 	strcat(cmd_answer, "x:\tExit\n\r");
 	strcat(cmd_answer, "?:\tHelp\n\r");
 }
@@ -205,36 +221,20 @@ void cmd_comm_simulator(const char* cmd)
 
 void cmd_temperatur(void)
 {
-	int16_t value = 0;
-	int32_t temperatur;
+	int16_t temperature;
 
-	adc_read_int(4, &value);
+	temperature = getTemperature();
 
-	os_thread_sleep(10);
-
-	temperatur = value;
-	temperatur *= 2500;// Reference [mV]
-	temperatur /= 1024;
-	temperatur -= 600;
-
-	sprintf( cmd_answer, "IController temperatur: %d°C", (int16_t)temperatur/10);
+	sprintf( cmd_answer, "IController temperatur: %d.%d°C", temperature/100, temperature%100);
 }
 
 void cmd_voltage(void)
 {
-	int16_t value = 0;
-	int32_t voltage;
+	uint16_t voltage;
 
-	adc_read_int(5, &value);
+	voltage = getVoltage();
 
-	os_thread_sleep(10);
-
-	voltage = value;
-	voltage *= 2500;// Reference [mV]
-	voltage *= 146; // Calculate voltage divider
-	voltage /= 1024;
-
-	sprintf( cmd_answer, "IController voltage: %d.%dV", (int16_t)((voltage+500)/1000), (int16_t)((voltage%1000+50)/100));
+	sprintf( cmd_answer, "IController voltage: %d.%dV", voltage/100, voltage%100);
 }
 
 void cmd_current(void)
@@ -250,7 +250,7 @@ void cmd_capacity(void)
 {
 	int16_t capacity;
 
-    charge_get_capacity( &capacity );
+    	charge_get_capacity( &capacity );
 
 	sprintf( cmd_answer, "IController capacity: %dmAh", capacity);
 }

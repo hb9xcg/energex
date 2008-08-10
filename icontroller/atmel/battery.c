@@ -18,11 +18,75 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "battery.h"
+#include "adc.h"
+#include "charge.h"
 #include "protocol.h"
 #include <assert.h>
 #include <stdio.h>
 
+#define OVER_SAMPLING_LOG  4
+#define OVER_SAMPLING	  (1<<OVER_SAMPLING_LOG)
+#define VOLTAGE_INV_R1	   3*34650  // [Ohm]
+#define VOLTAGE_INV_R2	   6800     // [Ohm]
+#define V_REF		   2510     // [mV]
+#define ADC_RESOLUTION     10
+#define ADC_MAX_VALUE	   (1<<ADC_RESOLUTION)
+
 battery_t battery;
+int16 voltage[OVER_SAMPLING];
+int16 temperature[OVER_SAMPLING];
+
+// gets called each 400us from the timer interrupt 
+void battery_sample(void)
+{
+	static uint8_t idx;
+
+	charge_sample();
+	adc_read_int( CH_VOLTAGE, &voltage[idx]);
+	adc_read_int( CH_TEMPERATURE, &temperature[idx]);
+	
+	if (++idx == OVER_SAMPLING )
+	{
+		idx = 0;
+	}
+}
+
+uint16_t getVoltage(void)
+{
+	uint8_t idx;
+	uint16_t average = 0;
+	uint32_t voltage32;
+	
+	for (idx=0; idx<OVER_SAMPLING; idx++)
+	{
+		average += voltage[idx];
+	}
+
+	voltage32   = average;
+	voltage32  *= (V_REF/10 * VOLTAGE_INV_R1 / VOLTAGE_INV_R2 );     // voltage32 *= 35870;
+	voltage32 >>= (OVER_SAMPLING_LOG + ADC_RESOLUTION);
+
+	return voltage32;
+}
+
+int16_t getTemperature(void)
+{
+	uint8_t idx;
+	uint16_t average = 0;
+	int32_t temperature32;
+	
+	for (idx=0; idx<OVER_SAMPLING; idx++)
+	{
+		average += temperature[idx];
+	}
+
+	temperature32   = average;
+	temperature32  *= (V_REF*10);
+	temperature32 >>= (OVER_SAMPLING_LOG + ADC_RESOLUTION);
+	temperature32  -= 6000;
+
+	return temperature32;
+}
 
 void setParameterValue(uint8_t parameter, uint16_t value)
 {
@@ -64,7 +128,7 @@ int16_t getParameterValue(uint8_t parameter)
 	case IST_STROM:			return battery.current/3; 			
 	case LADESTROM:			return 280;
 	case FAHRSTROM:			return -1000;
-	case TOTAL_SPANNUNG:		return battery.voltage;
+	case TOTAL_SPANNUNG:		return getVoltage();
 	case SOLL_LADESPG:		return	44000;
 	
 	 // We simulate 3 batteries. Thus each of them reports one third of the real value.
@@ -100,7 +164,7 @@ int16_t getParameterValue(uint8_t parameter)
 	
 	case PC_CALIBR_TEMP:		return 0x5678;
 	case MAX_BAT_TEMP:		return 2000;
-	case UMGEBUNGS_TEMP:		return 2000;	
+	case UMGEBUNGS_TEMP:		return getTemperature();	
 	case MAX_LADETEMP:		return 4500;
 	case MIN_LADETEMP:		return 0;
 	case MAX_FAHRTEMP:		return 4500;
