@@ -84,7 +84,7 @@ uint8_t balance_min_current(void)
 {
 	int16_t current;
 	
-	charge_get_current( &current );
+	current = charge_get_current();
 	
 	return( current <= BALANCER_MIN_CURRENT );
 }

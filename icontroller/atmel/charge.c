@@ -31,6 +31,9 @@
 static int16_t charge_current;
 static int64_t charge_capacity;
 
+#define OVER_SAMPLING_LOG	4
+#define OVER_SAMPLING 		(1<<OVER_SAMPLING_LOG)
+
 static int16_t charge_charging_sample;
 static int16_t charge_discharging_sample;
 
@@ -73,7 +76,7 @@ void charge_sample(void)
 				break;
 		}
 	}
-	charge_capacity += charge_current;
+	charge_capacity -= charge_current;
 }
 
 void charge_reset(void)
@@ -81,9 +84,15 @@ void charge_reset(void)
 	charge_capacity = 0;
 }
 
-void charge_get_capacity(int16_t* mAh)
+void charge_set_capacity(uint16_t newCapacity)
 {
-	int32_t capacity; 
+	charge_capacity  = newCapacity;
+	charge_capacity *= 3072000;
+}
+
+int16_t charge_get_capacity(void)
+{
+	int32_t charge10mAh; 
 
 #if 0
 	capacity = charge_capacity / 1024; // 10Bit AD converter
@@ -92,23 +101,23 @@ void charge_get_capacity(int16_t* mAh)
 	capacity /= 2500; // 400us -> s	
 	capacity /= 3600; // s -> h, Now we have mAh
 #else
-	capacity = charge_capacity / 307200;
+	charge10mAh = charge_capacity / 3072000; // [10mAh]
 #endif
-	*mAh = (int16_t)capacity;
+	return charge10mAh;
 }
 
 // Returns actual current [mA]
-void charge_get_current(int16_t* mA)
+int16_t charge_get_current()
 {
-	int32_t current;
+	int32_t current10mA;
 
-	current = charge_current;
-#if 1
+	current10mA = charge_current;
+#if 0
 	current *= 2500; // Reference voltage [mV]
 	current *= 12;   // Calculate differential amplifier
 	current /= 1024; // 10Bit AD converter
 #else
-	current *= 39;
+	current10mA *= 4;
 #endif
-	*mA = (int16_t)current;
+	return current10mA;
 }

@@ -29,12 +29,12 @@
 
 #include "icontroller.h"
 
-void charge_get_current(int16_t* current);
+int16_t charge_get_current(void);
 
 void charge_sample(void);
 
-void charge_get_capacity(int16_t* capacity);
-
+int16_t charge_get_capacity(void);
+void charge_set_capacity(uint16_t newCapacity);
 void charge_reset(void);
 
 #endif
