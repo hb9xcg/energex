@@ -26,7 +26,7 @@
 
 #define OVER_SAMPLING_LOG  4
 #define OVER_SAMPLING	  (1<<OVER_SAMPLING_LOG)
-#define VOLTAGE_INV_R1	   3*34650  // [Ohm]
+#define VOLTAGE_INV_R1	   3*346500  // [Ohm]
 #define VOLTAGE_INV_R2	   6800     // [Ohm]
 #define V_REF		   2510     // [mV]
 #define ADC_RESOLUTION     10
@@ -96,6 +96,8 @@ void setParameterValue(uint8_t parameter, uint16_t value)
 	case RELAIS_STATE:	battery.relais_state 	= value;	break;
 	case BUS_ADRESSE:	battery.address 	= value;	break;
 	case TOTAL_SPANNUNG:	battery.voltage 	= value;	break;
+	case AH_ZAEHLER:	charge_set_capacity(value*3);		break;
+
 	default:
 		break;
 	}	
@@ -125,14 +127,14 @@ int16_t getParameterValue(uint8_t parameter)
 	case BINFO:			return 0;
 	
 	// We simulate 3 batteries. Thus each of them reports one third of the real value.
-	case IST_STROM:			return battery.current/3; 			
+	case IST_STROM:			return charge_get_current()/3;
 	case LADESTROM:			return 280;
 	case FAHRSTROM:			return -1000;
 	case TOTAL_SPANNUNG:		return getVoltage();
 	case SOLL_LADESPG:		return	44000;
 	
 	 // We simulate 3 batteries. Thus each of them reports one third of the real value.
-	case AH_ZAEHLER:		return battery.ah_counter/3;
+	case AH_ZAEHLER:		return charge_get_capacity()/3;
 	case Q:				return -1400;
 	case LEISTUNG:			return (battery.current/100)*(battery.voltage/100);
 	case BATTERIE_TEMP:		return 2000;

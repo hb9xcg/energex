@@ -241,18 +241,18 @@ void cmd_current(void)
 {
 	int16_t current;
 	
-	charge_get_current( &current );
+	current = charge_get_current();
 	
-	sprintf( cmd_answer, "IController current: %dmA", current);
+	sprintf( cmd_answer, "IController current: %d.%dA", current/100, current%100);
 }
 
 void cmd_capacity(void)
 {
 	int16_t capacity;
 
-    	charge_get_capacity( &capacity );
+    	capacity = charge_get_capacity();
 
-	sprintf( cmd_answer, "IController capacity: %dmAh", capacity);
+	sprintf( cmd_answer, "IController capacity: %d.%dAh", capacity/100, capacity%100);
 }
 
 void cmd_reset(void)
