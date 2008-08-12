@@ -43,8 +43,9 @@
 
 #define XTAL F_CPU			 /*!< Crystal frequency in Hz */
 
-#define IGBT   0x20
-#define RELAIS 0x40
+#define IGBT   		0x20
+#define RELAIS 		0x40
+#define STOP_SWITCH	0x04
 
 typedef enum
 {

@@ -1,7 +1,7 @@
 <!DOCTYPE KontrollerLab>
 <PROJECT VERSION="0.8.0-beta1" >
   <FILES>
-    <FILE VIEWS="211,232,921,682,4," SHOWN="TRUE" NAME="icontroller.c" />
+    <FILE VIEWS="0,0,921,682,5," SHOWN="TRUE" NAME="icontroller.c" />
     <FILE VIEWS="142,163,1024,682,4," SHOWN="TRUE" NAME="icontroller.h" />
     <FILE VIEWS="326,347,921,682,4," SHOWN="TRUE" NAME="adc.c" />
     <FILE VIEWS="372,393,921,682,4," SHOWN="TRUE" NAME="adc.h" />
@@ -26,16 +26,16 @@
     <FILE SHOWN="FALSE" NAME="command.h" />
     <FILE VIEWS="96,117,921,683,4," SHOWN="TRUE" NAME="supervisor.c" />
     <FILE SHOWN="FALSE" NAME="supervisor.h" />
-    <FILE VIEWS="0,0,921,682,5," SHOWN="TRUE" NAME="charge.c" />
-    <FILE VIEWS="349,370,921,682,4," SHOWN="TRUE" NAME="charge.h" />
-    <FILE VIEWS="142,163,1024,682,4," SHOWN="TRUE" NAME="balancer.c" />
+    <FILE VIEWS="211,232,921,683,4," SHOWN="TRUE" NAME="charge.c" />
+    <FILE VIEWS="234,255,921,683,4," SHOWN="TRUE" NAME="charge.h" />
+    <FILE VIEWS="257,278,921,682,4," SHOWN="TRUE" NAME="balancer.c" />
     <FILE SHOWN="FALSE" NAME="balancer.h" />
-    <FILE VIEWS="165,186,1024,682,4," SHOWN="TRUE" NAME="simulator.c" />
+    <FILE VIEWS="280,301,1024,682,4," SHOWN="TRUE" NAME="simulator.c" />
     <FILE SHOWN="FALSE" NAME="simulator.h" />
-    <FILE VIEWS="188,209,921,682,4," SHOWN="TRUE" NAME="protocol.c" />
-    <FILE VIEWS="211,232,400,300,4," SHOWN="TRUE" NAME="protocol.h" />
+    <FILE VIEWS="303,324,1024,682,4," SHOWN="TRUE" NAME="protocol.c" />
+    <FILE VIEWS="326,347,921,682,4," SHOWN="TRUE" NAME="protocol.h" />
     <FILE VIEWS="349,370,400,300,4," SHOWN="TRUE" NAME="battery.c" />
-    <FILE VIEWS="372,393,921,683,4," SHOWN="TRUE" NAME="battery.h" />
+    <FILE VIEWS="372,393,400,300,4," SHOWN="TRUE" NAME="battery.h" />
   </FILES>
   <SETTINGS>
     <ASSEMBLER_COMMAND VALUE="avr-gcc" />
