@@ -68,8 +68,10 @@ int main(void)
 
 	delay(100);	
 
-	DDRD |= RELAIS;
-	DDRD |= IGBT;
+	DDRD |= RELAIS; // Output
+	DDRD |= IGBT; // Output
+	DDRD &= ~STOP_SWITCH; // Input
+	PORTD |= STOP_SWITCH; // Pullup enabled
 
 	uart_init();
 
@@ -87,6 +89,9 @@ int main(void)
 
 	ePowerIst = ePowerOff;
 
+	EICRA = (1<<ISC01) | (1<<ISC10); // Configure any change on pin INT0 for interrupt.
+	EIMSK = (1<<INT0);               // Enable INT0 interrupt
+
 	while(1)
 	{
 		if( ePowerSoll != ePowerIst)
@@ -94,7 +99,7 @@ int main(void)
 			if( ePowerSoll == ePowerFull )
 			{
 				PORTD |= IGBT;         // Switch IGBT on
-				os_thread_sleep(50);   // Relais spark quenching
+				os_thread_sleep(10);   // Relais spark quenching
 				PORTD |= RELAIS;       // Switch Relais on
 			}
 			else if( ePowerSoll == ePowerSave )
@@ -105,7 +110,7 @@ int main(void)
 			else
 			{
 				PORTD &= ~RELAIS;      // Switch Relais off
-				os_thread_sleep(200);  // Relais spark quenching
+				os_thread_sleep(300);  // Relais spark quenching
 				PORTD &= ~IGBT;        // Switch IGBT off
 				os_thread_sleep(5000); // Let IGBT cool down, in case we're still powered.
 			}
@@ -114,4 +119,12 @@ int main(void)
 		os_thread_yield();
 	}
 	return 0;
+}
+
+/*!
+ * Interrupt-Handler fuer den Interrupt 0. Trennt den das ganze Twike von der Batterie.
+ */
+ISR (INT0_vect)
+{
+	ePowerSoll = ePowerOff;
 }
