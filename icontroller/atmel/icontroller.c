@@ -38,8 +38,11 @@
 #include "supervisor.h"
 #include "simulator.h"
 #include "delay.h"
+#include "protocol.h"
+#include "battery.h"
 
 EPowerState ePowerIst;
+
 
 int main(void)
 {
@@ -50,7 +53,7 @@ int main(void)
 
 	wdt_disable();	// Watchdog aus!
 
-	os_create_thread((uint8_t *)SP, NULL);	// Hauptthread anlegen
+	os_create_thread((uint8_t *)SP, NULL);	// main Hauptthread anlegen mit höchster Priorität.
 
 	timer_2_init();
 	
@@ -68,10 +71,10 @@ int main(void)
 
 	delay(100);	
 
-	DDRD |= RELAIS; // Output
-	DDRD |= IGBT; // Output
-	DDRD &= ~STOP_SWITCH; // Input
-	PORTD |= STOP_SWITCH; // Pullup enabled
+	DDRD  |=  RELAIS; // Output
+	DDRD  |=  IGBT; // Output
+	DDRD  &= ~STOP_SWITCH; // Input
+	PORTD |=  STOP_SWITCH; // Pullup enabled
 
 	uart_init();
 
@@ -84,10 +87,10 @@ int main(void)
 
 	i2c_init(100000); // 100kHz Speed
 
-	simulator_init();
 	supervisor_init();
 
 	ePowerIst = ePowerOff;
+	setBInfo(BAT_REL_OPEN);    // Atomic update of battery info
 
 	EICRA = (1<<ISC01) | (1<<ISC10); // Configure any change on pin INT0 for interrupt.
 	EIMSK = (1<<INT0);               // Enable INT0 interrupt
@@ -101,21 +104,25 @@ int main(void)
 		{
 			if( ePowerSoll == ePowerFull )
 			{
-				PORTD |= IGBT;         // Switch IGBT on
-				os_thread_sleep(10);   // Relais spark quenching
-				PORTD |= RELAIS;       // Switch Relais on
+				PORTD |= IGBT;             // Switch IGBT on
+				os_thread_sleep(10);       // Relais spark quenching
+				PORTD |= RELAIS;           // Switch Relais on
+				os_thread_sleep(300);      // Relais delay time
+				clearBInfo(BAT_REL_OPEN);  // Atomic update of battery info
 			}
 			else if( ePowerSoll == ePowerSave )
 			{
-				PORTD |= IGBT;         // Switch IGBT on
-				PORTD &= ~RELAIS;      // Switch Relais off
+				setBInfo(BAT_REL_OPEN);    // Atomic update of battery info
+				PORTD |= IGBT;             // Switch IGBT on
+				PORTD &= ~RELAIS;          // Switch Relais off				
 			}
 			else
 			{
-				PORTD &= ~RELAIS;      // Switch Relais off
-				os_thread_sleep(300);  // Relais spark quenching
-				PORTD &= ~IGBT;        // Switch IGBT off
-				os_thread_sleep(5000); // Let IGBT cool down, in case we're still powered.
+				setBInfo(BAT_REL_OPEN);    // Atomic update of battery info
+				PORTD &= ~RELAIS;          // Switch Relais off
+				os_thread_sleep(300);      // Relais spark quenching
+				PORTD &= ~IGBT;            // Switch IGBT off
+				os_thread_sleep(5000);     // Let IGBT cool down, in case we're still powered.
 			}
 			ePowerIst = ePowerSoll;
 		}
@@ -123,6 +130,7 @@ int main(void)
 	}
 	return 0;
 }
+
 
 /*!
  * Interrupt-Handler fuer den Interrupt 0. Trennt den das ganze Twike von der Batterie.
