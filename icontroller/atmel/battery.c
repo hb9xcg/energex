@@ -21,6 +21,7 @@
 #include "adc.h"
 #include "charge.h"
 #include "protocol.h"
+#include "os_thread.h"
 #include <assert.h>
 #include <stdio.h>
 
@@ -90,6 +91,8 @@ int16_t getTemperature(void)
 
 void setParameterValue(uint8_t parameter, uint16_t value)
 {
+	os_enterCS();
+
 	switch(parameter)
 	{
 	case DRIVE_STATE:	battery.drive_state  	= value;	break;
@@ -100,172 +103,196 @@ void setParameterValue(uint8_t parameter, uint16_t value)
 
 	default:
 		break;
-	}	
+	}
+
+	os_exitCS();
 }
 
 int16_t getParameterValue(uint8_t parameter)
 {
+	uint16_t value;
+
+	os_enterCS();
+
 	switch(parameter)
 	{						
-	case MODEL_TYPE:		return 1;
-	case PROGRAM_REV:		return 510;
-	case PAR_TAB_REV:		return 510;
+	case MODEL_TYPE:		value = 1;			break;
+	case PROGRAM_REV:		value = 530;			break;
+	case PAR_TAB_REV:		value = 530;			break;
 	
-	case NENNSPNG:			return 33600;		
-	case NENNSTROM:			return 280;
-	case SERIE_NUMMER:		return 40847;
-	case REP_DATUM: 		return 2;
-	case STANDZEIT:			return 64;
-	case FAHR_LADE_ZEIT:		return 9;
-	case LAST_ERROR:		return 0;
-	case BUS_ADRESSE:		return battery.address;
+	case NENNSPNG:			value = 33600;			break;
+	case NENNSTROM:			value = 280;			break;
+	case SERIE_NUMMER:		value = 40847;			break;
+	case REP_DATUM: 		value = 2;			break;
+	case STANDZEIT:			value = 64;			break;
+	case FAHR_LADE_ZEIT:		value = 9;			break;
+	case LAST_ERROR:		value = 0;			break;
+	case BUS_ADRESSE:		value = battery.address;	break;
 
-	case DRIVE_STATE:		return battery.drive_state;
-	case RELAIS_STATE:		return battery.relais_state;
-	case PARAM_PROT:		return 0;
+	case DRIVE_STATE:		value = battery.drive_state;	break;
+	case RELAIS_STATE:		value = battery.relais_state;	break;
+	case PARAM_PROT:		value = 0;			break;
 
-	case BINFO:			return 0;
+	case BINFO:			value = battery.binfo;		break;
 	
 	// We simulate 3 batteries. Thus each of them reports one third of the real value.
-	case IST_STROM:			return charge_get_current()/3;
-	case LADESTROM:			return 280;
-	case FAHRSTROM:			return -1000;
-	case TOTAL_SPANNUNG:		return getVoltage();
-	case SOLL_LADESPG:		return	44000;
+	case IST_STROM:			value = charge_get_current()/3;	break;
+	case LADESTROM:			value = 280;			break;
+	case FAHRSTROM:			value = -1000;			break;
+	case TOTAL_SPANNUNG:		value = getVoltage();		break;
+	case SOLL_LADESPG:		value =	44000;			break;
 	
 	 // We simulate 3 batteries. Thus each of them reports one third of the real value.
-	case AH_ZAEHLER:		return charge_get_capacity()/3;
-	case Q:				return -1400;
-	case LEISTUNG:			return (battery.current/100)*(battery.voltage/100);
-	case BATTERIE_TEMP:		return 2000;
-	case FINFO:			return 0;
-	case SYM_SPANNUNG:		return 26;
+	case AH_ZAEHLER:		value = charge_get_capacity()/3;			break;
+	case Q:				value = -1400;						break;
+	case LEISTUNG:			value = (battery.current/100)*(battery.voltage/100);	break;
+	case BATTERIE_TEMP:		value = 2000;						break;
+	case FINFO:			value = 0;						break;
+	case SYM_SPANNUNG:		value = 26;						break;
 				
-	case TEILSPANNUNG1:		return 5100;
-	case TEILSPANNUNG2:		return 5100;
-	case TEILSPANNUNG3:		return 5100;
-	case TEILSPANNUNG4:		return 5100;
-	case TEILSPANNUNG5:		return 5100;
-	case TEILSPANNUNG6:		return 5100;
-	case TEILSPANNUNG7:		return 5100;
+	case TEILSPANNUNG1:		value = 5100;	break;
+	case TEILSPANNUNG2:		value = 5100;	break;
+	case TEILSPANNUNG3:		value = 5100;	break;
+	case TEILSPANNUNG4:		value = 5100;	break;
+	case TEILSPANNUNG5:		value = 5100;	break;
+	case TEILSPANNUNG6:		value = 5100;	break;
+	case TEILSPANNUNG7:		value = 5100;	break;
 			
-	case TEMPERATUR1:		return 2000;
-	case TEMPERATUR2:		return 2000;
-	case TEMPERATUR3:		return 2000;
-	case TEMPERATUR4:		return 2000;
-	case TEMPERATUR5:		return 2000;
-	case TEMPERATUR6:		return 2000;
-	case TEMPERATUR7:		return 2000;
-	case TEMPERATUR8:		return 2000;
-	case TEMPERATUR9:		return 2000;
-	case TEMPERATUR10:		return 2000;
-	case TEMPERATUR11:		return 2000;
-	case TEMPERATUR12:		return 2000;
-	case TEMPERATUR13:		return 2000;
-	case TEMPERATUR14:		return 2000;
+	case TEMPERATUR1:		value = 2000;	break;
+	case TEMPERATUR2:		value = 2000;	break;
+	case TEMPERATUR3:		value = 2000;	break;
+	case TEMPERATUR4:		value = 2000;	break;
+	case TEMPERATUR5:		value = 2000;	break;
+	case TEMPERATUR6:		value = 2000;	break;
+	case TEMPERATUR7:		value = 2000;	break;
+	case TEMPERATUR8:		value = 2000;	break;
+	case TEMPERATUR9:		value = 2000;	break;
+	case TEMPERATUR10:		value = 2000;	break;
+	case TEMPERATUR11:		value = 2000;	break;
+	case TEMPERATUR12:		value = 2000;	break;
+	case TEMPERATUR13:		value = 2000;	break;
+	case TEMPERATUR14:		value = 2000;	break;
 	
-	case PC_CALIBR_TEMP:		return 0x5678;
-	case MAX_BAT_TEMP:		return 2000;
-	case UMGEBUNGS_TEMP:		return getTemperature();	
-	case MAX_LADETEMP:		return 4500;
-	case MIN_LADETEMP:		return 0;
-	case MAX_FAHRTEMP:		return 4500;
-	case MIN_FAHRTEMP:		return 0;
-	case MAX_LAGERTEMP:		return 4500;
-	case MIN_LAGERTEMP:		return 0;
+	case PC_CALIBR_TEMP:		value = 0x5678;			break;
+	case MAX_BAT_TEMP:		value = 2000;			break;
+	case UMGEBUNGS_TEMP:		value = getTemperature();	break;
+	case MAX_LADETEMP:		value = 4500;			break;
+	case MIN_LADETEMP:		value = 0;			break;
+	case MAX_FAHRTEMP:		value = 4500;			break;
+	case MIN_FAHRTEMP:		value = 0;			break;
+	case MAX_LAGERTEMP:		value = 4500;			break;
+	case MIN_LAGERTEMP:		value = 0;			break;
 
-	case MAX_KAPAZITAET:		return 305;
-	case MIN_KAPAZITAET:		return 280;
-	case GELADENE_AH:		return 1000;
-	case ENTLADENE_AH:		return 800;
-	case LADEZYKLEN:		return 100;
-	case TIEFENTLADE_ZYKLEN:	return 0;
+	case MAX_KAPAZITAET:		value = 305;	break;
+	case MIN_KAPAZITAET:		value = 280;	break;
+	case GELADENE_AH:		value = 1000;	break;
+	case ENTLADENE_AH:		value = 800;	break;
+	case LADEZYKLEN:		value = 100;	break;
+	case TIEFENTLADE_ZYKLEN:	value = 0;	break;
 	
-	case MAX_ENTLADE_STROM:		return -1000;
+	case MAX_ENTLADE_STROM:		value = -1000;	break;
 				
-	case ZYKLUS_UEBER_110:		return 0;
-	case ZYKLUS_UEBER_100:		return 10;
-	case ZYKLUS_UEBER_90:		return 0;
-	case ZYKLUS_UEBER_80:		return 0;
-	case ZYKLUS_UEBER_70:		return 0;
-	case ZYKLUS_UEBER_60:		return 0;
-	case ZYKLUS_UEBER_50:		return 0;
-	case ZYKLUS_UEBER_40:		return 0;
-	case ZYKLUS_UEBER_30:		return 0;
-	case ZYKLUS_UEBER_20:		return 0;
-	case ZYKLUS_UEBER_10:		return 0;
-	case ZYKLUS_UNTER_10:		return 0;
+	case ZYKLUS_UEBER_110:		value = 0;	break;
+	case ZYKLUS_UEBER_100:		value = 10;	break;
+	case ZYKLUS_UEBER_90:		value = 0;	break;
+	case ZYKLUS_UEBER_80:		value = 0;	break;
+	case ZYKLUS_UEBER_70:		value = 0;	break;
+	case ZYKLUS_UEBER_60:		value = 0;	break;
+	case ZYKLUS_UEBER_50:		value = 0;	break;
+	case ZYKLUS_UEBER_40:		value = 0;	break;
+	case ZYKLUS_UEBER_30:		value = 0;	break;
+	case ZYKLUS_UEBER_20:		value = 0;	break;
+	case ZYKLUS_UEBER_10:		value = 0;	break;
+	case ZYKLUS_UNTER_10:		value = 0;	break;
 
-	case MAX_UEBERLADUNG:		return 5000;
-	case MIN_LDG_F_VOLL:		return -500;
-	case STROM_ZUNAHME:		return 40;
-	case MAX_LADE_SPG:		return 44000;
-	case MIN_LADE_TEMP:		return 0;
-	case MAX_LADE_TEMP:		return 4500;
-	case MAX_TEMP_ZUNAHME:		return 100;
-	case MAX_LADEZEIT:		return 800;
-	case SYMMETRIER_STROM:		return 28;
+	case MAX_UEBERLADUNG:		value = 5000;	break;
+	case MIN_LDG_F_VOLL:		value = -500;	break;
+	case STROM_ZUNAHME:		value = 40;	break;
+	case MAX_LADE_SPG:		value = 44000;	break;
+	case MIN_LADE_TEMP:		value = 0;	break;
+	case MAX_LADE_TEMP:		value = 4500;	break;
+	case MAX_TEMP_ZUNAHME:		value = 100;	break;
+	case MAX_LADEZEIT:		value = 800;	break;
+	case SYMMETRIER_STROM:		value = 28;	break;
 
-	case LADE_STR_UNTER_M10:	return 56;
-	case LADE_STR_UEBER_M10:	return 56;
-	case LADE_STR_UEBER_P00:	return 280;
-	case LADE_STR_UEBER_P10:	return 280;
-	case LADE_STR_UEBER_P20:	return 280;
-	case LADE_STR_UEBER_P30:	return 280;
-	case LADE_STR_UEBER_P40:	return 79;
-	case LADE_STR_UEBER_P45:	return 28;
-	case LADE_STR_UEBER_P50:	return 28;
+	case LADE_STR_UNTER_M10:	value = 56;	break;
+	case LADE_STR_UEBER_M10:	value = 56;	break;
+	case LADE_STR_UEBER_P00:	value = 280;	break;
+	case LADE_STR_UEBER_P10:	value = 280;	break;
+	case LADE_STR_UEBER_P20:	value = 280;	break;
+	case LADE_STR_UEBER_P30:	value = 280;	break;
+	case LADE_STR_UEBER_P40:	value = 79;	break;
+	case LADE_STR_UEBER_P45:	value = 28;	break;
+	case LADE_STR_UEBER_P50:	value = 28;	break;
 			
-	case LADE_SPG_UNTER_M10:	return 44000;
-	case LADE_SPG_UEBER_M10:	return 44000;
-	case LADE_SPG_UEBER_P00:	return 44000;
-	case LADE_SPG_UEBER_P10:	return 44000;
-	case LADE_SPG_UEBER_P20:	return 44000;
-	case LADE_SPG_UEBER_P30:	return 42000;
-	case LADE_SPG_UEBER_P40:	return 40000;
-	case LADE_SPG_UEBER_P45:	return 38000;
-	case LADE_SPG_UEBER_P50:	return 36000;
+	case LADE_SPG_UNTER_M10:	value = 44000;	break;
+	case LADE_SPG_UEBER_M10:	value = 44000;	break;
+	case LADE_SPG_UEBER_P00:	value = 44000;	break;
+	case LADE_SPG_UEBER_P10:	value = 44000;	break;
+	case LADE_SPG_UEBER_P20:	value = 44000;	break;
+	case LADE_SPG_UEBER_P30:	value = 42000;	break;
+	case LADE_SPG_UEBER_P40:	value = 40000;	break;
+	case LADE_SPG_UEBER_P45:	value = 38000;	break;
+	case LADE_SPG_UEBER_P50:	value = 36000;	break;
 			
-	case NOM_KAPAZITAET:		return 280;
-	case MIN_FAHR_SPANNUNG:		return 31000;
-	case SELBST_ENTL_STROM:		return 28000;
-	case TIEFENTLADE_SPG:		return 25000;
-	case MAX_SPANNUNG_DIFF:		return 500;
-	case MIN_FAHR_TEMP_B:		return -2500;
-	case MAX_FAHR_TEMP_B:		return 6000;
-	case MAX_FAHR_STROM:		return -1000;
+	case NOM_KAPAZITAET:		value = 280;	break;
+	case MIN_FAHR_SPANNUNG:		value = 31000;	break;
+	case SELBST_ENTL_STROM:		value = 28000;	break;
+	case TIEFENTLADE_SPG:		value = 25000;	break;
+	case MAX_SPANNUNG_DIFF:		value = 500;	break;
+	case MIN_FAHR_TEMP_B:		value = -2500;	break;
+	case MAX_FAHR_TEMP_B:		value = 6000;	break;
+	case MAX_FAHR_STROM:		value = -1000;	break;
 	
-	case AD_STROM:			return 0x817F;
+	case AD_STROM:			value = 0x817F;	break;
 	
-	case KAL_TEMP_7_6:		return 0xFFFF;
-	case KAL_TEMP_5_4:		return 0xFEFD;
-	case KAL_TEMP_3_2:		return 0xFCFD;
-	case KAL_TEMP_1_AMB:		return 0x00FE;
-	case KAL_TEMP_GD_14:		return 0x7C00;
-	case KAL_TEMP_13_12:		return 0x00FF;
-	case KAL_TEMP_11_10:		return 0xFE00;
-	case KAL_TEMP_9_8:		return 0x0002;
+	case KAL_TEMP_7_6:		value = 0xFFFF;	break;
+	case KAL_TEMP_5_4:		value = 0xFEFD;	break;
+	case KAL_TEMP_3_2:		value = 0xFCFD;	break;
+	case KAL_TEMP_1_AMB:		value = 0x00FE;	break;
+	case KAL_TEMP_GD_14:		value = 0x7C00;	break;
+	case KAL_TEMP_13_12:		value = 0x00FF;	break;
+	case KAL_TEMP_11_10:		value = 0xFE00;	break;
+	case KAL_TEMP_9_8:		value = 0x0002;	break;
 
-	case SENSOR_MASK:		return 0x0000;
+	case SENSOR_MASK:		value = 0x0000;	break;
 			
-	case OFFS_KLEIN_STL:		return 1508;
-	case OFFS_GROSS_STL:		return 12523;
-	case KALIB_SPG_1:		return 0x00A3;
-	case KALIB_SPG_2:		return 0x009F;
-	case KALIB_SPG_3:		return 0x00A6;
-	case KALIB_SPG_4:		return 0x00B1;
-	case KALIB_SPG_5:		return 0x007C;
-	case KALIB_SPG_6:		return 0x00A7;
-	case KALIB_SPG_9:		return 0x00A7;
+	case OFFS_KLEIN_STL:		value = 1508;	break;
+	case OFFS_GROSS_STL:		value = 12523;	break;
+	case KALIB_SPG_1:		value = 0x00A3;	break;
+	case KALIB_SPG_2:		value = 0x009F;	break;
+	case KALIB_SPG_3:		value = 0x00A6;	break;
+	case KALIB_SPG_4:		value = 0x00B1;	break;
+	case KALIB_SPG_5:		value = 0x007C;	break;
+	case KALIB_SPG_6:		value = 0x00A7;	break;
+	case KALIB_SPG_9:		value = 0x00A7;	break;
 			
-	case DEBUG_VALUE_C:		return 22498;
-	case DEBUG_VALUE_H:		return 0x57E2;
-	case DEBUG_VALUE_ADDR:		return 0xFFFF;
+	case DEBUG_VALUE_C:		value = 22498;	break;
+	case DEBUG_VALUE_H:		value = 0x57E2;	break;
+	case DEBUG_VALUE_ADDR:		value = 0xFFFF;	break;
 
-	case GESCHWINDIGKEIT:		return 0;
-	case TAGESKILOMETER:		return 0;
+	case GESCHWINDIGKEIT:		value = 0;	break;
+	case TAGESKILOMETER:		value = 0;	break;
 	
 	default:
-		return 0x0000;
+		value = 0x0000;
 	}
+
+	os_exitCS();
+
+	return value;
+}
+
+void setBInfo(uint8_t bitNo)
+{
+	os_enterCS();
+	battery.binfo |= (1<<bitNo);
+	os_exitCS();
+}
+
+void clearBInfo(uint8_t bitNo)
+{
+	os_enterCS();
+	battery.binfo &= ~(1<<bitNo);
+	os_exitCS();
 }

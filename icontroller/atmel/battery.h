@@ -21,21 +21,24 @@
 #define BATTERY_H_
 
 #include "global.h"
+#include "protocol.h"
 
 #ifdef __cplusplus
  extern "C"
  {
 #endif
 
+
 typedef struct 
 {
-	uint16_t voltage;
-	int16_t  current;
-	int16_t  ah_counter;
-	int16_t  temerature;
-	uint8_t  address;
-	uint8_t  drive_state;
-	uint8_t  relais_state;
+	uint16_t	voltage;
+	int16_t		current;
+	int16_t		ah_counter;
+	int16_t		temerature;
+	uint8_t		address;
+	EDriveState	drive_state;
+	uint8_t		relais_state;
+	uint16_t	binfo;
 } battery_t;
 
 extern battery_t battery;
@@ -45,6 +48,8 @@ int16_t getParameterValue(uint8_t parameter);
 void battery_sample(void);
 int16_t getTemperature(void);
 uint16_t getVoltage(void);
+void setBInfo(uint8_t bitNo);
+void clearBInfo(uint8_t bitNo);
 
 #ifdef __cplusplus
  }
