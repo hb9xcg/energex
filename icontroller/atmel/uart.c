@@ -43,6 +43,7 @@
 #define BUFSIZE_IN 0x30
 uint8_t inbuf[BUFSIZE_IN];	/*!< Eingangspuffer */
 fifo_t infifo;				/*!< Eingangs-FIFO */
+uint8_t simplex = 0;
 
 #if BAUDRATE == 115200
 #define BUFSIZE_OUT	0x70	// wer schneller sendet, braucht auch weniger Pufferspeicher ;)
@@ -113,7 +114,10 @@ void uart_init(void){
 //			bot_2_pc_listen();		// Daten des Puffers auswerten
 //		#endif
 //	}
-	_inline_fifo_put(&infifo, UDR);
+	uint8_t data = UDR;
+	if (!simplex) {
+		_inline_fifo_put(&infifo, data);
+	}
 //	UCSRB |= (1 << RXCIE);	// diesen Interrupt wieder an 	
 }
 
@@ -133,7 +137,20 @@ void uart_init(void){
 	if (outfifo.count > 0){
 		UDR = _inline_fifo_get(&outfifo);
 		UCSRB |= (1 << UDRIE);	// diesen Interrupt wieder an 
-	}	
+	}
+}
+
+/*!
+ * @brief	Interrupthandler fuer wenn ausgehende Daten fertig gesendet wurden.
+ * Schaltet den Empfangpfad wieder ein für den simplex RS485 Betrieb.
+ */
+SIGNAL (USART0_TX_vect)
+{
+	// RS485-Receiver einschalten
+	simplex = 0;
+
+	// andere Interrupts wieder an
+	sei();
 }
 
 /*!
@@ -153,7 +170,11 @@ void uart_write(const uint8* data, uint8 length){
 	if (space < length) uart_flush();
 	/* Daten in Ausgangs-FIFO kopieren */
 	fifo_put_data(&outfifo, data, length);
-	/* Interrupt an */
-	UCSRB |= (1 << UDRIE);
+
+	// RS485-Receiver ausschalten. 
+	simplex = 1;
+	
+	/* Data empty und TX Complete Interrupt an */
+	UCSRB |= (1 << UDRIE) | (1 << TXCIE0);	
 }
 

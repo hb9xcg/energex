@@ -92,6 +92,9 @@ int main(void)
 	EICRA = (1<<ISC01) | (1<<ISC10); // Configure any change on pin INT0 for interrupt.
 	EIMSK = (1<<INT0);               // Enable INT0 interrupt
 
+	os_thread_sleep(3000);
+	ePowerSoll = ePowerSave;
+
 	while(1)
 	{
 		if( ePowerSoll != ePowerIst)
