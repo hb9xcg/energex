@@ -1,10 +1,10 @@
 <!DOCTYPE KontrollerLab>
 <PROJECT VERSION="0.8.0-beta1" >
   <FILES>
-    <FILE VIEWS="0,0,921,682,5," SHOWN="TRUE" NAME="icontroller.c" />
-    <FILE VIEWS="142,163,1024,682,4," SHOWN="TRUE" NAME="icontroller.h" />
-    <FILE VIEWS="326,347,921,682,4," SHOWN="TRUE" NAME="adc.c" />
-    <FILE VIEWS="372,393,921,682,4," SHOWN="TRUE" NAME="adc.h" />
+    <FILE VIEWS="4,25,400,300,4," SHOWN="TRUE" NAME="icontroller.c" />
+    <FILE VIEWS="27,48,921,683,4," SHOWN="TRUE" NAME="icontroller.h" />
+    <FILE VIEWS="50,71,921,683,4," SHOWN="TRUE" NAME="adc.c" />
+    <FILE VIEWS="73,94,1024,682,4," SHOWN="TRUE" NAME="adc.h" />
     <FILE SHOWN="FALSE" NAME="delay.h" />
     <FILE SHOWN="FALSE" NAME="delay.c" />
     <FILE SHOWN="FALSE" NAME="os_utils.h" />
@@ -13,29 +13,29 @@
     <FILE SHOWN="FALSE" NAME="os_scheduler.h" />
     <FILE SHOWN="FALSE" NAME="os_scheduler.c" />
     <FILE SHOWN="FALSE" NAME="timer.h" />
-    <FILE VIEWS="280,301,921,682,4," SHOWN="TRUE" NAME="timer.c" />
-    <FILE VIEWS="165,186,1024,682,4," SHOWN="TRUE" NAME="global.h" />
+    <FILE VIEWS="96,117,921,682,4," SHOWN="TRUE" NAME="timer.c" />
+    <FILE VIEWS="119,140,921,682,4," SHOWN="TRUE" NAME="global.h" />
     <FILE SHOWN="FALSE" NAME="i2c.h" />
     <FILE SHOWN="FALSE" NAME="i2c.c" />
-    <FILE VIEWS="303,324,921,682,4," SHOWN="TRUE" NAME="timer-low.c" />
-    <FILE SHOWN="FALSE" NAME="uart.c" />
+    <FILE VIEWS="142,163,921,682,4," SHOWN="TRUE" NAME="timer-low.c" />
+    <FILE VIEWS="0,0,921,682,5," SHOWN="TRUE" NAME="uart.c" />
     <FILE SHOWN="FALSE" NAME="uart.h" />
     <FILE SHOWN="FALSE" NAME="fifo.c" />
     <FILE SHOWN="FALSE" NAME="fifo.h" />
-    <FILE VIEWS="73,94,1024,682,4," SHOWN="TRUE" NAME="command.c" />
+    <FILE VIEWS="188,209,921,683,4," SHOWN="TRUE" NAME="command.c" />
     <FILE SHOWN="FALSE" NAME="command.h" />
-    <FILE VIEWS="96,117,921,683,4," SHOWN="TRUE" NAME="supervisor.c" />
+    <FILE VIEWS="211,232,1024,682,4," SHOWN="TRUE" NAME="supervisor.c" />
     <FILE SHOWN="FALSE" NAME="supervisor.h" />
-    <FILE VIEWS="211,232,921,683,4," SHOWN="TRUE" NAME="charge.c" />
-    <FILE VIEWS="234,255,921,683,4," SHOWN="TRUE" NAME="charge.h" />
-    <FILE VIEWS="257,278,921,682,4," SHOWN="TRUE" NAME="balancer.c" />
+    <FILE VIEWS="234,255,921,682,4," SHOWN="TRUE" NAME="charge.c" />
+    <FILE VIEWS="257,278,1024,682,4," SHOWN="TRUE" NAME="charge.h" />
+    <FILE VIEWS="280,301,921,683,4," SHOWN="TRUE" NAME="balancer.c" />
     <FILE SHOWN="FALSE" NAME="balancer.h" />
-    <FILE VIEWS="280,301,1024,682,4," SHOWN="TRUE" NAME="simulator.c" />
+    <FILE VIEWS="303,324,921,683,4," SHOWN="TRUE" NAME="simulator.c" />
     <FILE SHOWN="FALSE" NAME="simulator.h" />
-    <FILE VIEWS="303,324,1024,682,4," SHOWN="TRUE" NAME="protocol.c" />
-    <FILE VIEWS="326,347,921,682,4," SHOWN="TRUE" NAME="protocol.h" />
-    <FILE VIEWS="349,370,400,300,4," SHOWN="TRUE" NAME="battery.c" />
-    <FILE VIEWS="372,393,400,300,4," SHOWN="TRUE" NAME="battery.h" />
+    <FILE VIEWS="326,347,921,683,4," SHOWN="TRUE" NAME="protocol.c" />
+    <FILE VIEWS="349,370,921,682,4," SHOWN="TRUE" NAME="protocol.h" />
+    <FILE VIEWS="372,393,1024,682,4," SHOWN="TRUE" NAME="battery.c" />
+    <FILE VIEWS="395,416,1024,682,4," SHOWN="TRUE" NAME="battery.h" />
   </FILES>
   <SETTINGS>
     <ASSEMBLER_COMMAND VALUE="avr-gcc" />
