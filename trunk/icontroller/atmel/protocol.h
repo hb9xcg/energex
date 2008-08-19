@@ -197,8 +197,52 @@
 #define GESCHWINDIGKEIT     0xFE
 #define TAGESKILOMETER      0xFF
 
+// BatterieInfo / FahrInfo (BitNo)
+#define	 REKUPERATION_NOK    0 // Rekuperation nicht erlaubt
+#define	 CHARGE_NOK          1 // Ladung nicht erlaubt
+#define	 DRIVE_NOK           2 // Fahren nicht erlaubt
+#define	 CHARGE_CUR_TO_HI    3 // Zu hoher Ladestrom
+#define	 DRIVE_CUR_TO_HI     4 // Zu hoher Fahrstrom
+#define	 VOLTAGE_TO_HI       5 // Zu hohe Ladespannung
+#define	 VOLTAGE_TO_LO       6 // Zu tiefe Fahrspannung
+#define	 BAT_REL_OPEN        7 // Batterie Relais offen
+#define	 BAT_FULL            8 // Batterie voll
+#define	 BAT_EMPTY           9 // Batterie entladen
+#define	 CHARGE_TEMP_TO_HI  10 // Zu hohe Ladetemperatur
+#define	 CHARGE_TEMP_TO_LO  11 // Zu tiefe Ladetemperatur
+#define	 DRIVE_TEMP_TO_HI   12 // Zu hohe Fahrtemperatur
+#define	 DRIVE_TEMP_TO_LO   13 // Zu tiefe Fahrtemperatur
+#define	 VOLTAGE_NOK        14 // Unsymmetrische Spannungen
+#define	 BAT_ERROR          15 // Fehler in der Batterieüberwachung
 
-void receiveTwikeByte(uint8_t character);
+
+typedef enum
+{
+	eConverterOff   =  0, // InvOff           Umrichter aus
+	eConverterTest  =  1, // InvTest          Test-Modus
+	eConverterProg  =  2, // InvProg          Programm-Modus
+	eConverterIdle  =  3, // InvIdle          Umschaltungszustand vor dem Fahren
+	eBreakDown      =  4, // BreakDown        Fehler des Umrichters
+	eDrive          =  5, // Drive            Fahren
+	eReadyCharge    =  6, // ReadyCharge      warten auf Netzspannung
+	ePreCharge      =  7, // PreCharge        Vorladung
+	eClosePCRelais  =  8, // CloseVRelais     Vorladerelais schliessen
+	eICharge        =  9, // ICharge          I-Ladung
+	eUCharge        = 10, // UCharge          U-Ladung
+	eOpenBatRelais  = 11, // OpenBRelais      Batterierelais öffnen
+	ePostCharge     = 12, // PostCharge       Nachladung
+	eCloseBatRelais = 13, // CloseBRelais     Batterierelais schliessen
+	eSymCharge      = 14, // SymmCharge       Symmetrierladung
+	eTrickleCharge  = 15, // TrickleCharge    Erhaltungsladung
+	eTrickleWait    = 16, // TrickleWait      Pause
+	eUnknown17      = 17, // (?)              (möglicherweise Erhaltungsladung einzelner Blöcke?)
+	eUnknown18      = 18, // (?)              (möglicherweise Erhaltungsladung einzelner Blöcke?)
+	eUnknown19      = 19, // (?)              (möglicherweise Erhaltungsladung einzelner Blöcke?)
+	eUnknown20      = 20 // (?)
+} EDriveState;
+
+
+extern void receiveTwikeByte(uint8_t character);
 
 #ifdef __cplusplus
  }
