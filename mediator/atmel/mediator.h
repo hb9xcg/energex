@@ -18,7 +18,7 @@
  */
 
 /*! 
- * @file 	icontroller.h
+ * @file 	mediator.h
  * @brief 	Main twike master application.
  * @author 	Markus Walser (markus.walser@gmail.com)
  * @date 	11.02.08

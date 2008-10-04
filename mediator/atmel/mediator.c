@@ -18,7 +18,7 @@
  */
 
 /*! 
- * @file 	icontroller.c
+ * @file 	mediator.c
  * @brief 	Main twike master application.
  * @author 	Markus Walser (markus.walser@gmail.com)
  * @date 	11.02.08
@@ -27,7 +27,7 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <avr/wdt.h>
-#include "icontroller.h"
+#include "mediator.h"
 #include <avr/eeprom.h>
 #include "i2c.h"
 #include "adc.h"
