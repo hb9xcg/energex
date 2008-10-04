@@ -32,6 +32,7 @@
 #include "i2c.h"
 #include "adc.h"
 #include "uart.h"
+#include "softuart.h"
 #include "timer.h"
 #include "os_thread.h"
 #include "command.h"
@@ -77,6 +78,8 @@ int main(void)
 	PORTD |=  STOP_SWITCH; // Pullup enabled
 
 	uart_init();
+
+	softuart_init();
 
 	adc_init(CH_TEMPERATURE); // Temperatur sensor
 	adc_init(CH_VOLTAGE);     // Voltage

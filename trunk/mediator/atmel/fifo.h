@@ -40,13 +40,13 @@
 		uint8 size;                 /*!< Puffer-Grosse */
 		uint8 *pread;               /*!< Lesezeiger */
 		uint8 *pwrite;              /*!< Schreibzeiger */
-		uint8 read2end;				/*!< # Zeichen bis zum Ueberlauf Lesezeiger */
-		uint8 write2end; 			/*!< # Zeichen bis zum Ueberlauf Schreibzeiger */
+		uint8 read2end;             /*!< # Zeichen bis zum Ueberlauf Lesezeiger */
+		uint8 write2end;            /*!< # Zeichen bis zum Ueberlauf Schreibzeiger */
 	} fifo_t;
 	
 	/*!
-	 * @brief			Initialisiert die FIFO, setzt Lese- und Schreibzeiger, etc. 
-	 * @param f			Zeiger auf FIFO-Datenstruktur
+	 * @brief		Initialisiert die FIFO, setzt Lese- und Schreibzeiger, etc. 
+	 * @param f		Zeiger auf FIFO-Datenstruktur
 	 * @param buf		Zeiger auf den Puffer der Groesse size fuer die FIFO
 	 * @param size		Anzahl der Bytes, die die FIFO speichern soll	.
 	 */
@@ -58,8 +58,8 @@
 //	extern uint8 fifo_put(fifo_t*, const uint8 data);
 	
 	/*!
-	 * @brief			Schreibt length Byte in die FIFO
-	 * @param f			Zeiger auf FIFO-Datenstruktur
+	 * @brief		Schreibt length Byte in die FIFO
+	 * @param f		Zeiger auf FIFO-Datenstruktur
 	 * @param data		Zeiger auf Quelldaten
 	 * @param length	Anzahl der zu kopierenden Bytes
 	 */	
