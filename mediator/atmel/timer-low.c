@@ -25,7 +25,7 @@
  */
 
 
-#include "icontroller.h"
+#include "mediator.h"
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
@@ -50,7 +50,7 @@
 /*!
   Interrupt Handler fuer Timer/Counter 2(A)
  */
-#ifdef __AVR_ATmega644__
+#ifdef __AVR_ATmega644P__
 ISR(TIMER2_COMPA_vect) {
 #else
 ISR(SIG_OUTPUT_COMPARE2) {
@@ -93,7 +93,7 @@ void timer_2_init(void) {
 	
 	// aendert man den Prescaler muss man die Formel fuer OCR2 anpassen !!!
 	// Compare Register nur 8-Bit breit --> evtl. Teiler anpassen
-	#ifdef __AVR_ATmega644__
+	#ifdef __AVR_ATmega644P__
 		TCCR2A = _BV(WGM21);	// CTC Mode
 		TCCR2B = _BV(CS22);		// Prescaler = CLK/64
 		OCR2A = ((XTAL/64/TIMER_2_CLOCK) - 1);	// Timer2A

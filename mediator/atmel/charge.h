@@ -27,7 +27,7 @@
 #ifndef _CHARGE_H_
 #define _CHARGE_H_
 
-#include "icontroller.h"
+#include "mediator.h"
 
 int16_t charge_get_current(void);
 

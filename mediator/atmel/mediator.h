@@ -24,14 +24,15 @@
  * @date 	11.02.08
  */
 
-#ifndef I_CONTROLLER_H_DEF
-#define I_CONTROLLER_H_DEF
+#ifndef MEDIATOR_H_DEF
+#define MEDIATOR_H_DEF
 
 #define MCU
 #define NEW_AVR_LIB
 #define OS_AVAILABLE
 
 #include "global.h"
+#include "io.h"
 
 #define ADC_AVAILABLE		/*!< A/D-Converter */
 
@@ -43,9 +44,7 @@
 
 #define XTAL F_CPU			 /*!< Crystal frequency in Hz */
 
-#define IGBT   		0x20
-#define RELAIS 		0x40
-#define STOP_SWITCH	0x04
+
 
 typedef enum
 {

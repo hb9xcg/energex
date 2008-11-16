@@ -27,7 +27,7 @@
 #ifndef _THREAD_H
 #define _THREAD_H
 
-#include "icontroller.h"
+#include "mediator.h"
 
 
 #include "timer.h"

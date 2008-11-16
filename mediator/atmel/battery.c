@@ -24,14 +24,15 @@
 #include "os_thread.h"
 #include <assert.h>
 #include <stdio.h>
+#include <avr/io.h>
 
-#define OVER_SAMPLING_LOG  4
-#define OVER_SAMPLING	  (1<<OVER_SAMPLING_LOG)
-#define VOLTAGE_INV_R1	   3*346500  // [Ohm]
-#define VOLTAGE_INV_R2	   6800     // [Ohm]
-#define V_REF		   2510     // [mV]
-#define ADC_RESOLUTION     10
-#define ADC_MAX_VALUE	   (1<<ADC_RESOLUTION)
+#define OVER_SAMPLING_LOG	4
+#define OVER_SAMPLING		(1<<OVER_SAMPLING_LOG)
+#define VOLTAGE_INV_R1		2*330000ULL  // [Ohm]
+#define VOLTAGE_INV_R2		3740ULL      // [Ohm]
+#define V_REF		   		2500ULL     // [mV]
+#define ADC_RESOLUTION		10
+#define ADC_MAX_VALUE		(1<<ADC_RESOLUTION)
 
 battery_t battery;
 int16 voltage[OVER_SAMPLING];
@@ -52,19 +53,25 @@ void battery_sample(void)
 	}
 }
 
+void battery_init(void)
+{
+	battery.drive_state = 0;
+	battery.binfo       = 0;
+}
+
 uint16_t getVoltage(void)
 {
 	uint8_t idx;
 	uint16_t average = 0;
 	uint32_t voltage32;
-	
+
 	for (idx=0; idx<OVER_SAMPLING; idx++)
 	{
 		average += voltage[idx];
 	}
 
 	voltage32   = average;
-	voltage32  *= (V_REF/10 * VOLTAGE_INV_R1 / VOLTAGE_INV_R2 );     // voltage32 *= 35870;
+	voltage32  *= (V_REF/10 * VOLTAGE_INV_R1 / VOLTAGE_INV_R2 );     // voltage32 *= 44117;
 	voltage32 >>= (OVER_SAMPLING_LOG + ADC_RESOLUTION);
 
 	return voltage32;
@@ -95,11 +102,17 @@ void setParameterValue(uint8_t parameter, uint16_t value)
 
 	switch(parameter)
 	{
-	case DRIVE_STATE:	battery.drive_state  	= value;	break;
-	case RELAIS_STATE:	battery.relais_state 	= value;	break;
-	case BUS_ADRESSE:	battery.address 	= value;	break;
-	case TOTAL_SPANNUNG:	battery.voltage 	= value;	break;
-	case AH_ZAEHLER:	charge_set_capacity(value*3);		break;
+	case DRIVE_STATE:	
+		battery.drive_state  	= value;
+		break;
+	case RELAIS_STATE:	battery.relais_state 	= value;	
+		break;
+	case BUS_ADRESSE:	battery.address 	= value;
+		break;
+	case TOTAL_SPANNUNG:	battery.voltage 	= value;
+		break;
+	case AH_ZAEHLER:	charge_set_capacity(value*3);
+		break;
 
 	default:
 		break;

@@ -28,7 +28,7 @@
 #ifndef I2C_H_
 #define I2C_H_
 
-#include "icontroller.h"
+#include "mediator.h"
 #include <stdlib.h>
 
 #ifdef I2C_AVAILABLE

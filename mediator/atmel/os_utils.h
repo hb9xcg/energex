@@ -27,7 +27,7 @@
 #ifndef _OS_UTILS_H
 #define _OS_UTILS_H
 
-#include "icontroller.h"
+#include "mediator.h"
 
 #include <avr/io.h>
 #include <avr/interrupt.h>

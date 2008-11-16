@@ -26,7 +26,7 @@
 #ifndef _BALANCER_H
 #define _BALANCER_H
 
-#include "icontroller.h"
+#include "mediator.h"
 
 extern void balance_sample(void);
 

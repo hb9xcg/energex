@@ -28,7 +28,7 @@
 #ifndef global_H
 #define global_H
 
-#include "icontroller.h"
+#include "mediator.h"
 	
 #ifndef __ASSEMBLER__
 	#include <stdint.h>

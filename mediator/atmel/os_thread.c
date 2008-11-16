@@ -28,7 +28,7 @@
  * Dokumentation: siehe Documentation/BotOS.html
  */
 
-#include "icontroller.h"
+#include "mediator.h"
 
 
 #include "os_thread.h"

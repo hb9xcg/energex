@@ -24,7 +24,7 @@
  * @date 	05.09.2007
  */
 
-#include "icontroller.h"
+#include "mediator.h"
 
 #ifdef I2C_AVAILABLE
 #include <util/twi.h>

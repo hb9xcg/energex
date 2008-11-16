@@ -26,7 +26,7 @@
 #ifndef _SUPERVISOR_H
 #define _SUPERVISOR_H
 
-#include "icontroller.h"
+#include "mediator.h"
 
 typedef struct {
 	int16_t  voltage;      // [mV]

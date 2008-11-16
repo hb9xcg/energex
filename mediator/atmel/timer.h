@@ -27,7 +27,7 @@
 #ifndef TIMER_H_
 #define TIMER_H_
 
-#include "icontroller.h"
+#include "mediator.h"
 #include <stdint.h>
 
 /*!
