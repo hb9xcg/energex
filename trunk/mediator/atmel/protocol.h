@@ -55,7 +55,7 @@
 #define REP_DATUM           0x07 
 #define STANDZEIT           0x08
 #define FAHR_LADE_ZEIT      0x09
-#define LAST_ERROR	          0x0a		
+#define LAST_ERROR          0x0a
 #define BUS_ADRESSE         0x0b
 
 #define DRIVE_STATE         0x11
@@ -242,7 +242,7 @@ typedef enum
 } EDriveState;
 
 
-extern void receiveTwikeByte(uint8_t character);
+extern void protocol_receive_byte(uint8_t character);
 
 #ifdef __cplusplus
  }

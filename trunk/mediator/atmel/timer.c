@@ -23,7 +23,7 @@
  * @date 	26.12.05
 */
 
-#include "icontroller.h"
+#include "mediator.h"
 #include "timer.h"
 
 #ifdef PC

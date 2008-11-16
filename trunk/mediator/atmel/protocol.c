@@ -53,7 +53,7 @@ static void transmitData(void);
 static void transmitGroup(void);
 static uint8_t frame_stuffing(uint8_t packet[], uint8_t length);
 
-void receiveTwikeByte(uint8_t character)
+void protocol_receive_byte(uint8_t character)
 {
 	switch(eState)
 	{

@@ -33,7 +33,7 @@
 #include <stdio.h>
 
 
-
+#define OFFSET_OVERSAMPLING_LOG		3
 
 
 typedef struct{
@@ -41,8 +41,9 @@ typedef struct{
 	int16* value;
 } adc_channel_t;
 
-static volatile int8 act_channel = -1;
+static volatile int8 act_channel_idx = -1;
 static adc_channel_t channels[8];
+static int16 offset = 0;
 
 /*!
  * Initialisert den AD-Umsetzer. 
@@ -51,36 +52,98 @@ static adc_channel_t channels[8];
  * Bit0 = Kanal 0 usw.
  */
 void adc_init(uint8 channel){
-	DDRA &= ~ channel;	// Pin als input
+	DDRA  &= ~ channel;	// Pin als input
 	PORTA &= ~ channel;	// Alle Pullups aus.
 }
 
-// deprecated
-///*!
-// * Liest einen analogen Kanal aus
-// * @param channel Kanal - hex-Wertigkeit des Pins (0x01 fuer PA0; 0x02 fuer PA1, ..)
-// */
-//uint16 adc_read(uint8 channel){
-//	uint16 result = 0x00;
-//
-//	// interne Refernzspannung AVCC, rechts Ausrichtung
-//	ADMUX= _BV(REFS0) ;//| _BV(REFS1);	 //|(0<<ADLAR);	
-//
-//	ADMUX |= (channel & 0x07);		// Und jetzt Kanal waehlen, nur single ended
-//	
-//	ADCSRA= (1<<ADPS2) | (1<<ADPS1)|	// prescale faktor= 128 ADC laeuft
-//		(1 <<ADPS0) |			// mit 14,7456MHz/ 128 = 115,2kHz 
-//		(1 << ADEN)|			// ADC an
-//		(1 << ADSC);			// Beginne mit der Konvertierung
-//			
-//	while ( (ADCSRA & (1<<ADSC)) != 0){asm volatile("nop");} //Warten bis konvertierung beendet
-//					      // Das sollte 25 ADC-Zyklen dauern!
-//					      // also 1/4608 s
-//	result= ADCL; 
-//	result+=(ADCH <<8);	// Ergebnis zusammenbauen
-//	
-//	return result;
-//}
+
+
+/*!
+ * Misst interne Offsetspannung
+ */
+void adc_calibrate_offset(void){
+	uint16 result = 0;
+	uint8_t i;
+
+	DDRA  &= ~ 0x4;	// ADC2 als input
+	PORTA &= ~ 0x4;	// ADC2 Pullup aus.
+
+	ADMUX = 0; // externe 2.500V Refernzspannung AVCC, rechts Ausrichtung
+
+	ADMUX |= 0x1A;	// Differential meassurement: ADC2+ ADC2- (connected to AGND)
+	
+	ADCSRA |= (1 << ADSC);		// Beginne mit der Konvertierung
+			
+	//Warten bis konvertierung beendet, das sollte 25 ADC-Zyklen dauern!
+	while ( (ADCSRA & (1<<ADSC)) != 0) { 
+		asm volatile("nop");
+	} 
+	ADCH;	// Spühle erste Messung
+
+	// Echte 8-fache Messung
+	for (i=0; i<(1<<OFFSET_OVERSAMPLING_LOG); i++)	{
+		ADCSRA |= (1 << ADSC); // Starte erneut
+		while ( (ADCSRA & (1<<ADSC)) != 0) {
+			asm volatile("nop");
+		} //Warten bis konvertierung beendet
+
+		result += ADCL;
+		result += (ADCH<<8);	// Ergebnis zusammenbauen
+	}
+
+	result >>= OFFSET_OVERSAMPLING_LOG;
+
+	if (result & 0x200)	{
+		offset = (int16_t)result - 1024;
+	} else {
+		offset = result;
+	}
+	ADCSRA &= ~ADIF;
+}
+
+/*!
+ * Liefert gemessene interne Offsetspannung
+ */
+int16_t adc_get_offset(void)
+{
+	return offset;
+}
+
+/*!
+ * Liesst pollend einen channel aus
+ * @param channel 	Kanal - hex-Wertigkeit des Pins (0x01 fuer PA0; 0x02 fuer PA1, ..)
+ */
+uint16_t adc_read_polled(uint8 channel) {
+	uint16 result = 0;
+	uint8_t i;
+
+	ADMUX = channel & 0x7; // externe 2.500V Refernzspannung AVCC, rechts Ausrichtung
+	
+	ADCSRA |= (1 << ADSC);		// Beginne mit der Konvertierung
+			
+	//Warten bis konvertierung beendet, das sollte 25 ADC-Zyklen dauern!
+	while ( (ADCSRA & (1<<ADSC)) != 0) { 
+		asm volatile("nop");
+	} 
+	ADCH;	// Spühle erste Messung
+
+	// Echte 8-fache Messung
+	for (i=0; i<(1<<OFFSET_OVERSAMPLING_LOG); i++)	{
+		ADCSRA |= (1 << ADSC); // Starte erneut diesmal nur 13 Zyklen -> 104us
+		while ( (ADCSRA & (1<<ADSC)) != 0) {
+			asm volatile("nop");
+		} //Warten bis konvertierung beendet
+
+		result += ADCL;
+		result += (ADCH<<8);	// Ergebnis zusammenbauen
+	}
+
+	result >>= OFFSET_OVERSAMPLING_LOG;
+
+	ADCSRA &= ~ADIF;
+	
+	return result;
+}
 
 /*!
  * @brief			Fuegt einen analogen Kanal in die ADC-Konvertierungsliste ein und wertet ihn per Interrupt aus
@@ -89,26 +152,29 @@ void adc_init(uint8 channel){
  */
 void adc_read_int(uint8 channel, int16* p_sens)
 {
-	static uint8 next_channel = 0;
-	if (act_channel == -1) next_channel = 0;
-	if (next_channel >= 8) return;	// es gibt nur 8 ADC-Channels
-	channels[next_channel].value = p_sens;
-	channels[next_channel++].channel = channel & 0x7;
-	if (act_channel == -1)
+	static uint8 next_channel_idx = 0;
+
+	if (act_channel_idx == -1)
+		next_channel_idx = 0;
+
+	if (next_channel_idx >= 8) 
+		return;	// es gibt nur 8 ADC-Channels
+
+	channels[next_channel_idx].value = p_sens;
+	channels[next_channel_idx++].channel = channel & 0x7;
+	if (act_channel_idx == -1)
 	{
-		act_channel = 0;
+		act_channel_idx = 0;
 		
-		// interne 2.5V Refernzspannung , rechts Ausrichtung
-		ADMUX = _BV(REFS0) | _BV(REFS1);	 //|(0<<ADLAR);		
-	
-		ADMUX |= (channel & 0x07);		// Und jetzt Kanal waehlen, nur single ended
-		
-		ADCSRA= (1 << ADPS2)	|
-		        (1 << ADPS1)	|	// prescale faktor= 128 ADC laeuft
-// 64		        (1 << ADPS0)	|	// mit 8MHz / 128 = 62.5kHz 
-		        (1 << ADEN) 	|	// ADC an
-		        (1 << ADSC) 	|	// Beginne mit der Konvertierung
-		        (1 << ADIE);		// Interrupt an
+		ADMUX  = 0;// externe 2.5V Referenz, rechts Ausrichtung		
+		ADMUX |= (channel & 0x07);	// Und jetzt Kanal waehlen, nur single ended
+
+		ADCSRA= (1 <<ADPS2) | 
+				(1 <<ADPS1) |		// prescale faktor= 128 ADC laeuft
+				(1 <<ADPS0) |		// mit 16MHz/ 128 = 125kHz 
+				(1 <<ADEN)  |		// ADC an
+				(1 <<ADSC)  |		// Beginne mit der Konvertierung
+				(1 <<ADIE);			// Interrupt an
 	}
 }
 
@@ -119,24 +185,24 @@ void adc_read_int(uint8 channel, int16* p_sens)
 SIGNAL (SIG_ADC)
 {
 	/* Daten speichern und Pointer im Puffer loeschen */
-	*channels[act_channel].value = ADCL | (ADCH << 8);
-	channels[act_channel].value = NULL;
+	*channels[act_channel_idx].value = ADCL | (ADCH << 8);
+	channels[act_channel_idx].value = NULL;
 	/* zum naechsten Sensor weiterschalten */
-	act_channel++;	
-	if (act_channel < 8 && channels[act_channel].value != NULL)
+	act_channel_idx++;	
+	if (act_channel_idx < 8 && channels[act_channel_idx].value != NULL)
 	{
-		ADMUX = _BV(REFS0) | _BV(REFS1);	//|(0<<ADLAR);	// interne 2.5V Refernzspannung, rechts Ausrichtung		
-		ADMUX |= channels[act_channel].channel;
-		ADCSRA = (1 << ADPS2)	|
-		         (1 << ADPS1)	|	// prescale faktor = 64 ADC laeuft
-// 		         (1 << ADPS0)	|	// mit 8MHz / 64 = 125kHz -> Conversion time ~ 104us
-		         (1 << ADEN) 	|	// ADC an
-		         (1 << ADSC) 	|	// Beginne mit der Konvertierung
-		         (1 << ADIE);		// Interrupt an
+		ADMUX  = 0;// externe 2.5V Referenz, rechts Ausrichtung		
+		ADMUX |= channels[act_channel_idx].channel;
+
+		ADCSRA= (1 <<ADPS2) | 
+				(1 <<ADPS1) |		// prescale faktor= 128 ADC laeuft
+				(1 <<ADPS0) |		// mit 16MHz/ 128 = 125kHz 
+				(1 <<ADEN)  |		// ADC an
+				(1 <<ADSC)	|		// Beginne mit der Konvertierung
+				(1 <<ADIE);		// Interrupt an
 	} else{
-//		ADCSRA = 0;	// ADC aus
-		ADCSRA = (1 << ADEN); 	// ADC eingeschaltet lassen
-		act_channel = -1;
+		ADCSRA = (1 << ADEN);   // ADC eingeschaltet lassen
+		act_channel_idx = -1;
 	}
 }
 
@@ -146,7 +212,7 @@ SIGNAL (SIG_ADC)
  * 255: derzeit wird kein Channel ausgewertet (= Konvertierung fertig)
  */
 uint8 adc_get_active_channel(void){
-	return (uint8)act_channel;	
+	return (uint8)act_channel_idx;	
 }
 
 #endif

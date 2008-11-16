@@ -26,7 +26,7 @@
 #ifndef _SIMULATOR_H
 #define _SIMULATOR_H
 
-#include "icontroller.h"
+#include "mediator.h"
 
 
 void simulator_init(void);

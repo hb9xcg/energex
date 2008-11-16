@@ -32,7 +32,6 @@
 #include "i2c.h"
 #include "adc.h"
 #include "uart.h"
-#include "softuart.h"
 #include "timer.h"
 #include "os_thread.h"
 #include "command.h"
@@ -52,14 +51,20 @@ int main(void)
 	PORTC=0; DDRC=0;
 	PORTD=0; DDRD=0;
 
+	// Disable JTag to allow normal usage of Port C.		
+	MCUCR = 1<< JTD;
+	MCUCR = 1<< JTD;
+
 	wdt_disable();	// Watchdog aus!
+
+	// adc_calibrate_offset();
 
 	os_create_thread((uint8_t *)SP, NULL);	// main Hauptthread anlegen mit höchster Priorität.
 
 	timer_2_init();
 	
 	/* Ist das ein Power on Reset? */
-	#ifdef __AVR_ATmega644__
+	#ifdef __AVR_ATmega644P__
 		if ((MCUSR & 1) == 1) {
 			MCUSR &= ~1;	// Bit loeschen
 	#else
@@ -70,16 +75,21 @@ int main(void)
 		asm volatile("jmp 0");
 	}
 
-	delay(100);	
+	delay(100);
 
-	DDRD  |=  RELAIS; // Output
-	DDRD  |=  IGBT; // Output
+
+	DDRB  |=  RELAIS; // Output
+	DDRB  |=  IGBT; // Output
 	DDRD  &= ~STOP_SWITCH; // Input
 	PORTD |=  STOP_SWITCH; // Pullup enabled
 
-	uart_init();
+	DDRC  |=  LED_RED; // Output
+	PORTC &= ~LED_RED; // Switch off red led.
 
-	softuart_init();
+	battery_init();	
+
+	uart_init();
+	
 
 	adc_init(CH_TEMPERATURE); // Temperatur sensor
 	adc_init(CH_VOLTAGE);     // Voltage
@@ -98,7 +108,6 @@ int main(void)
 	EICRA = (1<<ISC01) | (1<<ISC10); // Configure any change on pin INT0 for interrupt.
 	EIMSK = (1<<INT0);               // Enable INT0 interrupt
 
-	os_thread_sleep(3000);
 	ePowerSoll = ePowerSave;
 
 	while(1)
@@ -107,29 +116,32 @@ int main(void)
 		{
 			if( ePowerSoll == ePowerFull )
 			{
-				PORTD |= IGBT;             // Switch IGBT on
+				PORTB |= IGBT;             // Switch IGBT on
 				os_thread_sleep(10);       // Relais spark quenching
-				PORTD |= RELAIS;           // Switch Relais on
+				PORTB |= RELAIS;           // Switch Relais on
 				os_thread_sleep(300);      // Relais delay time
 				clearBInfo(BAT_REL_OPEN);  // Atomic update of battery info
 			}
 			else if( ePowerSoll == ePowerSave )
 			{
 				setBInfo(BAT_REL_OPEN);    // Atomic update of battery info
-				PORTD |= IGBT;             // Switch IGBT on
-				PORTD &= ~RELAIS;          // Switch Relais off				
+				PORTB |= IGBT;             // Switch IGBT on
+				PORTB &= ~RELAIS;          // Switch Relais off				
 			}
 			else
 			{
 				setBInfo(BAT_REL_OPEN);    // Atomic update of battery info
-				PORTD &= ~RELAIS;          // Switch Relais off
+				PORTB &= ~RELAIS;          // Switch Relais off
 				os_thread_sleep(300);      // Relais spark quenching
-				PORTD &= ~IGBT;            // Switch IGBT off
+				PORTB &= ~IGBT;            // Switch IGBT off
 				os_thread_sleep(5000);     // Let IGBT cool down, in case we're still powered.
 			}
 			ePowerIst = ePowerSoll;
 		}
 		os_thread_yield();
+		//os_thread_sleep(500);	// Hello world.
+		//PORTC ^= LED_RED; 	// toggle red led.
+		//uart_write("Hallo\n", 6);
 	}
 	return 0;
 }

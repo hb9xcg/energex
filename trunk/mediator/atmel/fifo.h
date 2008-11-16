@@ -28,7 +28,7 @@
 #ifndef _FIFO_H_
 #define _FIFO_H_
 
-#include "icontroller.h"
+#include "mediator.h"
 #ifdef MCU
 	#include <avr/io.h>
 	#include <avr/interrupt.h>

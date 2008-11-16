@@ -26,7 +26,7 @@
 
 #ifndef OS_SCHEDULER_H_
 #define OS_SCHEDULER_H_
-#include "icontroller.h"
+#include "mediator.h"
 
 
 #define OS_TIME_SLICE	10	/*!< Dauer einer Zeitscheibe in ms */

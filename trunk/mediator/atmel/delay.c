@@ -24,7 +24,7 @@
 */
 
 
-#include "icontroller.h"
+#include "mediator.h"
 
 #ifdef NEW_AVR_LIB
 	#include <util/delay.h>

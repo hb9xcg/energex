@@ -26,7 +26,7 @@
  */
 
 
-#include "icontroller.h"
+#include "mediator.h"
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
@@ -59,6 +59,10 @@ fifo_t outfifo;				/*!< Ausgangs-FIFO */
  */
 void uart_init(void){	 
     uint8 sreg = SREG;
+
+    DDRB  |=  TRANSMIT_ENABLE; // Configure RS485 transmit/receive enable output
+    PORTB &= ~TRANSMIT_ENABLE; // RS485-Transmitter ausschalten und RS485-Receiver einschalten
+
     UBRRH = (UART_CALC_BAUDRATE(BAUDRATE)>>8) & 0xFF;
     UBRRL = (UART_CALC_BAUDRATE(BAUDRATE) & 0xFF);
     
@@ -69,7 +73,7 @@ void uart_init(void){
 	UCSRB = (1 << RXEN) | (1 << TXEN) | (1 << RXCIE);
 	/* Data mode 8N1, asynchron */
 	uint8 ucsrc = (1 << UCSZ1) | (1 << UCSZ0);
-	#ifdef URSEL 
+	#ifdef URSEL
 		ucsrc |= (1 << URSEL);	// fuer ATMega32
 	#endif    
 	UCSRC = ucsrc;
@@ -98,7 +102,7 @@ void uart_init(void){
  * @brief	Interrupthandler fuer eingehende Daten
  * Empfangene Zeichen werden in die Eingabgs-FIFO gespeichert und warten dort.
  */ 
-#ifdef __AVR_ATmega644__
+#ifdef __AVR_ATmega644P__
 	SIGNAL (USART0_RX_vect){		
 #else
 	SIGNAL (SIG_UART_RECV){
@@ -114,10 +118,7 @@ void uart_init(void){
 //			bot_2_pc_listen();		// Daten des Puffers auswerten
 //		#endif
 //	}
-	uint8_t data = UDR;
-	if (!simplex) {
-		_inline_fifo_put(&infifo, data);
-	}
+	_inline_fifo_put(&infifo, UDR);
 //	UCSRB |= (1 << RXCIE);	// diesen Interrupt wieder an 	
 }
 
@@ -127,7 +128,7 @@ void uart_init(void){
  * Ist das Zeichen fertig ausgegeben, wird ein neuer SIG_UART_DATA-IRQ getriggert.
  * Ist die FIFO leer, deaktiviert die ISR ihren eigenen IRQ.
  */ 
-#ifdef __AVR_ATmega644__
+#ifdef __AVR_ATmega644P__
 	SIGNAL (USART0_UDRE_vect){
 #else
 	SIGNAL (SIG_UART_DATA){
@@ -146,8 +147,11 @@ void uart_init(void){
  */
 SIGNAL (USART0_TX_vect)
 {
-	// RS485-Receiver einschalten
-	simplex = 0;
+	if (outfifo.count == 0){
+		// RS485-Transmitter ausschalten und RS485-Receiver einschalten
+		PORTB &= ~TRANSMIT_ENABLE;
+		UCSRB |= (1 << RXEN);
+	}
 
 	// andere Interrupts wieder an
 	sei();
@@ -171,8 +175,9 @@ void uart_write(const uint8* data, uint8 length){
 	/* Daten in Ausgangs-FIFO kopieren */
 	fifo_put_data(&outfifo, data, length);
 
-	// RS485-Receiver ausschalten. 
-	simplex = 1;
+	// RS485-Transmitter einschalten und RS485-Receiver ausschalten
+	UCSRB &= ~(1 << RXEN);
+	PORTB |= TRANSMIT_ENABLE;
 	
 	/* Data empty und TX Complete Interrupt an */
 	UCSRB |= (1 << UDRIE) | (1 << TXCIE0);	

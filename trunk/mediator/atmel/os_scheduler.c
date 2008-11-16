@@ -24,7 +24,7 @@
  * @date 	02.10.2007
  */
 
-#include "icontroller.h"
+#include "mediator.h"
 
 #include "os_utils.h"
 #include "os_thread.h"

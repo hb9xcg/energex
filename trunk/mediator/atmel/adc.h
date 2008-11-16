@@ -28,16 +28,26 @@
 
 #include "global.h"
 
-#define CH_CHARGE      6
-#define CH_DISCHARGE   7
-#define CH_VOLTAGE     5
+#define CH_CHARGE      1
+#define CH_DISCHARGE   3
+#define CH_VOLTAGE     7
 #define CH_TEMPERATURE 4
 
-///*!
-// * Liest einen analogen Kanal aus
-// * @param channel Kanal - hex-Wertigkeit des Pins (0x01 fuer PA0; 0x02 fuer PA1, ..)
-// */
-//uint16 adc_read(uint8 channel);
+/*!
+ * Misst interne Offsetspannung
+ */
+void adc_calibrate_offset(void);
+
+/*!
+ * Liefert gemessene interne Offsetspannung
+ */
+int16_t adc_get_offset(void);
+
+/*!
+ * Liesst pollend einen channel aus
+ * @param channel 	Kanal - hex-Wertigkeit des Pins (0x01 fuer PA0; 0x02 fuer PA1, ..)
+ */
+uint16_t adc_read_polled(uint8 channel);
 
 /*!
  * @brief			Fuegt einen analogen Kanal in die ADC-Konvertierungsliste ein und wertet ihn per Interrupt aus
