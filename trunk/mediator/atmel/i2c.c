@@ -43,6 +43,14 @@ static uint8_t i2c_error = 0;		/*!< letzter Bus-Fehler */
 static volatile uint8_t i2c_complete = 0;	/*!< Spin-Lock; 0: ready, 128: Transfer aktiv */
 
 
+#ifdef DEBUG
+static char i2c_debug[64];
+#define TRACE(x)        sprintf((char*)i2c_debug, "%s:%d time=%d\r\n", __FUNCTION__, __LINE__, x); \
+                        uart_write(i2c_debug, strlen((char*)i2c_debug));
+#else
+#define TRACE(x)
+#endif
+
 /*!
  * ISR fuer I2C-Master
  */
@@ -129,7 +137,8 @@ ISR(TWI_vect) {
 
 /*!
  * Initialisiert das I2C-Modul
- * @param bitrate	Init-Wert fuer Bit Rate Register (TWBR)
+ * @param bitrate	Init-Wert fuer Bit Rate Register (TWBR) 
+ * @warning Minimale bitrate = 31kbit/s, sonst muss prescaler erhöht werden!
  */
 void i2c_init(uint32_t bitrate) {
 	TWBR = (F_CPU / bitrate - 16 ) / 2;
@@ -177,14 +186,16 @@ void i2c_read(uint8_t sla, uint8_t txData, uint8_t * pRx, uint8_t nRx) {
  */
 uint8_t i2c_wait(void) {
 	uint8_t ticks = TIMER_GET_TICKCOUNT_8;
+
 	/* spinning bis Lock frei */
 	while (i2c_complete == 0) {
-		if (timer_ms_passed(&ticks, 3)) {
+		if (timer_ms_passed(&ticks, 50)) {
 			/* Timeout */
 			TWCR = 0;	// I2C aus
 			return TW_BUS_ERROR;
 		}
 	}
+
 	TWCR = 0;	// I2C aus
 	return i2c_error;
 }

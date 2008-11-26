@@ -33,9 +33,10 @@
 #include "adc.h"
 #include "charge.h"
 #include "battery.h"
-#include "supervisor.h"
 #include "simulator.h"
 #include "protocol.h"
+#include "ow.h"
+#include "sensors.h"
 
 #define COMMAND_STACK_SIZE 256
 #define CMD_LINE   256
@@ -66,7 +67,8 @@ static void cmd_capacity(void);
 static void cmd_reset(void);
 static void cmd_offset(void);
 static void cmd_power(const char* cmd);
-static void cmd_supervisor(const char* cmd);
+static void cmd_onewire(const char* cmd);
+static void cmd_sensor(const char* cmd);
 static void cmd_comm_simulator(const char* cmd);
 
 
@@ -117,7 +119,10 @@ void cmd_dispatcher(void)
 				cmd_receive_byte(character);
 			}
 		}
-		os_thread_sleep(100);
+		else
+		{
+			os_thread_sleep(50);
+		}
 	}
 }
 
@@ -162,7 +167,7 @@ void cmd_process( const char* cmd )
 	{
 		case 'c':
 			cmd_comm_simulator(cmd);
-			break;
+		break;
 		case 'i':
 			cmd_current();
 		break;
@@ -179,7 +184,7 @@ void cmd_process( const char* cmd )
 			cmd_reset();
 		break;
 		case 's':
-			cmd_supervisor(cmd);
+			cmd_sensor(cmd);
 		break;
 		case 't':
 			cmd_temperatur();
@@ -187,11 +192,14 @@ void cmd_process( const char* cmd )
 		case 'u':
 			cmd_voltage();
 		break;
-		case '?':
-			cmd_help();
+		case 'w':
+			cmd_onewire(cmd);
 		break;
 		case 'x':
 			eMode = eTwike;
+		break;
+		case '?':
+			cmd_help();
 		break;
 		default:
 			strcpy(cmd_line, "<Unknown command, try ? for help.");
@@ -206,7 +214,7 @@ void cmd_help(void)
 	strcat(cmd_line, "p:\tPower state {full|save|off}\n\r");
 	strcat(cmd_line, "q:\tCapacity\n\r");
 	strcat(cmd_line, "r:\tReset\n\r");
-	strcat(cmd_line, "s:\tSupervisor {on|off|info}\n\r");
+	strcat(cmd_line, "s:\tSensor\n\r");
 	strcat(cmd_line, "t:\tTemperatur\n\r");
 	strcat(cmd_line, "u:\tVoltage\n\r");
 //	strcat(cmd_line, "c:\tCommunication simulation {start|stop}\n\r");
@@ -294,42 +302,37 @@ void cmd_reset(void)
 	sprintf( cmd_line, "Mediator resetted capacity to 0mAh");
 }
 
-static void cmd_supervisor(const char* cmd)
+static void cmd_sensor(const char* cmd)
 {
-	if( strstr( cmd, "on") )
-	{
-		supervisor_activate();
-		strcpy(cmd_line, "Activated supervisor bus.");
-	}
-	else if( strstr( cmd, "off") )
-	{
-		supervisor_deactivate();
-		strcpy(cmd_line, "Deactivated supervisor bus.");
-	}
-	else if( strstr( cmd, "info") )
-	{
-		cell_t info;
-		int8_t nbr_of_info;
-		uint8_t idx;
+	int8_t nbr_of_sensors;
+	uint8_t idx, serial[8];
+	int16_t temp;
 
-		char* header = "cell temp voltage err\n\r";
-		uart_write( (uint8_t*)header, strlen(header) );
-		
-		char* line   = (char*)&cmd_line[0]; // temporarily available memory
-		nbr_of_info = supervisor_get_nbr_of_info();
-		for(idx=0; idx<nbr_of_info; idx++)
-		{
-			supervisor_get_info( idx, &info);
-			sprintf( line, "%4d %2d°C %5dmV %#x\n\r", idx, info.temperture, info.voltage, info.error);
-			uart_write( (uint8_t*)line, strlen(line) );
-			uart_flush();
-		}
-		strcpy(cmd_line, "=====================");
-	}
-	else
+	char* header = "device serial number      temperatur\n\r";
+	uart_write( (uint8_t*)header, strlen(header) );
+	
+	nbr_of_sensors = sensors_get_nbr_of_devices();
+	for(idx=0; idx<nbr_of_sensors; idx++)
 	{
-		strcpy(cmd_line, "Use \'on\', \'off\' or \'info\' as argument");
+		temp = 0;
+		sensors_get_temperatur( idx, &temp);
+		sensors_get_serial( idx, serial);
+		sprintf( cmd_line, "%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x       %d.%01d°C\r\n",
+				serial[0], 
+				serial[1], 
+				serial[2],
+				serial[3],
+				serial[4],
+				serial[5],
+				serial[6],
+				serial[7],
+				temp>>1, 
+				5*(temp&0x1));
+
+		uart_write( (uint8_t*)cmd_line, strlen(cmd_line) );
+		uart_flush();
 	}
+	strcpy(cmd_line, "====================================");
 }
 
 void cmd_power(const char* cmd)
@@ -355,3 +358,54 @@ void cmd_power(const char* cmd)
 	}
 }
 
+
+void cmd_onewire(const char* cmd)
+{
+	int8_t result;
+	if( strstr( cmd, "restart") )
+	{
+		result = ow_restart();
+		sprintf( cmd_line, "ow_restart returned %d", result);
+	}
+	else if (strstr( cmd, "reset") )
+	{
+		result = ow_reset();
+		sprintf( cmd_line, "ow_reset returned %d", result);
+	}
+	else if (strstr( cmd, "search"))
+	{
+		ow_reset();
+
+		uint8_t last_device = 0;
+		uint8_t snum[8];
+		uint8_t nbr_of_dev = 0;
+
+		for (;;)
+		{
+			PORTC |= LED_RED;
+
+			result = ow_search( 0, &last_device, snum);
+			sprintf( cmd_line, "one wire dev: %02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x\r\n",
+				snum[0], snum[1], snum[2], snum[3], snum[4], snum[5], snum[6], snum[7]);
+			uart_write( (uint8_t*)cmd_line, strlen(cmd_line) );
+			
+			PORTC &= ~LED_RED;
+
+			if( result == 0) {
+				nbr_of_dev++;
+			}
+			
+			if (!last_device) {
+				os_thread_sleep(1280);
+			} else {
+				break;
+			}
+		}
+		
+		sprintf( cmd_line, "ow_search found %d one wire device%s", nbr_of_dev, nbr_of_dev>1 ? "s" : "");
+	}
+	else
+	{
+		strcpy(cmd_line, "Use \'restart\', \'reset\' or \'search\' as argument");
+	}
+}

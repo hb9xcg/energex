@@ -21,7 +21,6 @@
     <FILE VIEWS="303,324,1120,707,4," SHOWN="TRUE" NAME="fifo.c" />
     <FILE VIEWS="326,347,1120,707,4," SHOWN="TRUE" NAME="fifo.h" />
     <FILE VIEWS="579,600,921,682,4," SHOWN="TRUE" NAME="command.h" />
-    <FILE VIEWS="694,71,921,682,4," SHOWN="TRUE" NAME="supervisor.h" />
     <FILE VIEWS="763,140,917,682,4," SHOWN="TRUE" NAME="charge.c" />
     <FILE VIEWS="556,577,921,682,4," SHOWN="TRUE" NAME="charge.h" />
     <FILE VIEWS="510,531,921,682,4," SHOWN="TRUE" NAME="balancer.h" />
@@ -29,13 +28,16 @@
     <FILE VIEWS="648,25,921,682,4," SHOWN="TRUE" NAME="protocol.h" />
     <FILE VIEWS="533,554,921,682,4," SHOWN="TRUE" NAME="battery.h" />
     <FILE VIEWS="464,485,400,300,4," SHOWN="TRUE" NAME="mediator.h" />
-    <FILE VIEWS="602,623,400,300,4," SHOWN="TRUE" NAME="mediator.c" />
-    <FILE VIEWS="625,646,921,683,4," SHOWN="TRUE" NAME="supervisor.c" />
-    <FILE VIEWS="0,0,960,682,5," SHOWN="TRUE" NAME="battery.c" />
-    <FILE VIEWS="717,94,908,683,4," SHOWN="TRUE" NAME="command.c" />
-    <FILE VIEWS="740,117,921,682,4," SHOWN="TRUE" NAME="protocol.c" />
-    <FILE VIEWS="763,140,921,682,4," SHOWN="TRUE" NAME="simulator.c" />
-    <FILE VIEWS="786,163,921,682,4," SHOWN="TRUE" NAME="io.h" />
+    <FILE VIEWS="625,646,400,300,4," SHOWN="TRUE" NAME="mediator.c" />
+    <FILE VIEWS="648,25,960,683,4," SHOWN="TRUE" NAME="battery.c" />
+    <FILE VIEWS="0,0,960,682,5," SHOWN="TRUE" NAME="command.c" />
+    <FILE VIEWS="694,71,921,683,4," SHOWN="TRUE" NAME="protocol.c" />
+    <FILE VIEWS="717,94,960,683,4," SHOWN="TRUE" NAME="simulator.c" />
+    <FILE VIEWS="740,117,908,683,4," SHOWN="TRUE" NAME="io.h" />
+    <FILE VIEWS="763,140,921,682,4," SHOWN="TRUE" NAME="ow.h" />
+    <FILE VIEWS="786,163,921,682,4," SHOWN="TRUE" NAME="ow.c" />
+    <FILE VIEWS="809,186,921,682,4," SHOWN="TRUE" NAME="sensors.c" />
+    <FILE VIEWS="832,209,960,683,4," SHOWN="TRUE" NAME="sensors.h" />
   </FILES>
   <SETTINGS>
     <ASSEMBLER_COMMAND VALUE="avr-gcc" />

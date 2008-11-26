@@ -35,7 +35,7 @@
 #include "timer.h"
 #include "os_thread.h"
 #include "command.h"
-#include "supervisor.h"
+#include "sensors.h"
 #include "simulator.h"
 #include "delay.h"
 #include "protocol.h"
@@ -82,9 +82,13 @@ int main(void)
 	DDRB  |=  IGBT; // Output
 	DDRD  &= ~STOP_SWITCH; // Input
 	PORTD |=  STOP_SWITCH; // Pullup enabled
+	DDRD  |=  POWER_ONE_WIRE; // Output
+	PORTD |=  POWER_ONE_WIRE; // Power on
 
-	DDRC  |=  LED_RED; // Output
-	PORTC &= ~LED_RED; // Switch off red led.
+	DDRC  |=  LED_RED;   // Output
+	DDRC  |=  LED_GREEN; // Output
+	PORTC &= ~LED_RED;   // Switch off red led.
+	PORTC &= ~LED_GREEN; // Switch off green led.
 
 	battery_init();	
 
@@ -100,7 +104,7 @@ int main(void)
 
 	i2c_init(100000); // 100kHz Speed
 
-	supervisor_init();
+	sensors_init();
 
 	ePowerIst = ePowerOff;
 	setBInfo(BAT_REL_OPEN);    // Atomic update of battery info
