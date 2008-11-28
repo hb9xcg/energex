@@ -42,6 +42,9 @@ EDSError sensors_fetch_conversion(uint8_t serial[], int16_t* temp);
 void     sensors_wait_conversion(void);
 int8_t   sensors_get_nbr_of_devices(void);
 void     sensors_get_temperatur(int8_t index, int16_t* temp);
+void     sensors_get_max_temperatur(int16_t* temp);
+void     sensors_get_avg_temperatur(int16_t* temp);
 void     sensors_get_serial(int8_t index, uint8_t serial[]);
+uint16_t sensors_get_max_stack_usage(void);
 
 #endif

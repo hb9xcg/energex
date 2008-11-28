@@ -351,7 +351,7 @@ int8_t ow_search(uint8_t reset_search, uint8_t* last_device, uint8_t* device_add
 			return eOWSuccess;
 		}
 
-		if (result==eOWFailure || !search_serial_nbr[0]) {
+		if (/*result==eOWFailure ||*/ !search_serial_nbr[0]) {
 			last_discrepancy = 0;
 			*last_device = 0;
 		}

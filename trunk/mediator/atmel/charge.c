@@ -28,20 +28,20 @@
 #include "adc.h"
 
 
+#define R_SHUNT                 5ULL            // [mOhm]
+#define R1                      42400ULL        // [mOhm]
+#define R2                      1020000ULL      // [mOhm]
+#define V_REF                   2500ULL         // [mV]
+#define FACTOR_10MA             100ULL
+#define SAMPLES_PRE_HOUR        9000000ULL
+#define ADC_RESOLUTION          10
+#define ADC_MAX_VALUE           (1<<ADC_RESOLUTION)
+#define OVER_SAMPLING_LOG       4
+#define OVER_SAMPLING           (1<<OVER_SAMPLING_LOG)
+
+
 static int16_t charge_current;
 static int64_t charge_capacity;
-
-#define R_SHUNT				5ULL     	// [mOhm]
-#define R1					42400ULL 	// [mOhm]
-#define R2					1020000ULL	// [mOhm]
-#define V_REF		   		2500ULL		// [mV]
-#define FACTOR_10MA			100ULL
-#define SAMPLES_PRE_HOUR	9000000ULL
-#define ADC_RESOLUTION		10
-#define ADC_MAX_VALUE		(1<<ADC_RESOLUTION)
-#define OVER_SAMPLING_LOG	4
-#define OVER_SAMPLING 		(1<<OVER_SAMPLING_LOG)
-
 static int16_t charge_charging_sample;
 static int16_t charge_discharging_sample;
 
@@ -103,8 +103,8 @@ int16_t charge_get_capacity(void)
 	int32_t charge10mAh; 
 
 	// 1 Sample = 8.11uAs
-	charge10mAh = charge_capacity / 4434113; // [10mAh]
-	
+	charge10mAh = charge_capacity / 4434113LL; // [10mAh]
+
 	return charge10mAh;
 }
 
