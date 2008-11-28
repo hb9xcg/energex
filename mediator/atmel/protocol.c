@@ -47,11 +47,11 @@ static uint8_t idx = 0;
 static uint8_t frameDetection = ON;
 
 // Prototypes
-static void receivePacket(void);
-static void receiveData(void);
-static void transmitData(void);
-static void transmitGroup(void);
-static uint8_t frame_stuffing(uint8_t packet[], uint8_t length);
+static void protocol_receivePacket(void);
+static void protocol_receiveData(void);
+static void protocol_transmitData(void);
+static void protocol_transmitGroup(void);
+static uint8_t protocol_frame_stuffing(uint8_t packet[], uint8_t length);
 
 void protocol_receive_byte(uint8_t character)
 {
@@ -141,14 +141,14 @@ void protocol_receive_byte(uint8_t character)
 	case eExpectChecksum:
 		if(checksum==character)
 		{
-			receivePacket();
+			protocol_receivePacket();
 		}
 		eState = eExpectStart;
 		break;
 	}
 }
 
-void receivePacket(void)
+void protocol_receivePacket(void)
 {
 	parameter = data[1];
 	
@@ -157,7 +157,7 @@ void receivePacket(void)
 		switch(command)
 		{
 		case TRM_DATA:
-			receiveData();
+			protocol_receiveData();
 			break;
 		default:
 			break;
@@ -168,10 +168,10 @@ void receivePacket(void)
 		switch(command)
 		{
 		case REQ_DATA:
-			transmitData();
+			protocol_transmitData();
 			break;
 		case REQ_GROUP:
-			transmitGroup();
+			protocol_transmitGroup();
 			break;
 		case TRM_DATA:
 		case TRM_GROUP:
@@ -180,22 +180,22 @@ void receivePacket(void)
 	}	
 }
 
-void receiveData(void)
+void protocol_receiveData(void)
 {
 	uint16_t value;
 	
 	value = data[3] | (data[2]<<8);
 	
-	setParameterValue(parameter, value);
+	battery_set_parameter_value(parameter, value);
 }
 
-void transmitData(void)
+void protocol_transmitData(void)
 {
 	uint8_t packet[11];
 	int16_t value;
 	int8_t checksum=0, i;
 	
-	value = getParameterValue(parameter);
+	value = battery_get_parameter_value(parameter);
 	
 	packet[ 0] = FRAME;
 	packet[ 1] = address;
@@ -210,26 +210,27 @@ void transmitData(void)
 	
 	packet[7] = checksum;
 	
-	length = frame_stuffing(packet, 8);
+	length = protocol_frame_stuffing(packet, 8);
 	
 	uart_write( packet, length);
 }
 
-void transmitGroup(void)
+void protocol_transmitGroup(void)
 {
 	uint8_t packet[18];
-	int16_t value, current, voltage;
+	int16_t value, current, voltage, binfo;
 	int8_t checksum=0, i;
 	
-	value   = getParameterValue(parameter);
-	voltage = getParameterValue(TOTAL_SPANNUNG);
-	current = getParameterValue(IST_STROM);
+	value   = battery_get_parameter_value(parameter);
+	voltage = battery_get_parameter_value(TOTAL_SPANNUNG);
+	current = battery_get_parameter_value(IST_STROM);
+	binfo   = battery_get_info();
 	
 	packet[ 0] = FRAME;
 	packet[ 1] = address;
 	packet[ 2] = TRM_DATA;
-	packet[ 3] = 0;
-	packet[ 4] = 0;
+	packet[ 3] = binfo >> 8;
+	packet[ 4] = binfo & 0xff;
 	packet[ 5] = current >> 8;
 	packet[ 6] = current & 0xff;
 	packet[ 7] = voltage >> 8;
@@ -242,12 +243,12 @@ void transmitGroup(void)
 	
 	packet[11] = checksum;
 	
-	length = frame_stuffing(packet, 12);
+	length = protocol_frame_stuffing(packet, 12);
 	
 	uart_write( packet, length);
 }
 
-uint8_t frame_stuffing(uint8_t packet[], uint8_t length)
+uint8_t protocol_frame_stuffing(uint8_t packet[], uint8_t length)
 {
 	int8_t idxFrom, idxTo;
 	for(idxFrom=START_DATA_IDX; idxFrom<length; idxFrom++)

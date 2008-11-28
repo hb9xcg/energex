@@ -18,6 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "battery.h"
+#include "sensors.h"
 #include "adc.h"
 #include "charge.h"
 #include "protocol.h"
@@ -33,6 +34,8 @@
 #define V_REF		   		2500ULL     // [mV]
 #define ADC_RESOLUTION		10
 #define ADC_MAX_VALUE		(1<<ADC_RESOLUTION)
+
+#define NBR_OF_BATTERIES	3
 
 battery_t battery;
 int16 voltage[OVER_SAMPLING];
@@ -57,9 +60,11 @@ void battery_init(void)
 {
 	battery.drive_state = 0;
 	battery.binfo       = 0;
+	battery.voltage     = 0;
+	battery.current     = 0;
 }
 
-uint16_t getVoltage(void)
+uint16_t battery_get_voltage(void)
 {
 	uint8_t idx;
 	uint16_t average = 0;
@@ -77,7 +82,21 @@ uint16_t getVoltage(void)
 	return voltage32;
 }
 
-int16_t getTemperature(void)
+uint16_t battery_get_power(void)
+{
+	int16_t current, voltage;
+	int32_t power;
+
+	current = charge_get_current();
+	voltage = battery_get_voltage();
+
+	power = current * voltage;
+	power /= 30000;
+
+	return power;
+}
+
+int16_t battery_get_temperature(void)
 {
 	uint8_t idx;
 	uint16_t average = 0;
@@ -96,16 +115,24 @@ int16_t getTemperature(void)
 	return temperature32;
 }
 
-void setParameterValue(uint8_t parameter, uint16_t value)
+void battery_command(uint16_t relais_state)
+{
+	if (relais_state) {
+		ePowerSoll = ePowerFull;
+	} else {
+		ePowerSoll = ePowerSave;
+	}
+}
+
+void battery_set_parameter_value(uint8_t parameter, uint16_t value)
 {
 	os_enterCS();
 
 	switch(parameter)
 	{
-	case DRIVE_STATE:	
-		battery.drive_state  	= value;
+	case DRIVE_STATE:	battery.drive_state  	= value;
 		break;
-	case RELAIS_STATE:	battery.relais_state 	= value;	
+	case COMMAND:		battery_command(value);
 		break;
 	case BUS_ADRESSE:	battery.address 	= value;
 		break;
@@ -115,13 +142,14 @@ void setParameterValue(uint8_t parameter, uint16_t value)
 		break;
 
 	default:
+		SET_RED_LED;
 		break;
 	}
 
 	os_exitCS();
 }
 
-int16_t getParameterValue(uint8_t parameter)
+int16_t battery_get_parameter_value(uint8_t parameter)
 {
 	uint16_t value;
 
@@ -142,26 +170,26 @@ int16_t getParameterValue(uint8_t parameter)
 	case LAST_ERROR:		value = 0;			break;
 	case BUS_ADRESSE:		value = battery.address;	break;
 
-	case DRIVE_STATE:		value = battery.drive_state;	break;
-	case RELAIS_STATE:		value = battery.relais_state;	break;
-	case PARAM_PROT:		value = 0;			break;
+	case DRIVE_STATE:		value = battery.drive_state;		break;
+	case COMMAND:			value = battery_info_get(BAT_REL_OPEN);	break;
+	case PARAM_PROT:		value = 0;				break;
 
-	case BINFO:			value = battery.binfo;		break;
+	case BINFO:			value = battery_get_info();	break;
 	
 	// We simulate 3 batteries. Thus each of them reports one third of the real value.
-	case IST_STROM:			value = charge_get_current()/3;	break;
+	case IST_STROM:			value = charge_get_current()/NBR_OF_BATTERIES;	break;
 	case LADESTROM:			value = 280;			break;
 	case FAHRSTROM:			value = -1000;			break;
-	case TOTAL_SPANNUNG:		value = getVoltage();		break;
+	case TOTAL_SPANNUNG:		value = battery_get_voltage();	break;
 	case SOLL_LADESPG:		value =	44000;			break;
 	
 	 // We simulate 3 batteries. Thus each of them reports one third of the real value.
-	case AH_ZAEHLER:		value = charge_get_capacity()/3;			break;
-	case Q:				value = -1400;						break;
-	case LEISTUNG:			value = (battery.current/100)*(battery.voltage/100);	break;
-	case BATTERIE_TEMP:		value = 2000;						break;
-	case FINFO:			value = 0;						break;
-	case SYM_SPANNUNG:		value = 26;						break;
+	case AH_ZAEHLER:		value = charge_get_capacity()/NBR_OF_BATTERIES;	break;
+	case Q:				value = -1400;					break;
+	case LEISTUNG:			value = battery_get_power();			break;
+	case BATTERIE_TEMP:		sensors_get_avg_temperatur((int16_t*)&value);	break;
+	case FINFO:			value = 0;					break;
+	case SYM_SPANNUNG:		value = 26;					break;
 				
 	case TEILSPANNUNG1:		value = 5100;	break;
 	case TEILSPANNUNG2:		value = 5100;	break;
@@ -171,24 +199,24 @@ int16_t getParameterValue(uint8_t parameter)
 	case TEILSPANNUNG6:		value = 5100;	break;
 	case TEILSPANNUNG7:		value = 5100;	break;
 			
-	case TEMPERATUR1:		value = 2000;	break;
-	case TEMPERATUR2:		value = 2000;	break;
-	case TEMPERATUR3:		value = 2000;	break;
-	case TEMPERATUR4:		value = 2000;	break;
-	case TEMPERATUR5:		value = 2000;	break;
-	case TEMPERATUR6:		value = 2000;	break;
-	case TEMPERATUR7:		value = 2000;	break;
-	case TEMPERATUR8:		value = 2000;	break;
-	case TEMPERATUR9:		value = 2000;	break;
-	case TEMPERATUR10:		value = 2000;	break;
-	case TEMPERATUR11:		value = 2000;	break;
-	case TEMPERATUR12:		value = 2000;	break;
-	case TEMPERATUR13:		value = 2000;	break;
-	case TEMPERATUR14:		value = 2000;	break;
+	case TEMPERATUR1:		sensors_get_temperatur( 0, (int16_t*)&value);	break;
+	case TEMPERATUR2:		sensors_get_temperatur( 1, (int16_t*)&value);	break;
+	case TEMPERATUR3:		sensors_get_temperatur( 2, (int16_t*)&value);	break;
+	case TEMPERATUR4:		sensors_get_temperatur( 3, (int16_t*)&value);	break;
+	case TEMPERATUR5:		sensors_get_temperatur( 4, (int16_t*)&value);	break;
+	case TEMPERATUR6:		sensors_get_temperatur( 5, (int16_t*)&value);	break;
+	case TEMPERATUR7:		sensors_get_temperatur( 6, (int16_t*)&value);	break;
+	case TEMPERATUR8:		sensors_get_temperatur( 7, (int16_t*)&value);	break;
+	case TEMPERATUR9:		sensors_get_temperatur( 8, (int16_t*)&value);	break;
+	case TEMPERATUR10:		sensors_get_temperatur( 9, (int16_t*)&value);	break;
+	case TEMPERATUR11:		sensors_get_temperatur(10, (int16_t*)&value);	break;
+	case TEMPERATUR12:		sensors_get_temperatur(11, (int16_t*)&value);	break;
+	case TEMPERATUR13:		sensors_get_temperatur(12, (int16_t*)&value);	break;
+	case TEMPERATUR14:		sensors_get_temperatur(13, (int16_t*)&value);	break;
 	
 	case PC_CALIBR_TEMP:		value = 0x5678;			break;
-	case MAX_BAT_TEMP:		value = 2000;			break;
-	case UMGEBUNGS_TEMP:		value = getTemperature();	break;
+	case MAX_BAT_TEMP:		sensors_get_max_temperatur((int16_t*)&value);	break;
+	case UMGEBUNGS_TEMP:		value = battery_get_temperature();		break;
 	case MAX_LADETEMP:		value = 4500;			break;
 	case MIN_LADETEMP:		value = 0;			break;
 	case MAX_FAHRTEMP:		value = 4500;			break;
@@ -296,16 +324,39 @@ int16_t getParameterValue(uint8_t parameter)
 	return value;
 }
 
-void setBInfo(uint8_t bitNo)
+void battery_info_set(uint8_t bitNo)
 {
 	os_enterCS();
 	battery.binfo |= (1<<bitNo);
 	os_exitCS();
 }
 
-void clearBInfo(uint8_t bitNo)
+void battery_info_clear(uint8_t bitNo)
 {
 	os_enterCS();
 	battery.binfo &= ~(1<<bitNo);
 	os_exitCS();
 }
+
+uint8_t battery_info_get(uint8_t bitNo)
+{
+	uint8_t result;
+
+	os_enterCS();
+	result = (battery.binfo & (1<<bitNo)) != 0;
+	os_exitCS();
+
+	return result;
+}
+
+uint16_t battery_get_info(void)
+{
+	uint16_t result;
+
+	os_enterCS();
+	result = battery.binfo;
+	os_exitCS();
+
+	return result;
+}
+

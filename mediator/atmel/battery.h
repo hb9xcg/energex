@@ -43,14 +43,16 @@ typedef struct
 
 extern battery_t battery;
 
-void setParameterValue(uint8_t parameter, uint16_t value);
-int16_t getParameterValue(uint8_t parameter);
-void battery_sample(void);
-void battery_init(void);
-int16_t getTemperature(void);
-uint16_t getVoltage(void);
-void setBInfo(uint8_t bitNo);
-void clearBInfo(uint8_t bitNo);
+void     battery_set_parameter_value(uint8_t parameter, uint16_t value);
+int16_t  battery_get_parameter_value(uint8_t parameter);
+void     battery_sample(void);
+void     battery_init(void);
+int16_t  battery_get_temperature(void);
+uint16_t battery_get_voltage(void);
+uint16_t battery_get_info(void);
+void     battery_info_set(uint8_t bitNo);
+void     battery_info_clear(uint8_t bitNo);
+uint8_t  battery_info_get(uint8_t bitNo);
 
 #ifdef __cplusplus
  }

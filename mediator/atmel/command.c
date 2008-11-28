@@ -38,8 +38,8 @@
 #include "ow.h"
 #include "sensors.h"
 
-#define COMMAND_STACK_SIZE 256
-#define CMD_LINE   256
+#define COMMAND_STACK_SIZE 384
+#define CMD_LINE   128
 #define DEBUG(str)  uart_write((uint8_t*)(str), sizeof(str) );
 
 #define FRAME 		0x10
@@ -70,11 +70,27 @@ static void cmd_power(const char* cmd);
 static void cmd_onewire(const char* cmd);
 static void cmd_sensor(const char* cmd);
 static void cmd_comm_simulator(const char* cmd);
+static void cmd_stack_memory(void);
 
 
 void cmd_init(void)
 {
+	memset(cmd_stack, 0xb6, sizeof(cmd_stack));
 	cmd_thread = os_create_thread((uint8_t *)&cmd_stack[COMMAND_STACK_SIZE-1], cmd_dispatcher );	// Command thread anlegen
+}
+
+uint16_t cmd_get_max_stack_usage(void)
+{
+	uint16_t stack_idx = 0;
+	while(stack_idx < COMMAND_STACK_SIZE)
+	{
+		if (cmd_stack[stack_idx] != 0xb6)
+		{
+			break;
+		}
+		stack_idx++;
+	}
+	return COMMAND_STACK_SIZE-stack_idx;
 }
 
 void cmd_dispatcher(void)
@@ -171,6 +187,9 @@ void cmd_process( const char* cmd )
 		case 'i':
 			cmd_current();
 		break;
+		case 'm':
+			cmd_stack_memory();
+		break;
 		case 'o':
 			cmd_offset();
 		break;
@@ -210,16 +229,26 @@ void cmd_process( const char* cmd )
 void cmd_help(void)
 {
 	strcpy(cmd_line, "\n\rAvailable commands:\n\r");
-	strcat(cmd_line, "i:\tCurrent\n\r");
-	strcat(cmd_line, "p:\tPower state {full|save|off}\n\r");
-	strcat(cmd_line, "q:\tCapacity\n\r");
-	strcat(cmd_line, "r:\tReset\n\r");
-	strcat(cmd_line, "s:\tSensor\n\r");
-	strcat(cmd_line, "t:\tTemperatur\n\r");
-	strcat(cmd_line, "u:\tVoltage\n\r");
-//	strcat(cmd_line, "c:\tCommunication simulation {start|stop}\n\r");
-	strcat(cmd_line, "x:\tExit\n\r");
-	strcat(cmd_line, "?:\tHelp\n\r");
+	uart_write( (uint8_t*)cmd_line, strlen(cmd_line) );
+	strcpy(cmd_line, "i:\tCurrent\n\r");
+	uart_write( (uint8_t*)cmd_line, strlen(cmd_line) );
+	strcpy(cmd_line, "m\tMemory info\n\r");
+	uart_write( (uint8_t*)cmd_line, strlen(cmd_line) );
+	strcpy(cmd_line, "p:\tPower state {full|save|off}\n\r");
+	uart_write( (uint8_t*)cmd_line, strlen(cmd_line) );
+	strcpy(cmd_line, "q:\tCapacity\n\r");
+	uart_write( (uint8_t*)cmd_line, strlen(cmd_line) );
+	strcpy(cmd_line, "r:\tReset\n\r");
+	uart_write( (uint8_t*)cmd_line, strlen(cmd_line) );
+	strcpy(cmd_line, "s:\tSensor\n\r");
+	uart_write( (uint8_t*)cmd_line, strlen(cmd_line) );
+	strcpy(cmd_line, "t:\tTemperatur\n\r");
+	uart_write( (uint8_t*)cmd_line, strlen(cmd_line) );
+	strcpy(cmd_line, "u:\tVoltage\n\r");
+	uart_write( (uint8_t*)cmd_line, strlen(cmd_line) );
+	strcpy(cmd_line, "x:\tExit\n\r");
+	uart_write( (uint8_t*)cmd_line, strlen(cmd_line) );
+	strcpy(cmd_line, "?:\tHelp\n\r");
 }
 
 void cmd_comm_simulator(const char* cmd)
@@ -240,7 +269,7 @@ void cmd_temperatur(void)
 {
 	int16_t temperature;
 
-	temperature = getTemperature();
+	temperature = battery_get_temperature();
 
 	sprintf( cmd_line, "Mediator temperatur: %d.%02d°C", temperature/100, temperature%100);
 }
@@ -249,7 +278,7 @@ void cmd_voltage(void)
 {
 	int16_t voltage;
 
-	voltage = getVoltage();
+	voltage = battery_get_voltage();
 
 	sprintf( cmd_line, "Mediator voltage: %d.%02dV", voltage/100, voltage%100);
 }
@@ -317,7 +346,7 @@ static void cmd_sensor(const char* cmd)
 		temp = 0;
 		sensors_get_temperatur( idx, &temp);
 		sensors_get_serial( idx, serial);
-		sprintf( cmd_line, "%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x       %d.%01d°C\r\n",
+		sprintf( cmd_line, "%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x      %d.%01d°C\r\n",
 				serial[0], 
 				serial[1], 
 				serial[2],
@@ -326,8 +355,8 @@ static void cmd_sensor(const char* cmd)
 				serial[5],
 				serial[6],
 				serial[7],
-				temp>>1, 
-				5*(temp&0x1));
+				temp/100,
+				temp%100);
 
 		uart_write( (uint8_t*)cmd_line, strlen(cmd_line) );
 		uart_flush();
@@ -408,4 +437,15 @@ void cmd_onewire(const char* cmd)
 	{
 		strcpy(cmd_line, "Use \'restart\', \'reset\' or \'search\' as argument");
 	}
+}
+
+void cmd_stack_memory(void)
+{
+	uint16_t result = cmd_get_max_stack_usage();
+
+	sprintf( cmd_line, "command_thread's max stack usage: %3d bytes\r\n", result);
+	uart_write( (uint8_t*)cmd_line, strlen(cmd_line) );
+
+	result = sensors_get_max_stack_usage();
+	sprintf( cmd_line, "sensors_thread's max stack usage: %3d bytes", result);
 }

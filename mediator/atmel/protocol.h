@@ -59,7 +59,7 @@
 #define BUS_ADRESSE         0x0b
 
 #define DRIVE_STATE         0x11
-#define RELAIS_STATE        0x12
+#define COMMAND             0x12
 #define PARAM_PROT          0x13
 
 #define BINFO               0x21

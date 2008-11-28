@@ -107,7 +107,7 @@ int main(void)
 	sensors_init();
 
 	ePowerIst = ePowerOff;
-	setBInfo(BAT_REL_OPEN);    // Atomic update of battery info
+	battery_info_set(BAT_REL_OPEN);    // Atomic update of battery info
 
 	EICRA = (1<<ISC01) | (1<<ISC10); // Configure any change on pin INT0 for interrupt.
 	EIMSK = (1<<INT0);               // Enable INT0 interrupt
@@ -121,22 +121,21 @@ int main(void)
 			if( ePowerSoll == ePowerFull )
 			{
 				PORTB |= IGBT;             // Switch IGBT on
-				os_thread_sleep(10);       // Relais spark quenching
 				PORTB |= RELAIS;           // Switch Relais on
-				os_thread_sleep(300);      // Relais delay time
-				clearBInfo(BAT_REL_OPEN);  // Atomic update of battery info
+				os_thread_sleep(500);      // Relais delay time
+				battery_info_clear(BAT_REL_OPEN);  // Atomic update of battery info
 			}
 			else if( ePowerSoll == ePowerSave )
 			{
-				setBInfo(BAT_REL_OPEN);    // Atomic update of battery info
+				battery_info_set(BAT_REL_OPEN);    // Atomic update of battery info
 				PORTB |= IGBT;             // Switch IGBT on
 				PORTB &= ~RELAIS;          // Switch Relais off				
 			}
 			else
 			{
-				setBInfo(BAT_REL_OPEN);    // Atomic update of battery info
+				battery_info_set(BAT_REL_OPEN);    // Atomic update of battery info
 				PORTB &= ~RELAIS;          // Switch Relais off
-				os_thread_sleep(300);      // Relais spark quenching
+				os_thread_sleep(500);      // Relais spark quenching
 				PORTB &= ~IGBT;            // Switch IGBT off
 				os_thread_sleep(5000);     // Let IGBT cool down, in case we're still powered.
 			}

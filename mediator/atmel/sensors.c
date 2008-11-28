@@ -37,7 +37,7 @@
 #define DS18S20_CMD_CONVERT       0x44
 #define DS18S20_CMD_READ_SCRATCH  0xBE
 
-#define SENSORS_MAX_DEVICES        1
+#define SENSORS_MAX_DEVICES        2
 #define SENSORS_UNUSED             0x8000
 #define SENSORS_USED               0x0000
 #define SENSORS_STACK_SIZE         128
@@ -70,7 +70,22 @@ void sensors_init(void)
 
 	sensors_search();
 
+	memset(sensors_stack, 0xb6, sizeof(sensors_stack));
 	sensors_thread_tcb = os_create_thread((uint8_t *)&sensors_stack[SENSORS_STACK_SIZE-1], sensors_thread );
+}
+
+uint16_t sensors_get_max_stack_usage(void)
+{
+	uint16_t stack_idx = 0;
+	while(stack_idx < SENSORS_STACK_SIZE)
+	{
+		if (sensors_stack[stack_idx] != 0xb6)
+		{
+			break;
+		}
+		stack_idx++;
+	}
+	return SENSORS_STACK_SIZE-stack_idx;
 }
 
 int8_t sensors_get_nbr_of_devices(void)
@@ -91,10 +106,47 @@ int8_t sensors_get_nbr_of_devices(void)
 void sensors_get_temperatur(int8_t index, int16_t* temp)
 {
 	os_enterCS();
-	if (sensors[index].temp != SENSORS_UNUSED) {
+	if (index < SENSORS_MAX_DEVICES && 
+            sensors[index].temp != SENSORS_UNUSED) {
 		*temp = sensors[index].temp;
+	} else {
+		*temp = 0;
 	}
 	os_exitCS();
+}
+
+void sensors_get_max_temperatur(int16_t* temp)
+{
+	int8_t i;
+	*temp = -9999;
+	
+	os_enterCS();
+	for (i=0; i<SENSORS_MAX_DEVICES; i++) {
+		if (sensors[i].temp > *temp) {
+			*temp = sensors[i].temp;
+		}
+	}
+	os_exitCS();
+}
+
+void sensors_get_avg_temperatur(int16_t* temp)
+{
+	int8_t i, nbr_of_devices=0;
+	int32_t avg_temp=0;
+
+	os_enterCS();
+	for (i=0; i<SENSORS_MAX_DEVICES; i++) {
+		if (sensors[i].temp != SENSORS_UNUSED) {
+			avg_temp += sensors[i].temp;
+			nbr_of_devices++;
+		}
+	}
+	os_exitCS();
+
+	if (nbr_of_devices) {
+		avg_temp /= nbr_of_devices;
+	}
+	*temp = avg_temp;
 }
 
 void sensors_get_serial(int8_t index, uint8_t serial[])
@@ -233,11 +285,8 @@ EDSError sensors_fetch_conversion(uint8_t serial[], int16_t* temp)
 	*temp   = value[1];
 	*temp <<= 8;
 	*temp  |= value[0];
+	*temp  *= 50; // create Twike temperature format.
 	os_exitCS();
-
-	// Check range between 10°C and 40°C
-	if (*temp<20 || *temp > 80)
-		PORTC |= LED_RED;
 
 	return eDSSuccess;
 }
