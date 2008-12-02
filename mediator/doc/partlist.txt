@@ -1,8 +1,8 @@
 Partlist
 
-Exported from mediator.sch at 17.10.08 20:03
+Exported from mediator.sch at 09.11.08 17:45
 
-EAGLE Version 5.2.0 Copyright (c) 1988-2008 CadSoft
+EAGLE Version 5.3.0 Copyright (c) 1988-2008 CadSoft
 
 Part      Value          Device            Package         Library          Sheet
 
@@ -29,6 +29,15 @@ C17       100nF          C-EUC0603K        C0603K          rcl              1
 C18       100nF          C-EUC0603K        C0603K          rcl              1
 C19       100nF          C-EUC0603K        C0603K          rcl              1
 C20       100nF          C-EUC0603K        C0603K          rcl              1
+C21       100nF          C-EUC0603K        C0603K          rcl              1
+C22       100nF          C-EUC0603K        C0603K          rcl              1
+C23       100nF          C-EUC0603K        C0603K          rcl              1
+C24       100nF          C-EUC0603K        C0603K          rcl              1
+C25       10uF           CPOL-EUSMCA       SMC_A           rcl              1
+C26       10uF           CPOL-EUSMCA       SMC_A           rcl              1
+C27       10uF           CPOL-EUSMCA       SMC_A           rcl              1
+C28       100nF          C-EUC0603K        C0603K          rcl              1
+C29       100nF          C-EUC0603K        C0603K          rcl              1
 D1        BAS40-06       BAS40-06          SOT23           diode            1
 D2        1N4148         DIODE-MICROMELF-R MICROMELF-R     diode            1
 D3        BAS40-06       BAS40-06          SOT23           diode            1
@@ -38,7 +47,7 @@ DC3       NME1205SC      NME               NME             dc-dc-converter  1
 G1        CR2032V        CR2032V           CR2032V         battery          1
 I2C       ADUM1250       ADUM1250          SO8             analog-devices   1
 IC1       ATMega644-A    MEGA32-A          TQFP44          atmel            1
-IC2       RF192          REF192            SO08            icontroller      1
+IC2       REF192         REF192            SO08            icontroller      1
 IC3       78L05          78L05             SOT89           icontroller      1
 IC4       78L05          78L05             SOT89           icontroller      1
 IC5       78L05          78L05             SOT89           icontroller      1
@@ -60,7 +69,7 @@ OK3       TLP281         TLP283            MINI-FLAT-4     optocoupler      1
 OK4       TLP281         TLP283            MINI-FLAT-4     optocoupler      1
 OK6       TLP281         TLP283            MINI-FLAT-4     optocoupler      1
 Q1        IRG4BC40W      IRG4BC15UD-S      D2PACK          transistor-power 1
-Q2        8MHz           XTAL/S            QS              special          1
+Q2        16MHz          XTAL/S            QS              special          1
 Q3        BC817-16SMD    BC817-16SMD       SOT23-BEC       transistor-npn   1
 Q4        32768          CRYSTALTC26H      TC26H           crystal          1
 Q5        BC817-25LT1SMD BC817-25LT1SMD    SOT23-BEC       transistor-npn   1
@@ -68,7 +77,6 @@ Q7        BC817-16SMD    BC817-16SMD       SOT23-BEC       transistor-npn   1
 R1        120            R-EU_M0805        M0805           rcl              1
 R2        42R2           R-EU_M0805        M0805           rcl              1
 R3        42R2           R-EU_M0805        M0805           rcl              1
-R4        1k02           R-EU_M0805        M0805           rcl              1
 R5        1k02           R-EU_M0805        M0805           rcl              1
 R6        1k02           R-EU_M0805        M0805           rcl              1
 R7        1k02           R-EU_M0805        M0805           rcl              1
@@ -85,11 +93,12 @@ R17       390            R-EU_M0805        M0805           rcl              1
 R18       180            R-EU_M0805        M0805           rcl              1
 R19       390            R-EU_M0805        M0805           rcl              1
 R20       390            R-EU_M0805        M0805           rcl              1
-R21       6k8            R-EU_M0805        M0805           rcl              1
+R21       3k74           R-EU_M0805        M0805           rcl              1
 R22       390            R-EU_M0805        M0805           rcl              1
+R23       100            R-EU_M0805        M0805           rcl              1
 R24       390            R-EU_M0805        M0805           rcl              1
-R28       560k           R-EU_MELF0207W    MINI_MELF-0207W rcl              1
-R31       630k           R-EU_MELF0207W    MINI_MELF-0207W rcl              1
+R28       330k           R-EU_MELF0207W    MINI_MELF-0207W rcl              1
+R31       330k           R-EU_MELF0207W    MINI_MELF-0207W rcl              1
 SV1                      MA05-2            MA05-2          con-lstb         1
 X1                       233-102           233-102         con-wago         1
 X2                       233-104           233-104         con-wago         1
