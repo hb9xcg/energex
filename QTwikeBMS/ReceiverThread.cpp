@@ -158,16 +158,24 @@ void ReceiverThread::run ()
 				
 				if(idx >= length)
 				{
+					frameDetection = ON;
 					eState = eExpectChecksum;
 				}
 				break;
 			
 			case eExpectChecksum:
-				if(checksum==character)
+				if (frameDetection && character == FRAME)
 				{
-					receivePacket();
+					frameDetection = OFF;
 				}
-				eState = eExpectStart;
+				else
+				{
+					if(checksum==character)
+					{
+						receivePacket();
+					}
+					eState = eExpectStart;
+				}
 				break;
 			}
 		}
@@ -286,7 +294,7 @@ void ReceiverThread::logTransmit(uint8_t packet[], uint8_t length)
 	QString text("Transmitted: ");
 	for(int i=0; i<length; i++) {
 		uint8_t character = packet[i];
-		text += QString("%1 ").arg(character, 0, 16);
+		text += QString("%1 ").arg(character, 2, 16, QLatin1Char('0'));
 	}
 
 	updateLog(text);
@@ -295,14 +303,14 @@ void ReceiverThread::logTransmit(uint8_t packet[], uint8_t length)
 void ReceiverThread::logReceive()
 {
 	QString text("Received: ");
-	text += QString("%1 ").arg(0x10, 0, 16);
-	text += QString("%1 ").arg(address, 0, 16);
-	text += QString("%1 ").arg(command, 0, 16);
+	text += QString("%1 ").arg(0x10, 2, 16, QLatin1Char('0'));
+	text += QString("%1 ").arg(address, 2, 16, QLatin1Char('0'));
+	text += QString("%1 ").arg(command, 2, 16, QLatin1Char('0'));
 	for(int idx=0; idx<length; idx++) {
 		uint8_t character = data[idx];
-		text += QString("%1 ").arg(character, 0, 16);
+		text += QString("%1 ").arg(character, 2, 16, QLatin1Char('0'));
 	}
-	text += QString("%1").arg(checksum, 0, 16);
+	text += QString("%1").arg(checksum, 2, 16, QLatin1Char('0'));
 	
 	updateLog(text);
 }

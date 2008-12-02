@@ -32,6 +32,7 @@ void setParameterValue(uint8_t parameter, uint16_t value)
 	case RELAIS_STATE:		battery.relais_state 	= value;	break;
 	case BUS_ADRESSE:		battery.address 		= value;	break;
 	case TOTAL_SPANNUNG:	battery.voltage 		= value;	break;
+	case AH_ZAEHLER:	    battery.ah_counter 		= value;	break;
 	default:
 		fprintf(stderr, "Writing unknown parameter %#x\n", parameter);
 	}	
