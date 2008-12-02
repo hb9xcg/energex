@@ -29,15 +29,15 @@
     <FILE VIEWS="533,554,921,682,4," SHOWN="TRUE" NAME="battery.h" />
     <FILE VIEWS="464,485,400,300,4," SHOWN="TRUE" NAME="mediator.h" />
     <FILE VIEWS="625,646,400,300,4," SHOWN="TRUE" NAME="mediator.c" />
-    <FILE VIEWS="0,0,960,682,5," SHOWN="TRUE" NAME="battery.c" />
+    <FILE VIEWS="648,25,400,300,4," SHOWN="TRUE" NAME="battery.c" />
     <FILE VIEWS="671,48,960,683,4," SHOWN="TRUE" NAME="command.c" />
-    <FILE VIEWS="694,71,960,683,4," SHOWN="TRUE" NAME="protocol.c" />
-    <FILE VIEWS="717,94,921,683,4," SHOWN="TRUE" NAME="simulator.c" />
-    <FILE VIEWS="740,117,960,683,4," SHOWN="TRUE" NAME="io.h" />
-    <FILE VIEWS="763,140,908,683,4," SHOWN="TRUE" NAME="ow.h" />
-    <FILE VIEWS="786,163,921,682,4," SHOWN="TRUE" NAME="ow.c" />
+    <FILE VIEWS="0,0,960,780,5," SHOWN="TRUE" NAME="protocol.c" />
+    <FILE VIEWS="717,94,960,683,4," SHOWN="TRUE" NAME="simulator.c" />
+    <FILE VIEWS="740,117,921,683,4," SHOWN="TRUE" NAME="io.h" />
+    <FILE VIEWS="763,140,960,683,4," SHOWN="TRUE" NAME="ow.h" />
+    <FILE VIEWS="786,163,908,683,4," SHOWN="TRUE" NAME="ow.c" />
     <FILE VIEWS="809,186,921,682,4," SHOWN="TRUE" NAME="sensors.c" />
-    <FILE VIEWS="832,209,960,683,4," SHOWN="TRUE" NAME="sensors.h" />
+    <FILE VIEWS="832,209,921,682,4," SHOWN="TRUE" NAME="sensors.h" />
   </FILES>
   <SETTINGS>
     <ASSEMBLER_COMMAND VALUE="avr-gcc" />

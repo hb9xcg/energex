@@ -238,7 +238,7 @@ typedef enum
 	eUnknown17      = 17, // (?)              (möglicherweise Erhaltungsladung einzelner Blöcke?)
 	eUnknown18      = 18, // (?)              (möglicherweise Erhaltungsladung einzelner Blöcke?)
 	eUnknown19      = 19, // (?)              (möglicherweise Erhaltungsladung einzelner Blöcke?)
-	eUnknown20      = 20 // (?)
+	eUnknown20      = 20  // (?)
 } EDriveState;
 
 
