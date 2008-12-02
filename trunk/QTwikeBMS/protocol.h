@@ -41,7 +41,7 @@
 #define ACK    			 0x20 // Acknowledged
 #define NAK    			 0xF2 // Not Acknowledged
 #define REQ_DATA 			 0x22 // Request Data
-#define REQ_GROUP			 0x42	// Request Group
+#define REQ_GROUP			 0x42 // Request Group
 #define TRM_DATA			 0x24 // Reply Data
 #define TRM_GROUP			 0x48 // Reply Group
 

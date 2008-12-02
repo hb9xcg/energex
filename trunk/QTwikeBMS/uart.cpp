@@ -21,7 +21,7 @@
 #include <SerialPort.h>
 
 
-static SerialPort serialPort( "/dev/ttyUSB0" );
+static SerialPort serialPort( "/dev/ttyS0" );
 
 /*!
  * @brief			Sendet Daten per UART im Little Endian
