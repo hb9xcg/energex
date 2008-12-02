@@ -97,6 +97,7 @@ void protocol_receive_byte(uint8_t character)
 			checksum = character;
 			length   = character & LENGTH_MASK;
 			idx      = 0;
+			frameDetection = ON;
 			eState   = eExpectData;
 			break;
 		case FRAME:
@@ -109,41 +110,52 @@ void protocol_receive_byte(uint8_t character)
 		
 	case eExpectData:
 		checksum ^= character;
-		if( frameDetection && idx>0 && data[idx-1] == FRAME)
+		if( frameDetection && character == FRAME)
 		{
-			if(character == FRAME)
+			frameDetection = OFF;
+		}
+		else
+		{	
+			if (frameDetection == OFF && character != FRAME)
 			{
-				// FRAME character was doubled:
-				// -> add one frame character to the data buffer.
-				frameDetection = OFF;						
-			}
-			else
-			{
-				// A single FRAME character detected:
+				// Single frame byte!
 				// -> Reset state machine to start condition.
 				address = character;
 				eState = eExpectCommand;
 				break;
 			}
-		}
-		else
-		{				
 			frameDetection = ON;
-			data[idx++] = character;
+			data[idx++] = character;	
 		}
 		
 		if(idx >= length)
 		{
+			frameDetection = ON;
 			eState = eExpectChecksum;
 		}
 		break;
 	
 	case eExpectChecksum:
-		if(checksum==character)
+		if (frameDetection && character == FRAME)
 		{
-			protocol_receivePacket();
+			frameDetection = OFF;
 		}
-		eState = eExpectStart;
+		else
+		{
+			if (frameDetection == OFF && character != FRAME)
+			{
+				// Single frame byte!
+				// -> Reset state machine to start condition.
+				address = character;
+				eState = eExpectCommand;
+				break;
+			}
+			if(checksum==character)
+			{
+				protocol_receivePacket();
+			}
+			eState = eExpectStart;
+		}
 		break;
 	}
 }
