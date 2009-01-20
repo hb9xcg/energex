@@ -29,7 +29,7 @@
 #include "mediator.h"
 
 
-#define OS_TIME_SLICE	10	/*!< Dauer einer Zeitscheibe in ms */
+#define OS_TIME_SLICE	2	/*!< Dauer einer Zeitscheibe in ms */
 
 extern volatile uint8_t os_scheduling_allowed;
 

@@ -141,7 +141,7 @@ int main(void)
 			}
 			ePowerIst = ePowerSoll;
 		}
-		os_thread_yield();
+		os_thread_sleep(100);
 		//os_thread_sleep(500);	// Hello world.
 		//PORTC ^= LED_RED; 	// toggle red led.
 		//uart_write("Hallo\n", 6);

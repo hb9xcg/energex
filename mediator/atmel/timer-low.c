@@ -71,8 +71,8 @@ ISR(SIG_OUTPUT_COMPARE2) {
 	
 	/* --- SCHEDULER --- */
 	#ifdef OS_AVAILABLE
-		/* Scheduling-Frequenz betraegt ca. 1 kHz */
-		if ((uint8_t)((uint8_t)ticks-scheduler_ticks) > MS_TO_TICKS(OS_TIME_SLICE)) {
+		/* Scheduling-Frequenz betraegt 500Hz */
+		if ((uint8_t)((uint8_t)ticks-scheduler_ticks) >= MS_TO_TICKS(OS_TIME_SLICE)) {
 			scheduler_ticks = (uint8_t)ticks;
 			os_schedule(ticks);
 		}

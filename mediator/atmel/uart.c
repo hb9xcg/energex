@@ -36,6 +36,7 @@
 
 #include "uart.h"
 #include "command.h"
+#include "os_thread.h"
 //#include "log.h"
 //#include "bot-2-pc.h"
 
@@ -183,3 +184,30 @@ void uart_write(const uint8* data, uint8 length){
 	UCSRB |= (1 << UDRIE) | (1 << TXCIE0);	
 }
 
+/*!
+ * @brief		Sendet Daten per UART mit Twike Timing.
+ * @param data		Datenpuffer
+ * @param length	Groesse des Datenpuffers in Bytes
+ */
+void uart_send_twike(const uint8_t* data, uint8_t length)
+{
+	os_thread_sleep(9); // Gets rounded to 10ms
+	// RS485-Transmitter einschalten und RS485-Receiver ausschalten
+	UCSRB &= ~((1 << RXEN) | (1 << TXCIE0));
+	PORTB |= TRANSMIT_ENABLE;
+	
+
+	os_thread_sleep(5); // Gets rounded to 6ms
+
+	uint8_t idx;
+
+	for (idx=0; idx<length; idx++)
+	{
+		UDR = data[idx];
+		os_thread_sleep(7); // Gets rounded to 8ms
+	}
+
+	// RS485-Transmitter ausschalten und RS485-Receiver einschalten
+	PORTB &= ~TRANSMIT_ENABLE;
+	UCSRB |= (1 << RXEN);
+}

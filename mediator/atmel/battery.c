@@ -23,6 +23,7 @@
 #include "charge.h"
 #include "protocol.h"
 #include "os_thread.h"
+#include "delay.h"
 #include <assert.h>
 #include <stdio.h>
 #include <avr/io.h>
@@ -138,11 +139,16 @@ void battery_set_parameter_value(uint8_t parameter, uint16_t value)
 		break;
 	case TOTAL_SPANNUNG:	battery.voltage 	= value;
 		break;
-	case AH_ZAEHLER:	charge_set_capacity(value*3);
+	case AH_ZAEHLER:	charge_set_capacity(value);
+		break;
+	case GESCHWINDIGKEIT:
+	case TAGESKILOMETER:
 		break;
 
 	default:
 		SET_RED_LED;
+		delay(5000);
+		CLEAR_RED_LED;
 		break;
 	}
 
@@ -170,9 +176,9 @@ int16_t battery_get_parameter_value(uint8_t parameter)
 	case LAST_ERROR:		value = 0;			break;
 	case BUS_ADRESSE:		value = battery.address;	break;
 
-	case DRIVE_STATE:		value = battery.drive_state;		break;
-	case COMMAND:			value = battery_info_get(BAT_REL_OPEN);	break;
-	case PARAM_PROT:		value = 0;				break;
+	case DRIVE_STATE:		value = battery.drive_state;			break;
+	case COMMAND:			value = !battery_info_get(BAT_REL_OPEN);	break;
+	case PARAM_PROT:		value = 0;					break;
 
 	case BINFO:			value = battery_get_info();	break;
 	
@@ -317,6 +323,9 @@ int16_t battery_get_parameter_value(uint8_t parameter)
 	
 	default:
 		value = 0x0000;
+		SET_RED_LED;
+		delay(5000);
+		CLEAR_RED_LED;
 	}
 
 	os_exitCS();
