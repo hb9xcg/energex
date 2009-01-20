@@ -137,7 +137,7 @@ void cmd_dispatcher(void)
 		}
 		else
 		{
-			os_thread_sleep(50);
+			os_thread_sleep(8);
 		}
 	}
 }
@@ -168,7 +168,7 @@ void cmd_receive_byte(uint8_t character)
 	}
 	else if (character == '\0')
 	{
-		PORTC ^= LED_RED;
+		TOGGLE_RED_LED;
 	}
 	else
 	{
@@ -411,14 +411,14 @@ void cmd_onewire(const char* cmd)
 
 		for (;;)
 		{
-			PORTC |= LED_RED;
+			SET_GREEN_LED;
 
 			result = ow_search( 0, &last_device, snum);
 			sprintf( cmd_line, "one wire dev: %02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x\r\n",
 				snum[0], snum[1], snum[2], snum[3], snum[4], snum[5], snum[6], snum[7]);
 			uart_write( (uint8_t*)cmd_line, strlen(cmd_line) );
 			
-			PORTC &= ~LED_RED;
+			CLEAR_GREEN_LED;;
 
 			if( result == 0) {
 				nbr_of_dev++;

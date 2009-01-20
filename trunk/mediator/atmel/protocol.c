@@ -19,7 +19,6 @@
  ***************************************************************************/
 #include "protocol.h"
 #include "uart.h"
-//#include "os_thread.h"
 #include "battery.h"
 
 #define START_DATA_IDX		5
@@ -188,8 +187,8 @@ void protocol_receivePacket(void)
 		case TRM_DATA:
 		case TRM_GROUP:
 			break;
-		}	
-	}	
+		}
+	}
 }
 
 void protocol_receiveData(void)
@@ -206,7 +205,7 @@ void protocol_transmitData(void)
 	uint8_t packet[11];
 	int16_t value;
 	int8_t checksum=0, i;
-	
+
 	value = battery_get_parameter_value(parameter);
 	
 	packet[ 0] = FRAME;
@@ -224,7 +223,7 @@ void protocol_transmitData(void)
 	
 	length = protocol_frame_stuffing(packet, 8);
 	
-	uart_write( packet, length);
+	uart_send_twike( packet, length);
 }
 
 void protocol_transmitGroup(void)
@@ -232,7 +231,7 @@ void protocol_transmitGroup(void)
 	uint8_t packet[18];
 	int16_t value, current, voltage, binfo;
 	int8_t checksum=0, i;
-	
+
 	value   = battery_get_parameter_value(parameter);
 	voltage = battery_get_parameter_value(TOTAL_SPANNUNG);
 	current = battery_get_parameter_value(IST_STROM);
@@ -240,7 +239,7 @@ void protocol_transmitGroup(void)
 	
 	packet[ 0] = FRAME;
 	packet[ 1] = address;
-	packet[ 2] = TRM_DATA;
+	packet[ 2] = TRM_GROUP;
 	packet[ 3] = binfo >> 8;
 	packet[ 4] = binfo & 0xff;
 	packet[ 5] = current >> 8;
@@ -257,7 +256,7 @@ void protocol_transmitGroup(void)
 	
 	length = protocol_frame_stuffing(packet, 12);
 	
-	uart_write( packet, length);
+	uart_send_twike( packet, length);
 }
 
 uint8_t protocol_frame_stuffing(uint8_t packet[], uint8_t length)

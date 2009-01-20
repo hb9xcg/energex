@@ -112,5 +112,12 @@
 	//uint8 uart_data_available(void);
 	#define uart_data_available()	infifo.count
 
+	/*!
+	 * @brief		Sendet Daten per UART mit Twike Timing.
+	 * @param data		Datenpuffer
+	 * @param length	Groesse des Datenpuffers in Bytes
+	 */
+	void uart_send_twike(const uint8_t* data, uint8_t length);
+
 
 #endif	// UART_H_

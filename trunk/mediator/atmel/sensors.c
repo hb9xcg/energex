@@ -171,10 +171,9 @@ void sensors_thread(void)
 			continue;
 		}
 		sensors_start_conversion(sensors[device].serial);
-		PORTC &= ~LED_GREEN;
+		CLEAR_GREEN_LED;
 		delay(750);
-		PORTC |=  LED_GREEN;
-		PORTC &= ~LED_RED;
+		SET_GREEN_LED;
 
 		sensors_fetch_conversion(sensors[device].serial, &sensors[device].temp);
 #ifdef DEBUG	

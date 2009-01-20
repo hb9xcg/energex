@@ -26,7 +26,6 @@
 
 #include "ow.h"
 #include "i2c.h"
-#include "os_thread.h"
 #include <string.h>
 #include <stdio.h>
 #include "uart.h"
