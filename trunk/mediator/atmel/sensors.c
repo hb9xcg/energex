@@ -1,21 +1,24 @@
-/*
- * Energex
- * 
- * This program is free software; you can redistribute it
- * and/or modify it under the terms of the GNU General
- * Public License as published by the Free Software
- * Foundation; either version 2 of the License, or (at your
- * option) any later version. 
- * This program is distributed in the hope that it will be 
- * useful, but WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
- * PURPOSE. See the GNU General Public License for more details.
- * You should have received a copy of the GNU General Public 
- * License along with this program; if not, write to the Free 
- * Software Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307, USA.
- * 
- */
+/***************************************************************************
+ *   Energex                                                               *
+ *                                                                         *
+ *   Copyright (C) 2008-2009 by Markus Walser                              *
+ *   markus.walser@gmail.com                                               *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ ***************************************************************************/
 
 /*! 
  * @file        sensors.c
@@ -32,15 +35,26 @@
 #include "os_thread.h"
 #include "delay.h"
 #include "uart.h"
+#include "crc8.h"
 
-#define DS18S20_CMD_MATCH_ROM     0x55
-#define DS18S20_CMD_CONVERT       0x44
-#define DS18S20_CMD_READ_SCRATCH  0xBE
+#define DS18S20_CMD_MATCH_ROM       0x55
+#define DS18S20_CMD_CONVERT         0x44
+#define DS18S20_CMD_READ_SCRATCH    0xBE
+#define DS18S20_CRC_POLYNOM         0x31      // X8 + X5 + X4 + 1
+#define DS18S20_SCRATCH_PAD_SIZE       9      // [bytes]
+#define DS18S20_IDX_TEMPERATURE_LSB    0
+#define DS18S20_IDX_TEMPERATURE_MSB    1
+#define DS18S20_IDX_COUNT_REMAIN       6
+#define DS18S20_IDX_COUNT_PER_GRAD     7
+#define DS18S20_IDX_CRC                8
 
 #define SENSORS_MAX_DEVICES        2
 #define SENSORS_UNUSED             0x8000
 #define SENSORS_USED               0x0000
 #define SENSORS_STACK_SIZE         128
+
+
+
 
 typedef struct
 {
@@ -55,7 +69,6 @@ static Tcb_t*   sensors_thread_tcb;
 
 static void     sensors_thread(void);
 static void     sensors_search(void);
-
 
 #ifdef DEBUG
     static 	char line[20];
@@ -115,15 +128,33 @@ void sensors_get_temperatur(int8_t index, int16_t* temp)
 	os_exitCS();
 }
 
-void sensors_get_max_temperatur(int16_t* temp)
+void sensors_get_min_temperatur(int16_t* temp)
 {
 	int8_t i;
-	*temp = -9999;
+	*temp = 9999;
 	
 	os_enterCS();
 	for (i=0; i<SENSORS_MAX_DEVICES; i++) {
-		if (sensors[i].temp > *temp) {
-			*temp = sensors[i].temp;
+		if (sensors[i].temp != SENSORS_UNUSED) {
+			if (sensors[i].temp < *temp) {
+				*temp = sensors[i].temp;
+			}
+		}
+	}
+	os_exitCS();
+}
+
+void sensors_get_max_temperatur(int16_t* temp)
+{
+	int8_t i;
+	*temp = -2999;
+	
+	os_enterCS();
+	for (i=0; i<SENSORS_MAX_DEVICES; i++) {
+		if (sensors[i].temp != SENSORS_UNUSED) {
+			if (sensors[i].temp > *temp) {
+				*temp = sensors[i].temp;
+			}
 		}
 	}
 	os_exitCS();
@@ -198,13 +229,15 @@ void sensors_search(void)
 	idx = 0;
 	while (idx < SENSORS_MAX_DEVICES)
 	{
-		PORTC |= LED_GREEN;
+		SET_GREEN_LED;
 		ret = ow_search( 0, &last_device, sensors[idx].serial);
-		PORTC &= ~LED_GREEN;
+		CLEAR_GREEN_LED;
 
 		if( ret == eOWSuccess) {
 			sensors[idx].temp = SENSORS_USED;
 			idx++;
+		} else {
+			break;
 		}
 		
 		if (last_device) {
@@ -263,7 +296,10 @@ EDSError sensors_fetch_conversion(uint8_t serial[], int16_t* temp)
 	// Step 2: ROM Command
 	ow_write_byte(DS18S20_CMD_MATCH_ROM);
 	for( i=0; i<8; i++) {
-		ow_write_byte(serial[i]);
+		ret = ow_write_byte(serial[i]);
+		if (ret != eOWSuccess) {
+			return ret;
+		}
 	}
 
 	// Step 3: Function Command
@@ -272,20 +308,56 @@ EDSError sensors_fetch_conversion(uint8_t serial[], int16_t* temp)
 		return ret;
 	}
 	
-	uint8_t value[2];
-	for( i=0; i<2; i++) {
-		ret = ow_read_byte( &value[i] );		
+	uint8_t value[DS18S20_SCRATCH_PAD_SIZE];
+	for( i=0; i<DS18S20_SCRATCH_PAD_SIZE; i++) {
+		ret = ow_read_byte( &value[i] );
 		if (ret != eOWSuccess) {
 			return ret;
 		}
 	}
-	os_enterCS();
-	*temp   = 0;
-	*temp   = value[1];
-	*temp <<= 8;
-	*temp  |= value[0];
-	*temp  *= 50; // create Twike temperature format.
-	os_exitCS();
 
-	return eDSSuccess;
+	if (crc8(value, DS18S20_SCRATCH_PAD_SIZE-1) == value[DS18S20_IDX_CRC])
+	{
+		int16_t temperature = value[DS18S20_IDX_TEMPERATURE_LSB]; 
+		
+		if (value[DS18S20_IDX_TEMPERATURE_MSB])
+		{
+			temperature -= 0xFF;
+		}
+		temperature >>= 1;   // Truncate bit 0 for extended resolution
+		temperature  *= 100; // create Twike temperature format.
+
+		// extended resolution
+		int16_t extended = -100;
+		extended *= value[DS18S20_IDX_COUNT_REMAIN];
+		extended /= value[DS18S20_IDX_COUNT_PER_GRAD];
+		extended += 75;
+
+		temperature += extended;
+
+		os_enterCS();
+		*temp = temperature;
+		os_exitCS();
+		
+		ret = eDSSuccess;
+	}
+	else
+	{
+		ret = eDSCrcError;
+	}
+
+	return ret;
 }
+
+/* Scratchpad memory:
+	Byte 0 Temperature LSB (AAh)
+	Byte 1 Temperature MSB (00h) EEPROM
+	Byte 2 TH Register or User Byte 1* TH Register or User Byte 1
+	Byte 3 TL Register or User Byte 2* TL Register or User Byte 2
+	Byte 4 Reserved (FFh)
+	Byte 5 Reserved (FFh)
+	Byte 6 COUNT REMAIN (0Ch)
+	Byte 7 COUNT PER °C (10h)
+	Byte 8 CRC*
+*/
+

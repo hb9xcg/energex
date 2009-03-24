@@ -1,5 +1,7 @@
 /***************************************************************************
- *   Copyright (C) 2008 by Markus Walser                                   *
+ *   Energex                                                               *
+ *                                                                         *
+ *   Copyright (C) 2008-2009 by Markus Walser                              *
  *   markus.walser@gmail.com                                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *

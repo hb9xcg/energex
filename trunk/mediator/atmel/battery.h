@@ -1,5 +1,7 @@
 /***************************************************************************
- *   Copyright (C) 2008 by Markus Walser                                   *
+ *   Energex                                                               *
+ *                                                                         *
+ *   Copyright (C) 2008-2009 by Markus Walser                              *
  *   markus.walser@gmail.com                                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -28,6 +30,27 @@
  {
 #endif
 
+typedef struct
+{
+	uint16_t rekuperation_nok :   1; // Rekuperation nicht erlaubt
+	uint16_t charge_nok       :   1; // Ladung nicht erlaubt
+	uint16_t drive_nok        :   1; // Fahren nicht erlaubt
+	uint16_t charge_cur_to_hi :   1; // Zu hoher Ladestrom
+	uint16_t drive_cur_to_hi  :   1; // Zu hoher Fahrstrom
+	uint16_t voltage_to_hi    :   1; // Zu hohe Ladespannung
+	uint16_t voltage_to_lo    :   1; // Zu tiefe Fahrspannung
+	uint16_t bat_rel_open     :   1; // Batterie Relais offen
+	uint16_t bat_full         :   1; // Batterie voll
+	uint16_t bat_empty        :   1; // Batterie entladen
+	uint16_t charge_temp_to_hi:   1; // Zu hohe Ladetemperatur
+	uint16_t charge_temp_to_lo:   1; // Zu tiefe Ladetemperatur
+	uint16_t drive_temp_to_hi :   1; // Zu hohe Fahrtemperatur
+	uint16_t drive_temp_to_lo :   1; // Zu tiefe Fahrtemperatur
+	uint16_t voltage_nok      :   1; // Unsymmetrische Spannungen
+	uint16_t bat_error        :   1; // Fehler in der Batterieüberwachung
+} T_BInfo;
+
+
 
 typedef struct 
 {
@@ -36,18 +59,18 @@ typedef struct
 	int16_t		ah_counter;
 	int16_t		temerature;
 	uint8_t		address;
-	EDriveState	drive_state;
 	uint8_t		relais_state;
 	uint16_t	binfo;
 } battery_t;
 
+extern int8_t battery_enable_sampling;
 extern battery_t battery;
 
 void     battery_set_parameter_value(uint8_t parameter, uint16_t value);
 int16_t  battery_get_parameter_value(uint8_t parameter);
 void     battery_sample(void);
 void     battery_init(void);
-int16_t  battery_get_temperature(void);
+//int16_t  battery_get_temperature(void);
 uint16_t battery_get_voltage(void);
 uint16_t battery_get_info(void);
 void     battery_info_set(uint8_t bitNo);

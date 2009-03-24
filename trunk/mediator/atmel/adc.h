@@ -28,20 +28,29 @@
 
 #include "global.h"
 
-#define CH_CHARGE      1
-#define CH_DISCHARGE   3
-#define CH_VOLTAGE     7
-#define CH_TEMPERATURE 4
 
+#define CH_CHARGE_1       0x3
+#define CH_DISCHARGE_1    0x1
+#define CH_CHARGE_10      0xD
+#define CH_DISCHARGE_10   0x9
+#define CH_VOLTAGE        0x7
+#define CH_TEMPERATURE    0x4
+
+extern int8_t adc_sampling;
 /*!
  * Misst interne Offsetspannung
  */
-void adc_calibrate_offset(void);
+void adc_calibrate_offset(int8_t channel);
 
 /*!
  * Liefert gemessene interne Offsetspannung
  */
-int16_t adc_get_offset(void);
+int8_t adc_get_offset(int8_t channel);
+
+/*!
+ * Liefert x mV/LSB
+ */
+int8_t adc_get_resolution(int8_t channel);
 
 /*!
  * Liesst pollend einen channel aus
@@ -70,4 +79,6 @@ uint8 adc_get_active_channel(void);
  * Bit0 = Kanal 0 usw.
  */
 void adc_init(uint8_t channel);
+
+
 #endif
