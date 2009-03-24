@@ -21,51 +21,61 @@
  ***************************************************************************/
 
 /*! 
- * @file 	mediator.h
- * @brief 	Main twike master application.
+ * @file 	data.h
+ * @brief 	Stores and loads persistent data.
  * @author 	Markus Walser (markus.walser@gmail.com)
- * @date 	11.02.08
+ * @date 	22.02.08
  */
 
-#ifndef MEDIATOR_H_DEF
-#define MEDIATOR_H_DEF
+#include <avr/eeprom.h>
+#include "data.h"
+#include "charge.h"
 
-#define MCU
-#define NEW_AVR_LIB
-#define OS_AVAILABLE
-
-#include "global.h"
-#include "battery.h"
-#include "io.h"
-
-#include <avr/io.h>
+// Declaration
+//uint8_t eeI2CAddress EEMEM = DEFAULT_I2C_ADDRESS;
+uint16_t eeChargingLevel    EEMEM = 0; // current battery charging level
+uint16_t eeTotalAhDischarge EEMEM = 0; // current battery charging level
+uint16_t eeTotalAhCharge    EEMEM = 0; // current battery charging level
 
 
-#define ADC_AVAILABLE		/*!< A/D-Converter */
-
-#define TWI_AVAILABLE
-
-#ifdef TWI_AVAILABLE
-	#define I2C_AVAILABLE	/*!< I2C-Treiber statt TWI-Implementierung benutzen */
-#endif
-
-#define XTAL F_CPU			 /*!< Crystal frequency in Hz */
-
-int16_t mediator_get_temperature(void);
-
-typedef enum
+void data_save(void)
 {
-	ePowerOff,
-	ePowerSave,
-	ePowerFull,
-	ePowerLast
-} EPowerState;
+	eeprom_busy_wait();
+	eeprom_write_word( &eeChargingLevel, charge_get_capacity() );
+	eeprom_busy_wait();
+	eeprom_write_word( &eeTotalAhDischarge, charge_get_total_discharge() );
+	eeprom_busy_wait();
+	eeprom_write_word( &eeTotalAhCharge, 0 );
+	eeprom_busy_wait();
+}
 
-EPowerState ePowerSoll;
+void data_load(void)
+{
+	uint16_t value;
 
-void mediator_set_drive_state(EDriveState eState);
-EDriveState mediator_get_drive_state(void);
-void mediator_check_binfo(void);
-extern int16 mediator_temperature;
+	eeprom_busy_wait();
+	value = eeprom_read_word( &eeChargingLevel );
+	charge_set_capacity(value);
+
+	eeprom_busy_wait();
+	value = eeprom_read_word( &eeTotalAhDischarge );
+	charge_set_total_discharge(value);
+
+	eeprom_busy_wait();
+	value = eeprom_read_word( &eeTotalAhCharge );
+}
+
+#if 0
+
+
+// read
+eeprom_busy_wait();
+callibration = eeprom_read_word( &eeCalibration );
+eeprom_busy_wait();
+address = eeprom_read_byte( &eeI2CAddress );
+
+
+
+
 
 #endif

@@ -1,21 +1,24 @@
-/*
- * Energex
- * 
- * This program is free software; you can redistribute it
- * and/or modify it under the terms of the GNU General
- * Public License as published by the Free Software
- * Foundation; either version 2 of the License, or (at your
- * option) any later version. 
- * This program is distributed in the hope that it will be 
- * useful, but WITHOUT ANY WARRANTY; without even the implied
- * warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
- * PURPOSE. See the GNU General Public License for more details.
- * You should have received a copy of the GNU General Public 
- * License along with this program; if not, write to the Free 
- * Software Foundation, Inc., 59 Temple Place, Suite 330, Boston,
- * MA 02111-1307, USA.
- * 
- */
+/***************************************************************************
+ *   Energex                                                               *
+ *                                                                         *
+ *   Copyright (C) 2008-2009 by Markus Walser                              *
+ *   markus.walser@gmail.com                                               *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ ***************************************************************************/
 
 /*! 
  * @file 	command.c
@@ -26,6 +29,8 @@
 #include <avr/io.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
+
 
 #include "command.h"
 #include "os_thread.h"
@@ -33,10 +38,10 @@
 #include "adc.h"
 #include "charge.h"
 #include "battery.h"
-#include "simulator.h"
 #include "protocol.h"
 #include "ow.h"
 #include "sensors.h"
+#include "data.h"
 
 #define COMMAND_STACK_SIZE 384
 #define CMD_LINE   128
@@ -69,7 +74,7 @@ static void cmd_offset(void);
 static void cmd_power(const char* cmd);
 static void cmd_onewire(const char* cmd);
 static void cmd_sensor(const char* cmd);
-static void cmd_comm_simulator(const char* cmd);
+static void cmd_eeprom(const char* cmd);
 static void cmd_stack_memory(void);
 
 
@@ -92,6 +97,7 @@ uint16_t cmd_get_max_stack_usage(void)
 	}
 	return COMMAND_STACK_SIZE-stack_idx;
 }
+
 
 void cmd_dispatcher(void)
 {
@@ -181,8 +187,8 @@ void cmd_process( const char* cmd )
 {	
 	switch( cmd[0] )
 	{
-		case 'c':
-			cmd_comm_simulator(cmd);
+		case 'e':
+			cmd_eeprom(cmd);
 		break;
 		case 'i':
 			cmd_current();
@@ -251,17 +257,24 @@ void cmd_help(void)
 	strcpy(cmd_line, "?:\tHelp\n\r");
 }
 
-void cmd_comm_simulator(const char* cmd)
+void cmd_eeprom(const char* cmd)
 {
-	if( strstr( cmd, "start") )
+	if (strstr( cmd, "load") )
 	{
-		simulator_activate();
-		strcpy(cmd_line, "Activated communication simulator.");
+		data_load();	
+		strcpy(cmd_line, "Persistent data loaded.");
 	}
-	else if( strstr( cmd, "stop") )
+	else if (strstr( cmd, "save") )
 	{
-		simulator_deactivate();
-		strcpy(cmd_line, "Deactivated communication simulator.");
+		data_save();
+		strcpy(cmd_line, "Persistent data saved.");
+	}
+	else if (strstr( cmd, "inct") )
+	{
+		uint16_t newCapacity;
+		newCapacity = charge_get_capacity();
+		newCapacity++;
+		charge_set_capacity(newCapacity);
 	}
 }
 
@@ -269,17 +282,18 @@ void cmd_temperatur(void)
 {
 	int16_t temperature;
 
-	temperature = battery_get_temperature();
+	temperature = mediator_get_temperature();
 
-	sprintf( cmd_line, "Mediator temperatur: %d.%02d°C", temperature/100, temperature%100);
+	sprintf( cmd_line, "Mediator temperatur: %d.%02d°C", temperature/100, abs(temperature)%100);
 }
+
 
 void cmd_voltage(void)
 {
 	int16_t voltage;
 
-	voltage = battery_get_voltage();
-
+	voltage = battery_get_voltage();	
+	
 	sprintf( cmd_line, "Mediator voltage: %d.%02dV", voltage/100, voltage%100);
 }
 
@@ -287,10 +301,11 @@ void cmd_current(void)
 {
 	int16_t current;
 	int8_t sign = ' ';
-	
+
 	current = charge_get_current();
 
-	if (current<0) {
+	if (current<0) 
+	{
 		sign = '-';
 		current = -current;
 	}
@@ -302,11 +317,16 @@ void cmd_offset(void)
 {
 	int16_t offset;
 	
-	offset = adc_get_offset();
+	offset = adc_get_offset(CH_CHARGE_10);
 	
-	sprintf( cmd_line, "Mediator ADC offset: %d", offset);
+	sprintf( cmd_line, "Mediator ADC charge offset: %d\n\r", offset);
+	uart_write( (uint8_t*)cmd_line, strlen(cmd_line) );
 
-	adc_calibrate_offset();
+	offset = adc_get_offset(CH_DISCHARGE_10);
+	
+	sprintf( cmd_line, "Mediator ADC discharge offset: %d", offset);
+
+	//adc_calibrate_offset(CH_CHARGE_10);
 }
 
 void cmd_capacity(void)

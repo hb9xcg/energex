@@ -1,5 +1,7 @@
 /***************************************************************************
- *   Copyright (C) 2008 by Markus Walser                                   *
+ *   Energex                                                               *
+ *                                                                         *
+ *   Copyright (C) 2008-2009 by Markus Walser                              *
  *   markus.walser@gmail.com                                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -17,6 +19,10 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+#include <assert.h>
+#include <stdio.h>
+#include <avr/io.h>
+#include "mediator.h"
 #include "battery.h"
 #include "sensors.h"
 #include "adc.h"
@@ -24,60 +30,67 @@
 #include "protocol.h"
 #include "os_thread.h"
 #include "delay.h"
-#include <assert.h>
-#include <stdio.h>
-#include <avr/io.h>
 
-#define OVER_SAMPLING_LOG	4
+
+
+#define OVER_SAMPLING_LOG	6
 #define OVER_SAMPLING		(1<<OVER_SAMPLING_LOG)
-#define VOLTAGE_INV_R1		2*330000ULL  // [Ohm]
+#define VOLTAGE_INV_R1		660000ULL    // [Ohm]
 #define VOLTAGE_INV_R2		3740ULL      // [Ohm]
-#define V_REF		   		2500ULL     // [mV]
+#define V_REF		   	2500ULL      // [mV]
 #define ADC_RESOLUTION		10
 #define ADC_MAX_VALUE		(1<<ADC_RESOLUTION)
 
 #define NBR_OF_BATTERIES	3
 
 battery_t battery;
-int16 voltage[OVER_SAMPLING];
-int16 temperature[OVER_SAMPLING];
 
-// gets called each 400us from the timer interrupt 
+uint16_t battery_voltage; // [ADC bits]
+int8_t battery_enable_sampling = 0;
+
+
+// gets called every 400us from the timer interrupt 
 void battery_sample(void)
 {
 	static uint8_t idx;
+	static uint16_t voltage_oversampling;
+	static int16_t voltage_sample;
 
 	charge_sample();
-	adc_read_int( CH_VOLTAGE, &voltage[idx]);
-	adc_read_int( CH_TEMPERATURE, &temperature[idx]);
+
+
+	voltage_oversampling += voltage_sample;
 	
-	if (++idx == OVER_SAMPLING )
+	if (++idx >= OVER_SAMPLING )
 	{
 		idx = 0;
+		battery_voltage = voltage_oversampling;
+		voltage_oversampling = 0;
+		voltage_sample = 0;
+
+		adc_read_int( CH_TEMPERATURE, &mediator_temperature);
+	}
+	else
+	{
+		adc_read_int( CH_VOLTAGE, &voltage_sample);
 	}
 }
 
 void battery_init(void)
 {
-	battery.drive_state = 0;
 	battery.binfo       = 0;
 	battery.voltage     = 0;
 	battery.current     = 0;
+
+	battery_enable_sampling = 1;
 }
 
 uint16_t battery_get_voltage(void)
 {
-	uint8_t idx;
-	uint16_t average = 0;
 	uint32_t voltage32;
 
-	for (idx=0; idx<OVER_SAMPLING; idx++)
-	{
-		average += voltage[idx];
-	}
-
-	voltage32   = average;
-	voltage32  *= (V_REF/10 * VOLTAGE_INV_R1 / VOLTAGE_INV_R2 );     // voltage32 *= 44117;
+	voltage32   = battery_voltage;
+	voltage32  *= (V_REF/10ULL * (VOLTAGE_INV_R1+VOLTAGE_INV_R2) / VOLTAGE_INV_R2 );     // voltage32 *= 44117;
 	voltage32 >>= (OVER_SAMPLING_LOG + ADC_RESOLUTION);
 
 	return voltage32;
@@ -96,7 +109,7 @@ uint16_t battery_get_power(void)
 
 	return power;
 }
-
+/*
 int16_t battery_get_temperature(void)
 {
 	uint8_t idx;
@@ -115,7 +128,7 @@ int16_t battery_get_temperature(void)
 
 	return temperature32;
 }
-
+*/
 void battery_command(uint16_t relais_state)
 {
 	if (relais_state) {
@@ -131,7 +144,7 @@ void battery_set_parameter_value(uint8_t parameter, uint16_t value)
 
 	switch(parameter)
 	{
-	case DRIVE_STATE:	battery.drive_state  	= value;
+	case DRIVE_STATE:	mediator_set_drive_state(value);
 		break;
 	case COMMAND:		battery_command(value);
 		break;
@@ -176,7 +189,7 @@ int16_t battery_get_parameter_value(uint8_t parameter)
 	case LAST_ERROR:		value = 0;			break;
 	case BUS_ADRESSE:		value = battery.address;	break;
 
-	case DRIVE_STATE:		value = battery.drive_state;			break;
+	case DRIVE_STATE:		value = mediator_get_drive_state();	break;
 	case COMMAND:			value = !battery_info_get(BAT_REL_OPEN);	break;
 	case PARAM_PROT:		value = 0;					break;
 
@@ -222,7 +235,7 @@ int16_t battery_get_parameter_value(uint8_t parameter)
 	
 	case PC_CALIBR_TEMP:		value = 0x5678;			break;
 	case MAX_BAT_TEMP:		sensors_get_max_temperatur((int16_t*)&value);	break;
-	case UMGEBUNGS_TEMP:		value = battery_get_temperature();		break;
+	case UMGEBUNGS_TEMP:		value = mediator_get_temperature();		break;
 	case MAX_LADETEMP:		value = 4500;			break;
 	case MIN_LADETEMP:		value = 0;			break;
 	case MAX_FAHRTEMP:		value = 4500;			break;
@@ -233,7 +246,7 @@ int16_t battery_get_parameter_value(uint8_t parameter)
 	case MAX_KAPAZITAET:		value = 305;	break;
 	case MIN_KAPAZITAET:		value = 280;	break;
 	case GELADENE_AH:		value = 1000;	break;
-	case ENTLADENE_AH:		value = 800;	break;
+	case ENTLADENE_AH:		value = charge_get_total_discharge()/NBR_OF_BATTERIES;	break;
 	case LADEZYKLEN:		value = 100;	break;
 	case TIEFENTLADE_ZYKLEN:	value = 0;	break;
 	

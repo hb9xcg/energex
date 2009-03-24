@@ -28,7 +28,7 @@
 #ifndef global_H
 #define global_H
 
-#include "mediator.h"
+//#include "mediator.h"
 	
 #ifndef __ASSEMBLER__
 	#include <stdint.h>
@@ -64,33 +64,8 @@
 	#define On                    1		/*!< An */
 	#define Off                   0		/*!< Aus */
 
-	#ifdef PC
-		#if defined WIN32
-		 	#define LITTLE_ENDIAN	1234
-		 	#define BIG_ENDIAN	4321
-		 	#define BYTE_ORDER	LITTLE_ENDIAN
-		#elif defined __linux__
-		 	#include <endian.h>
-		#else
-			#include <machine/endian.h>
-		#endif	// WIN32
-
-		#ifdef EEPROM_EMU_AVAILABLE
-			#ifdef __APPLE__
-				/* OS X */
-				#define EEPROM __attribute__ ((section ("__DATA,.eeprom"),aligned(1)))	/*!< EEPROM-Section */
-			#else
-				/* Linux und Windows */
-				#define EEPROM __attribute__ ((section (".eeprom"),aligned(1)))			/*!< EEPROM-Section */
-			#endif
-		#else
-			/* keine EEPROM-Emulation */
-			#define EEPROM	
-		#endif	// EEPROM_EMU_AVAILABLE
-	#else
-		/* MCU */
-		#define EEPROM __attribute__ ((section (".eeprom"),aligned(1)))			/*!< EEPROM-Section */
-	#endif	// PC
+	/* MCU */
+	#define EEPROM __attribute__ ((section (".eeprom"),aligned(1)))			/*!< EEPROM-Section */
 
 	#define binary(var,bit) ((var >> bit)&1)	/*!< gibt das Bit "bit" von "var" zurueck */
 #endif	// __ASSEMBLER__

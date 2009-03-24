@@ -21,51 +21,19 @@
  ***************************************************************************/
 
 /*! 
- * @file 	mediator.h
- * @brief 	Main twike master application.
+ * @file 	data.h
+ * @brief 	Stores and loads persistent data.
  * @author 	Markus Walser (markus.walser@gmail.com)
- * @date 	11.02.08
+ * @date 	22.02.08
  */
 
-#ifndef MEDIATOR_H_DEF
-#define MEDIATOR_H_DEF
+#ifndef _DATA_H_
+#define _DATA_H_
 
-#define MCU
-#define NEW_AVR_LIB
-#define OS_AVAILABLE
+#include "mediator.h"
 
-#include "global.h"
-#include "battery.h"
-#include "io.h"
+void data_save(void);
+void data_load(void);
 
-#include <avr/io.h>
-
-
-#define ADC_AVAILABLE		/*!< A/D-Converter */
-
-#define TWI_AVAILABLE
-
-#ifdef TWI_AVAILABLE
-	#define I2C_AVAILABLE	/*!< I2C-Treiber statt TWI-Implementierung benutzen */
-#endif
-
-#define XTAL F_CPU			 /*!< Crystal frequency in Hz */
-
-int16_t mediator_get_temperature(void);
-
-typedef enum
-{
-	ePowerOff,
-	ePowerSave,
-	ePowerFull,
-	ePowerLast
-} EPowerState;
-
-EPowerState ePowerSoll;
-
-void mediator_set_drive_state(EDriveState eState);
-EDriveState mediator_get_drive_state(void);
-void mediator_check_binfo(void);
-extern int16 mediator_temperature;
 
 #endif

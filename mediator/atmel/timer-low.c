@@ -63,8 +63,10 @@ ISR(SIG_OUTPUT_COMPARE2) {
 	sei(); 	// Interrupts wieder an, z.B. UART-Kommunikation kann parallel zu RC5 und Encoderauswertung laufen   
 	/* - FERNBEDIENUNG - */
 	
-
-	battery_sample();
+	if (battery_enable_sampling)
+	{
+		battery_sample();
+	}
 	
 	/* --- RADENCODER --- */
 	// MW bot_encoder_isr();

@@ -1,5 +1,7 @@
 /***************************************************************************
- *   Copyright (C) 2008 by Markus Walser                                   *
+ *   Energex                                                               *
+ *                                                                         *
+ *   Copyright (C) 2008-2009 by Markus Walser                              *
  *   markus.walser@gmail.com                                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -231,6 +233,8 @@ void protocol_transmitGroup(void)
 	uint8_t packet[18];
 	int16_t value, current, voltage, binfo;
 	int8_t checksum=0, i;
+
+	mediator_check_binfo();
 
 	value   = battery_get_parameter_value(parameter);
 	voltage = battery_get_parameter_value(TOTAL_SPANNUNG);
