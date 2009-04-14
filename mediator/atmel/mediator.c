@@ -96,22 +96,20 @@ int main(void)
 	MCUCR = 1<< JTD;
 	MCUCR = 1<< JTD;
 
+	if (MCUSR & 1<<WDRF) {
+		// We're comming from a soft reboot
+		MCUSR &= ~(1<<WDRF);
+	}
 	wdt_disable();	// Watchdog aus!
 
-	// adc_calibrate_offset();
 
 	os_create_thread((uint8_t *)SP, NULL);	// main Hauptthread anlegen mit höchster Priorität.
 
 	timer_2_init();
 	
 	/* Ist das ein Power on Reset? */
-	#ifdef __AVR_ATmega644P__
-		if ((MCUSR & 1) == 1) {
-			MCUSR &= ~1;	// Bit loeschen
-	#else
-		if ((MCUCSR & 1) == 1) {
-			MCUCSR &= ~1;	// Bit loeschen
-	#endif
+	if (MCUSR & (1<<PORF)) {
+		MCUSR &= ~(1<<PORF);	// Bit loeschen
 		delay(100);
 		asm volatile("jmp 0");
 	}
