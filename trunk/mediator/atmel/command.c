@@ -26,10 +26,12 @@
  * @author 	Markus Walser (markus.walser@gmail.com)
  * @date 	11.02.08
  */
-#include <avr/io.h>
 #include <string.h>
 #include <stdio.h>
-#include <stdlib.h>
+#include <stdlib.h> 
+#include <avr/io.h>
+#include <avr/wdt.h> 
+
 
 
 #include "command.h"
@@ -70,6 +72,7 @@ static void cmd_voltage(void);
 static void cmd_current(void);
 static void cmd_capacity(void);
 static void cmd_reset(void);
+static void cmd_reboot(void);
 static void cmd_offset(void);
 static void cmd_power(const char* cmd);
 static void cmd_onewire(const char* cmd);
@@ -187,6 +190,9 @@ void cmd_process( const char* cmd )
 {	
 	switch( cmd[0] )
 	{
+		case 'b':
+			cmd_reboot();
+		break;
 		case 'e':
 			cmd_eeprom(cmd);
 		break;
@@ -236,6 +242,8 @@ void cmd_help(void)
 {
 	strcpy(cmd_line, "\n\rAvailable commands:\n\r");
 	uart_write( (uint8_t*)cmd_line, strlen(cmd_line) );
+	strcpy(cmd_line, "b:\tReboot\n\r");
+	uart_write( (uint8_t*)cmd_line, strlen(cmd_line) );
 	strcpy(cmd_line, "i:\tCurrent\n\r");
 	uart_write( (uint8_t*)cmd_line, strlen(cmd_line) );
 	strcpy(cmd_line, "m\tMemory info\n\r");
@@ -276,6 +284,11 @@ void cmd_eeprom(const char* cmd)
 		newCapacity++;
 		charge_set_capacity(newCapacity);
 	}
+}
+
+void cmd_reboot(void)
+{
+	wdt_enable(WDTO_15MS);
 }
 
 void cmd_temperatur(void)
