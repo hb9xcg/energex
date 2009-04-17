@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
+
 import com.trolltech.qt.core.QByteArray;
 import com.trolltech.qt.core.QCoreApplication;
 import com.trolltech.qt.core.QDataStream;
@@ -42,7 +43,7 @@ import energex.storage.RawRecorder;
 
 public class TwikeAnalyzer extends QMainWindow implements DataInterface {
 
-    TwikeAnalyzerClass ui = new TwikeAnalyzerClass();
+	Ui_TwikeAnalyzerClass ui = new Ui_TwikeAnalyzerClass();
     QDataStream binaryStream;
     TwikePort port;
     String currentPort;
@@ -82,25 +83,26 @@ public class TwikeAnalyzer extends QMainWindow implements DataInterface {
 	    
 	    ui.logTable.setModel(model);
         
-        // restore current defaults
-        readSettings();
-		
-		if(currentPort.isEmpty()) {
-			ui.actionRecord.setEnabled(false);
-		} else {
-			port = new TwikePort(currentPort);
-			ui.statusBar.showMessage("Using serial port " + currentPort);
-			ui.actionRecord.setEnabled(true);
-		}
-		
+	    ui.actionRecord.setEnabled(false);
 		ui.actionPlay.setEnabled(false);
 		ui.actionPause.setEnabled(false);
 		ui.actionStop.setEnabled(false);
 		ui.actionBattery1.setEnabled(false);
 		ui.actionBattery2.setEnabled(false);
 		ui.actionBattery3.setEnabled(false);
+		ui.actionDownload.setEnabled(false);
+	    
+        // restore current defaults
+        readSettings();
 		
-	    ui.actionQuit.triggered.connect(QApplication.instance(), "quit()");
+		if(!currentPort.isEmpty()) {
+			port = new TwikePort(currentPort);
+			ui.statusBar.showMessage("Using serial port " + currentPort);
+			ui.actionRecord.setEnabled(true);
+			ui.actionDownload.setEnabled(true);
+		}
+				
+	    ui.actionQuit.triggered.connect(this, "close()");
 	    
 	    setWindowIcon(new QIcon(new QPixmap("classpath:energex/gui/icons/player-time.png")));
     }
@@ -109,18 +111,7 @@ public class TwikeAnalyzer extends QMainWindow implements DataInterface {
     	super(parent);
         ui.setupUi(this);
     }
-	
-	public void on_actionQuit_triggered() {
-    	try {
-    		writeSettings();
-    		if(port!=null && port.isOpen()) {
-    			port.close();
-    		}    		
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-    }
-	
+		
 	public void on_actionSettings_triggered() {
 		SettingsDialog settingsDialog = new SettingsDialog(this);
 		
@@ -135,7 +126,18 @@ public class TwikeAnalyzer extends QMainWindow implements DataInterface {
     		}
     		port = new TwikePort(settingsDialog.getPort());
     		ui.statusBar.showMessage("Using serial port "+settingsDialog.getPortName());
-    		ui.actionRecord.setEnabled(!settingsDialog.getPortName().isEmpty());	
+    		if (settingsDialog.getPortName().isEmpty())
+    		{
+    			ui.actionRecord.setEnabled(false);
+        		ui.actionDownload.setEnabled(false);
+    		}
+    		else
+    		{
+    			currentPort = settingsDialog.getPortName();
+    			ui.actionRecord.setEnabled(true);
+        		ui.actionDownload.setEnabled(true);
+    		}
+    		
     	}
 	}
 	
@@ -166,6 +168,7 @@ public class TwikeAnalyzer extends QMainWindow implements DataInterface {
 			ui.actionPlay.setEnabled(false);
 			ui.actionPause.setEnabled(true);
 			ui.actionStop.setEnabled(true);
+			ui.actionDownload.setEnabled(false);
 			recordingPaused = false;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -201,6 +204,7 @@ public class TwikeAnalyzer extends QMainWindow implements DataInterface {
 			ui.actionPlay.setEnabled(false);
 			ui.actionPause.setEnabled(false);
 			ui.actionStop.setEnabled(false);
+			ui.actionDownload.setEnabled(true);
 			onlineDecoder = null;
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -250,6 +254,23 @@ public class TwikeAnalyzer extends QMainWindow implements DataInterface {
     	aboutDialog.exec();
     }
     
+    public void on_actionDownload_triggered() {
+    	try {
+    		ui.actionRecord.setEnabled(false);
+			ui.actionPlay.setEnabled(false);
+			ui.actionPause.setEnabled(false);
+			ui.actionStop.setEnabled(false);
+			
+			DownloadDialog downloadDialog = new DownloadDialog(this, port);
+			downloadDialog.exec();
+			
+			ui.actionRecord.setEnabled(true);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+    }
+    
     private void readSettings() {
     	QSettings settings = new QSettings();
 
@@ -262,7 +283,7 @@ public class TwikeAnalyzer extends QMainWindow implements DataInterface {
         	ui.logTable.setColumnWidth(idx++, width );	
         }
         
-		currentPort = (String) settings.value("Port", "");
+		currentPort = (String) settings.value("currentPort", "");
 		
         settings.endGroup();
     }
@@ -273,13 +294,15 @@ public class TwikeAnalyzer extends QMainWindow implements DataInterface {
     	settings.beginGroup("TwikeAnalyzer");
         settings.setValue("geometry", saveGeometry());
         
+        settings.setValue("currentPort", currentPort);
+        
         int idx=0;
         for( String label : labels) {	
         	Integer width = ui.logTable.columnWidth(idx++);
         	settings.setValue(label, width.toString() );	
         }
         
-        settings.setValue("Port", currentPort);
+        
         settings.endGroup();
     }
     
@@ -287,6 +310,13 @@ public class TwikeAnalyzer extends QMainWindow implements DataInterface {
     {
         if (true) {
             writeSettings();
+            try {
+        		if(port!=null && port.isOpen()) {
+        			port.close();
+        		}
+    		} catch (Exception e) {
+    			e.printStackTrace();
+    		}
             event.accept();
         } else {
             event.ignore();

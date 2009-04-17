@@ -13,14 +13,6 @@
    <string>QTwikeAnalyzer</string>
   </property>
   <widget class="QWidget" name="centralwidget" >
-   <property name="geometry" >
-    <rect>
-     <x>0</x>
-     <y>71</y>
-     <width>739</width>
-     <height>596</height>
-    </rect>
-   </property>
    <layout class="QGridLayout" name="gridLayout" >
     <item row="0" column="0" >
      <widget class="QTableView" name="logTable" >
@@ -49,7 +41,7 @@
      <x>0</x>
      <y>0</y>
      <width>739</width>
-     <height>32</height>
+     <height>28</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile" >
@@ -93,14 +85,6 @@
    <addaction name="menuHelp" />
   </widget>
   <widget class="QToolBar" name="toolBar" >
-   <property name="geometry" >
-    <rect>
-     <x>0</x>
-     <y>32</y>
-     <width>739</width>
-     <height>39</height>
-    </rect>
-   </property>
    <property name="windowTitle" >
     <string>toolBar</string>
    </property>
@@ -111,25 +95,19 @@
     <bool>false</bool>
    </attribute>
    <addaction name="actionOpen" />
+   <addaction name="separator" />
    <addaction name="actionRecord" />
    <addaction name="actionStop" />
    <addaction name="actionPause" />
    <addaction name="actionPlay" />
+   <addaction name="separator" />
+   <addaction name="actionDownload" />
   </widget>
-  <widget class="QStatusBar" name="statusBar" >
-   <property name="geometry" >
-    <rect>
-     <x>0</x>
-     <y>667</y>
-     <width>739</width>
-     <height>25</height>
-    </rect>
-   </property>
-  </widget>
+  <widget class="QStatusBar" name="statusBar" />
   <action name="actionOpen" >
    <property name="icon" >
     <iconset>
-     <normaloff>classpath:energex/gui/icons/document-open.png</normaloff>classpath:energex/gui/icons/document-open.png</iconset>
+     <normaloff>classpath:file:/home/markus/eclipse/QTwikeAnalyzer/src#energex/gui/icons/document-open.png</normaloff>classpath:file:/home/markus/eclipse/QTwikeAnalyzer/src#energex/gui/icons/document-open.png</iconset>
    </property>
    <property name="text" >
     <string>&amp;Open</string>
@@ -138,7 +116,7 @@
   <action name="actionRecord" >
    <property name="icon" >
     <iconset>
-     <normaloff>classpath:energex/gui/icons/media-record.png</normaloff>classpath:energex/gui/icons/media-record.png</iconset>
+     <normaloff>classpath:file:/home/markus/eclipse/QTwikeAnalyzer/src#energex/gui/icons/media-record.png</normaloff>classpath:file:/home/markus/eclipse/QTwikeAnalyzer/src#energex/gui/icons/media-record.png</iconset>
    </property>
    <property name="text" >
     <string>&amp;Record</string>
@@ -147,7 +125,7 @@
   <action name="actionPause" >
    <property name="icon" >
     <iconset>
-     <normaloff>classpath:energex/gui/icons/media-playback-pause.png</normaloff>classpath:energex/gui/icons/media-playback-pause.png</iconset>
+     <normaloff>classpath:file:/home/markus/eclipse/QTwikeAnalyzer/src#energex/gui/icons/media-playback-pause.png</normaloff>classpath:file:/home/markus/eclipse/QTwikeAnalyzer/src#energex/gui/icons/media-playback-pause.png</iconset>
    </property>
    <property name="text" >
     <string>&amp;Pause</string>
@@ -156,7 +134,7 @@
   <action name="actionPlay" >
    <property name="icon" >
     <iconset>
-     <normaloff>classpath:energex/gui/icons/media-playback-start.png</normaloff>classpath:energex/gui/icons/media-playback-start.png</iconset>
+     <normaloff>classpath:file:/home/markus/eclipse/QTwikeAnalyzer/src#energex/gui/icons/media-playback-start.png</normaloff>classpath:file:/home/markus/eclipse/QTwikeAnalyzer/src#energex/gui/icons/media-playback-start.png</iconset>
    </property>
    <property name="text" >
     <string>P&amp;lay</string>
@@ -165,7 +143,7 @@
   <action name="actionStop" >
    <property name="icon" >
     <iconset>
-     <normaloff>classpath:energex/gui/icons/media-playback-stop.png</normaloff>classpath:energex/gui/icons/media-playback-stop.png</iconset>
+     <normaloff>classpath:file:/home/markus/eclipse/QTwikeAnalyzer/src#energex/gui/icons/media-playback-stop.png</normaloff>classpath:file:/home/markus/eclipse/QTwikeAnalyzer/src#energex/gui/icons/media-playback-stop.png</iconset>
    </property>
    <property name="text" >
     <string>S&amp;top</string>
@@ -179,7 +157,7 @@
   <action name="actionSaveAs" >
    <property name="icon" >
     <iconset>
-     <normaloff>classpath:energex/gui/icons/document-save-as.png</normaloff>classpath:energex/gui/icons/document-save-as.png</iconset>
+     <normaloff>classpath:file:/home/markus/eclipse/QTwikeAnalyzer/src#energex/gui/icons/document-save-as.png</normaloff>classpath:file:/home/markus/eclipse/QTwikeAnalyzer/src#energex/gui/icons/document-save-as.png</iconset>
    </property>
    <property name="text" >
     <string>&amp;Save As</string>
@@ -188,7 +166,7 @@
   <action name="actionSettings" >
    <property name="icon" >
     <iconset>
-     <normaloff>classpath:energex/gui/icons/configure.png</normaloff>classpath:energex/gui/icons/configure.png</iconset>
+     <normaloff>classpath:file:/home/markus/eclipse/QTwikeAnalyzer/src#energex/gui/icons/configure.png</normaloff>classpath:file:/home/markus/eclipse/QTwikeAnalyzer/src#energex/gui/icons/configure.png</iconset>
    </property>
    <property name="text" >
     <string>Settings</string>
@@ -215,12 +193,17 @@
    </property>
   </action>
   <action name="actionFind" >
-   <property name="icon" >
-    <iconset>
-     <normaloff>classpath:energex/gui/icons/find.png</normaloff>classpath:energex/gui/icons/find.png</iconset>
-   </property>
    <property name="text" >
     <string>&amp;Find</string>
+   </property>
+  </action>
+  <action name="actionDownload" >
+   <property name="icon" >
+    <iconset>
+     <normaloff>classpath:energex/gui/icons/mail-receive.png</normaloff>classpath:energex/gui/icons/mail-receive.png</iconset>
+   </property>
+   <property name="text" >
+    <string>Download</string>
    </property>
   </action>
  </widget>

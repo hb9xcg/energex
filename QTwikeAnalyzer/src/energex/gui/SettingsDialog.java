@@ -24,12 +24,11 @@ import com.trolltech.qt.core.QSettings;
 import com.trolltech.qt.gui.QComboBox;
 import com.trolltech.qt.gui.QDialog;
 
-import energex.gui.SettingsDialogClass;
 import gnu.io.CommPortIdentifier;
 
 public class SettingsDialog extends QDialog {
 	
-	SettingsDialogClass ui = new SettingsDialogClass();
+	Ui_SettingsDialogClass ui = new Ui_SettingsDialogClass();
 	QSettings settings = null;
 	
 	public SettingsDialog() {
@@ -61,7 +60,9 @@ public class SettingsDialog extends QDialog {
 		
 		// restore current default
 		settings = new QSettings();
+		settings.beginGroup("Settings");
 		String storedPort = (String) settings.value("Port");
+		settings.endGroup();
 
 		if(storedPort != null) {
 			int idx = ui.comboSerial.findText(storedPort);
@@ -71,7 +72,9 @@ public class SettingsDialog extends QDialog {
 	
 	public void on_buttonBox_accepted() {
 		// store selection
+		settings.beginGroup("Settings");
 		settings.setValue("Port", ui.comboSerial.currentText());
+		settings.endGroup();
 	}
 	
 	public String getPortName() {
