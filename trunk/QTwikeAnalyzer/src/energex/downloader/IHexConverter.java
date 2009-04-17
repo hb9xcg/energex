@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2008 by Markus Walser                                   *
+ *   Copyright (C) 2009 by Markus Walser                                   *
  *   markus.walser@gmail.com                                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -17,59 +17,40 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-package energex.protocol;
+package energex.downloader;
 
 import com.trolltech.qt.core.QByteArray;
+import com.trolltech.qt.core.QFile;
+import com.trolltech.qt.core.QTextStream;
 
-public class DataType {
-	enum EUnit {
-		eVoltage,
-		eCurrent,
-		eCharge,
-		eTemperatur,
-		ePower,
-		eUnknown
+import energex.tools.HexConverter;
+
+public class IHexConverter {
+	QByteArray binBuffer = new QByteArray();
+	
+	IHexConverter(QFile file) {
+		open(file);
 	}
 	
-	public static String decodeUnit(EUnit eUnit) {
-		switch(eUnit) {
-		case eVoltage:
-			return "V";
-		case eCurrent:
-			return "A";
-		case eCharge:
-			return "Ah";
-		case eTemperatur:
-			return "°C";
-		case ePower:
-			return "W";
-		default:
-			return ""; 
+	void open(QFile file) {
+		QTextStream textStream = new QTextStream(file);
+		
+		String line = textStream.readLine();
+		while (!line.isEmpty() && !line.equals(":00000001FF")) { 
+			QByteArray lineBuffer = convertLine(line);
+			binBuffer.append(lineBuffer);
+			line = textStream.readLine();
 		}
 	}
 	
-	public static float decodeSigned16(QByteArray data, int index) {
-		int nData = data.at(index) & 0x000000ff;
-		nData <<= 8;
-		nData += (data.at(index+1) & 0x000000ff);
-		float fData;
-		if( nData > 32767) {
-			fData = nData-65535;
-		} else {
-			fData = nData;
-		}
-		return fData;
-	}
-	
-	public static float decodeUnsigned16(QByteArray data, int index) {
-		int nData = data.at(index) & 0x000000ff;
-		nData <<= 8;
-		nData += (data.at(index+1) & 0x000000ff);
-		return nData;
+	private QByteArray convertLine(String line) {
+		String dataHex = line.substring(9, line.length()-2);
+		byte[] dataTmp = HexConverter.string2hex(dataHex);
+		QByteArray dataBin = new QByteArray(dataTmp);
+		return dataBin;		
 	}
 
-	public static float decodeSigned8(QByteArray data, int index) {
-		int nData = data.at(index) & 0x000000ff;
-		return nData;
+	byte[] getBin() {
+		return binBuffer.toByteArray();	
 	}
 }

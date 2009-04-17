@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2008 by Markus Walser                                   *
+ *   Copyright (C) 2009 by Markus Walser                                   *
  *   markus.walser@gmail.com                                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -17,59 +17,62 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-package energex.protocol;
+package energex.downloader;
 
-import com.trolltech.qt.core.QByteArray;
+import java.io.IOException;
 
-public class DataType {
-	enum EUnit {
-		eVoltage,
-		eCurrent,
-		eCharge,
-		eTemperatur,
-		ePower,
-		eUnknown
+import energex.communication.TwikePort;
+import energex.communication.TwikeReceiver;
+import gnu.io.UnsupportedCommOperationException;
+
+public class Terminal implements TwikeReceiver{
+	private TwikePort port;
+	private Byte trigger = new Byte((byte) 0);
+	
+	public Terminal(TwikePort port) {
+		this.port = port;
+		open();
 	}
 	
-	public static String decodeUnit(EUnit eUnit) {
-		switch(eUnit) {
-		case eVoltage:
-			return "V";
-		case eCurrent:
-			return "A";
-		case eCharge:
-			return "Ah";
-		case eTemperatur:
-			return "°C";
-		case ePower:
-			return "W";
-		default:
-			return ""; 
+	public void open() {
+		try {
+			port.close();
+			port.open();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (UnsupportedCommOperationException e) {
+			e.printStackTrace();
 		}
 	}
 	
-	public static float decodeSigned16(QByteArray data, int index) {
-		int nData = data.at(index) & 0x000000ff;
-		nData <<= 8;
-		nData += (data.at(index+1) & 0x000000ff);
-		float fData;
-		if( nData > 32767) {
-			fData = nData-65535;
-		} else {
-			fData = nData;
+	public void close() {
+		try {
+			port.close();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
-		return fData;
 	}
 	
-	public static float decodeUnsigned16(QByteArray data, int index) {
-		int nData = data.at(index) & 0x000000ff;
-		nData <<= 8;
-		nData += (data.at(index+1) & 0x000000ff);
-		return nData;
+	public boolean isEscaped() throws IOException, InterruptedException {
+		byte[] buffer = {'\n', '\r'};
+		boolean escaped = false;
+		port.sendData(buffer);
+		
+		trigger = 0;
+		synchronized (trigger) {
+			while (trigger.equals(63)) {
+				trigger.wait(1000);
+			}
+		}
+		
+		return escaped;		
 	}
 
-	public static float decodeSigned8(QByteArray data, int index) {
-		int nData = data.at(index) & 0x000000ff;
-		return nData;
+	@Override
+	public void receiveData(byte data) {
+		if (trigger.equals(data)) {
+			trigger = data;
+			trigger.notify();
+		}
 	}
 }

@@ -30,7 +30,7 @@ import energex.protocol.DataPacket;
 
 
 public class FindDialog extends QDialog {
-	FindDialogClass ui = new FindDialogClass();
+	Ui_FindDialogClass ui = new Ui_FindDialogClass();
 	List<QStandardItem> foundItems;
 	QTableView logTable;
 	QStandardItemModel model;
@@ -40,7 +40,6 @@ public class FindDialog extends QDialog {
 	String textToFind;
 	QSettings settings;
 	
-	@SuppressWarnings("unchecked")
 	public FindDialog(TwikeAnalyzer parent) {
 		super(parent);
 		ui.setupUi(this);

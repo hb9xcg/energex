@@ -129,12 +129,75 @@ public class TwikePort extends TwikeReceivable implements SerialPortEventListene
 		port.notifyOnDataAvailable(true);
 	}
 	
+	public void openBootloader() throws IOException, UnsupportedCommOperationException {
+		if(portId == null)
+		{
+		    System.err.println("No serial port specifeid");
+		    System.exit(1);
+		}
+		//
+		// Use port identifier for acquiring the port
+		//
+		try {
+		    port = (SerialPort) portId.open(
+		        "QTwikeAnalyzer", // Name of the application asking for the port 
+		        10000   // Wait max. 10 sec. to acquire port
+		    );
+		} catch(PortInUseException e) {
+		    System.err.println("Port already in use: " + e);
+		    System.exit(1);
+		}
+		// Now we are granted exclusive access to the particular serial
+		// port. We can configure it and obtain input and output streams.
+		//
+		
+
+		// Set all the params.  
+		// This may need to go in a try/catch block which throws UnsupportedCommOperationException
+		port.setSerialPortParams(
+		    38400,
+		    SerialPort.DATABITS_8,
+		    SerialPort.STOPBITS_1,
+		    SerialPort.PARITY_NONE);
+
+		// Open the input Reader and output stream. The choice of a
+		// Reader and Stream are arbitrary and need to be adapted to
+		// the actual application. Typically one would use Streams in
+		// both directions, since they allow for binary data transfer,
+		// not only character data transfer.
+		//
+		try {
+		  inputStream = port.getInputStream();
+		} catch (IOException e) {
+		  System.err.println("Can't open input stream: write-only");
+		  inputStream = null;
+		}
+		outputStream = port.getOutputStream();
+
+		// New Linuxes rely on UNICODE and it is possible you need to specify here the encoding scheme to be used
+		// for example : 
+		//		     os = new PrintStream(port.getOutputStream(), true, "ISO-8859-1");
+		// will ensure that you sent 8 bits characters on your port. Don't know about a modem accepting
+		// UNICODE data for its commands... 
+		//
+		// Actual data communication would happen here
+		// performReadWriteCode();
+		//
+		opened = true;
+
+		try {
+			port.addEventListener(this);
+		} catch (TooManyListenersException e) {
+			e.printStackTrace();
+		}
+		port.notifyOnDataAvailable(true);
+	}
+	
 	public void close() throws IOException {
 		//
 		// It is very important to close output/input streams as well as the port.
 		// Otherwise Java, driver and OS resources are not released.
 		//
-		port.removeEventListener();
 		
 		if (inputStream != null) { 
 			inputStream.close();
@@ -143,6 +206,7 @@ public class TwikePort extends TwikeReceivable implements SerialPortEventListene
 			outputStream.close();
 		}
 		if (port != null) { 
+			port.removeEventListener();
 			port.close();
 		}
 		opened = false;
@@ -219,5 +283,9 @@ public class TwikePort extends TwikeReceivable implements SerialPortEventListene
         }catch(IOException e){
             System.out.print(e);
         }
+	}
+	
+	public void sendData(byte[] buffer) throws IOException {
+		outputStream.write(buffer);
 	}
 }
