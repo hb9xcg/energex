@@ -216,6 +216,10 @@ public class TwikePort extends TwikeReceivable implements SerialPortEventListene
 	public boolean isOpen() {
 		return opened;
 	}
+	
+	public void flush() throws IOException {
+		outputStream.flush();
+	}
 
 	@Override
 	public void serialEvent(SerialPortEvent event) {

@@ -169,7 +169,8 @@ public class DownloadDialog extends QDialog {
 	    public void run()
 	    { 
 			String text = HexConverter.hex2string(data);
-			text = "recv: " + text;
+			char c = (char)data;
+			text = "recv: " + text + "\t" + c;
 			appendLog(text);	    	
 	    }
 	}
