@@ -51,8 +51,10 @@ public class Downloader extends QObject implements Runnable, TwikeReceiver {
 	
 	private byte reply;
 	
+	static final byte[] EXIT   = {'x','\r'};
 	static final byte[] ESCAPE = {0x10,'d'};
-	static final byte[] REBOOT = {'b','\n','\r'};
+	static final byte[] RETURN = {'\b','\r'};
+	static final byte[] REBOOT = {'b','\r'};
 	static final byte[] PASSWORD = {'A','V','R','U','B'};
 	
 	static final byte XMODEM_NUL = 0x00;
@@ -129,21 +131,42 @@ public class Downloader extends QObject implements Runnable, TwikeReceiver {
 				port.close();
 			}			
 			port.open();
+			port.addReceiver(this);
 			
-			sendData(REBOOT);
+			sendData(EXIT);
+			port.flush();
 			
-			QThread.sleep(900);
-			if (port.isOpen()) {
-				port.close();	
-			}			
+			QThread.sleep(100);
+			
+			sendData(ESCAPE);
+			port.flush();
+			
+			QThread.sleep(100);
+			
+			sendData(RETURN);
+			port.flush();
+						
+			QThread.sleep(1000);
+			
+			sendData(REBOOT);			
+			port.flush();
+			
+			QThread.sleep(200);
+			port.close();	
 			
 			port.openBootloader();
 			port.addReceiver(this);
 			
+			int loginCounter = 0;
+			QThread.sleep(200);
+			state = EState.eConnect;
 			do {
 				sendData(PASSWORD);
-				state = EState.eConnect;
 				QThread.sleep(200);
+				if (++loginCounter>10) {
+					appendLog.emit("Login failed.");
+					return;
+				}
 			} while (state != EState.eDownload);
 			
 
