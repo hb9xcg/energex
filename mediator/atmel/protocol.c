@@ -110,7 +110,6 @@ void protocol_receive_byte(uint8_t character)
 		break;
 		
 	case eExpectData:
-		checksum ^= character;
 		if( frameDetection && character == FRAME)
 		{
 			frameDetection = OFF;
@@ -127,6 +126,7 @@ void protocol_receive_byte(uint8_t character)
 			}
 			frameDetection = ON;
 			data[idx++] = character;	
+			checksum ^= character;
 		}
 		
 		if(idx >= length)
