@@ -1,0 +1,14 @@
+<RCC>
+    <qresource prefix="/" >
+        <file>images/player-time.png</file>
+        <file>images/media-record.png</file>
+        <file>images/document-open.png</file>
+        <file>images/document-save-as.png</file>
+        <file>images/file-find.png</file>
+        <file>images/mail-receive.png</file>
+        <file>images/media-playback-pause.png</file>
+        <file>images/media-playback-start.png</file>
+        <file>images/media-playback-stop.png</file>
+        <file>images/configure.png</file>
+    </qresource>
+</RCC>
