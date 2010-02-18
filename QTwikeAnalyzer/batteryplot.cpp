@@ -65,7 +65,6 @@ void BatteryPlot::temperature(int ms, int sensor, float temperature)
 {
     if (temperatureSensors.contains(sensor))
     {
-        int messwerte = temperatureSensors.size();
         double average = 0.0;
         foreach( float value, temperatureSensors)
         {
@@ -74,11 +73,6 @@ void BatteryPlot::temperature(int ms, int sensor, float temperature)
         average /= temperatureSensors.size();
         temperatureSensors.clear();
         temperatureSensors.insert(sensor, temperature);
-
-        if (batteryIndex == 1)
-        {
-//            printf("Temperatur(%d) = %f, messwerte=%d\n", batteryIndex, average, messwerte);
-        }
 
         timeT.append(double(ms)/1000.0);
         T.append(average*200.0/140.0+350.0);
