@@ -31,6 +31,8 @@
 #include "charge.h"
 #include "adc.h"
 #include "io.h"
+#include "os_thread.h"
+#include "ko.h"
 
 
 #define R_SHUNT                 5500LL          // [uOhm]
@@ -41,18 +43,19 @@
 #define SAMPLES_PRE_HOUR        9000000ULL
 #define ADC_RESOLUTION          10
 #define ADC_MAX_VALUE           (1<<ADC_RESOLUTION)
-#define OVER_SAMPLING_LOG       5
-#define OVER_SAMPLING           (1<<OVER_SAMPLING_LOG)
+#define OVER_SAMPLING           (25)
 #define OVER_DRIVE		(1)
+//#define BARREL		612580L // 42.2 Ohm
+#define BARREL			366601L // 68 Ohm
 
 
 
-static int64_t charge_capacity;
-static int64_t charge_total; 
+static uint16_t charge_charged_Ah; 
+static uint16_t charge_discharged_Ah; 
+static int16_t charge_counter_1mAh;
 
-static int32_t charge_current_oversampling;
 static int16_t charge_current_sample;
-static int32_t charge_current;
+static int16_t charge_current;
 
 static int8_t  charge_channel;
 
@@ -65,10 +68,13 @@ enum EState
 static enum EState charge_state = eCharging;
 
 uint8_t charge_select_channel(void);
+void charge_subsample(const int16_t sample);
 
 // gets called each 400us from the timer interrupt
 void charge_sample(void)
 {
+	static int32_t decimation_current;
+	
 	charge_current_sample -= adc_get_offset(charge_channel);     // Correct offset of raw sample
 	charge_current_sample *= adc_get_resolution(charge_channel); // [488uV/LSB];
 
@@ -84,26 +90,64 @@ void charge_sample(void)
 	{
 		charge_state = (charge_state==eCharging) ? eDischarging : eCharging;
 	}
+	
 
 	static int8_t idx=1;	
-	charge_current_oversampling += charge_current_sample;
+	decimation_current += charge_current_sample;
 	if (++idx >= OVER_SAMPLING)
 	{
 		idx = 0;
-		charge_current = charge_current_oversampling;
-		charge_current_oversampling = 0;
-		if (charge_current<0)
-		{
-			// sum up only discharged capacity for Ah counter
-			charge_total += -(charge_current>>OVER_SAMPLING_LOG);
-		}
+		charge_subsample(decimation_current>>2);
+		decimation_current = 0;
 	}
-
-	charge_capacity += charge_current_sample;
+	
+//	static int8_t ko=0;
+//	if (++ko >= 5)
+//	{
+//		ko = 0;
+//		ko_sample(&charge_current_sample);
+//	}
 
 	charge_channel = charge_select_channel();
 	adc_read_int(charge_channel, &charge_current_sample);  // dummy to settle down Atmel's analog circuit
 	adc_read_int(charge_channel, &charge_current_sample);  // Real measurement
+}
+
+// Gets called every 10ms 16Bit resolution, 1LSB = 587.678uA -> 982uA
+void charge_subsample(const int16_t sample)
+{
+	static int32_t barrel_1mAh;
+	static int16_t counter_charged_Ah;
+	static int16_t counter_discharged_Ah;
+
+	charge_current = sample;
+
+	barrel_1mAh += charge_current;
+
+	if (barrel_1mAh>= BARREL)
+	{
+		barrel_1mAh -= BARREL;
+		charge_counter_1mAh++;
+		
+		if (++counter_discharged_Ah >= 1000)
+		{
+			counter_discharged_Ah = 0;
+			charge_discharged_Ah++;
+		}
+	}
+	else if (barrel_1mAh <= -BARREL)
+	{
+		barrel_1mAh += BARREL;
+		charge_counter_1mAh--;
+
+		if (++counter_charged_Ah >= 1000)
+		{
+			counter_charged_Ah = 0;
+			charge_charged_Ah++;
+		}
+	}
+
+//	ko_sample(&charge_current);
 }
 
 uint8_t charge_select_channel(void)
@@ -131,53 +175,45 @@ uint8_t charge_select_channel(void)
 
 void charge_reset(void)
 {
-	charge_capacity = 0;
+	charge_counter_1mAh = 0;
 }
 
-void charge_set_capacity(uint16_t newCapacity)
+void charge_set_capacity(int16_t newCapacity)
 {
-	charge_capacity  = newCapacity;
-	charge_capacity *= 24503204LL;
+	charge_counter_1mAh = newCapacity*10;
 }
 
 int16_t charge_get_capacity(void)
 {
-	int32_t charge10mAh; 
-
-	// 1 Sample * 1 LSB = 1.47uAs
-	charge10mAh = charge_capacity / 24503204LL; // [10mAh]
-
-	return charge10mAh;
+	return charge_counter_1mAh/10;
 }
 
 void charge_set_total_discharge(uint16_t new_total)
 {
-	charge_total  = new_total;
-	charge_total *= 76572512ULL;
+	charge_discharged_Ah = new_total;
 }
 
-int16_t charge_get_total_discharge(void)
+uint16_t charge_get_total_discharge(void)
 {
-	int32_t totalAh; 
-
-	// 1 OverSample = 47uAs
-	totalAh = charge_total / 76572512ULL;
-
-	return totalAh; 
+	return charge_discharged_Ah; 
 }
 
-// Returns actual current [mA]
+uint16_t charge_get_total_charge(void)
+{
+	return charge_charged_Ah; 
+}
+
+// Returns actual current [10mA]
 int16_t charge_get_current()
 {
-	int32_t current10mA = charge_current;
+	int16_t current;
 	
-	//current10mA = current10mA * (V_REF * R1 * FACTOR_10MA / R2 / R_SHUNT / ADC_MAX_VALUE); 6625/3264
-	
-	current10mA  *= 1193L; // 1325 for 5mOhm reduce 10% for wire
-	current10mA  /= 3264L;
+	os_enterCS();
+	current = charge_current;
+	os_exitCS();
 
-	// oversampling
-	current10mA >>= OVER_SAMPLING_LOG;
+//	return current/17;	// 42.2 Ohm
 
-	return current10mA;
+	return current/10 - current/400;	// 68 Ohm
 }
+

@@ -34,7 +34,7 @@
  * MCU = Master, Taktgeschwindigkeit F_CPU/2 (Maximum)
  * @param speed	Konstante, die die Uebertragungsgeschwindigkeit bestimmt
  */
-void SPI_MasterInit(spi_speed_t speed) {
+void spi_master_init(spi_speed_t speed) {
 	/* Set MOSI and SCK output, MISO input */
 	uint8_t ddrb = DDRB;
 	ddrb |=  (1<<DDB5) | (1<<DDB7) | (1<<DDB4);
@@ -51,7 +51,7 @@ void SPI_MasterInit(spi_speed_t speed) {
 /*!
  * Uebertraegt ein Byte per SPI vom Master zum Slave
  */
-void SPI_MasterTransmit(uint8_t data) {
+void spi_master_transmit(uint8_t data) {
 	/* Start transmission */
 	SPDR = data;
 	/* Wait for transmission complete */
@@ -61,7 +61,7 @@ void SPI_MasterTransmit(uint8_t data) {
 /*!
  * Uebertraegt ein Byte per SPI vom Slave zum Master
  */
-uint8_t SPI_MasterReceive(void) {
+uint8_t spi_master_receive(void) {
 	SPDR = 0xff;
 	/* Wait for reception complete */
 	while(!(SPSR & (1<<SPIF))) {}

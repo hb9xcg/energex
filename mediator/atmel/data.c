@@ -33,19 +33,19 @@
 
 // Declaration
 //uint8_t eeI2CAddress EEMEM = DEFAULT_I2C_ADDRESS;
-uint16_t eeChargingLevel    EEMEM = 0; // current battery charging level
-uint16_t eeTotalAhDischarge EEMEM = 0; // current battery charging level
-uint16_t eeTotalAhCharge    EEMEM = 0; // current battery charging level
+uint16_t eeCounter_10mAh   EEMEM = 0; // current battery charging level
+uint16_t eeDischarged_Ah   EEMEM = 0; // current battery charging level
+uint16_t eeCharged_Ah      EEMEM = 0; // current battery charging level
 
 
 void data_save(void)
 {
 	eeprom_busy_wait();
-	eeprom_write_word( &eeChargingLevel, charge_get_capacity() );
+	eeprom_write_word( &eeCounter_10mAh, charge_get_capacity() );
 	eeprom_busy_wait();
-	eeprom_write_word( &eeTotalAhDischarge, charge_get_total_discharge() );
+	eeprom_write_word( &eeDischarged_Ah, charge_get_total_discharge() );
 	eeprom_busy_wait();
-	eeprom_write_word( &eeTotalAhCharge, 0 );
+	eeprom_write_word( &eeCharged_Ah, 0 );
 	eeprom_busy_wait();
 }
 
@@ -54,15 +54,15 @@ void data_load(void)
 	uint16_t value;
 
 	eeprom_busy_wait();
-	value = eeprom_read_word( &eeChargingLevel );
+	value = eeprom_read_word( &eeCounter_10mAh);
 	charge_set_capacity(value);
 
 	eeprom_busy_wait();
-	value = eeprom_read_word( &eeTotalAhDischarge );
+	value = eeprom_read_word( &eeDischarged_Ah );
 	charge_set_total_discharge(value);
 
 	eeprom_busy_wait();
-	value = eeprom_read_word( &eeTotalAhCharge );
+	value = eeprom_read_word( &eeCharged_Ah );
 }
 
 #if 0

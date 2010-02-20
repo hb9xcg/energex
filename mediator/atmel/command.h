@@ -31,5 +31,4 @@
 
 extern void cmd_init(void);
 
-
 #endif

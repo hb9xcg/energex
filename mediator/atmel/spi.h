@@ -47,16 +47,16 @@ typedef union {
  * MCU = Master, Taktgeschwindigkeit F_CPU/2 (Maximum)
  * @param speed	Konstante, die die Uebertragungsgeschwindigkeit bestimmt
  */
-void SPI_MasterInit(spi_speed_t speed);
+void spi_master_init(spi_speed_t speed);
 
 /*!
  * Uebertraegt ein Byte per SPI vom Master zum Slave
  */
-void SPI_MasterTransmit(uint8_t data);
+void spi_master_transmit(uint8_t data);
 
 /*!
  * Uebertraegt ein Byte per SPI vom Slave zum Master
  */
-uint8_t SPI_MasterReceive(void);
+uint8_t spi_master_receive(void);
 
 #endif	// SPI_H_

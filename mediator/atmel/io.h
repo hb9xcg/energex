@@ -35,12 +35,12 @@
 #define TRANSMIT_ENABLE 0x08	// Port B
 #define POWER_ONE_WIRE  0x10	// Port D
 
-#define SET_RED_LED		PORTC |=  LED_RED
-#define CLEAR_RED_LED		PORTC &= ~LED_RED
-#define TOGGLE_RED_LED		PORTC ^=  LED_RED
+#define SET_RED_LED		PORTC |= (uint8_t) LED_RED
+#define CLEAR_RED_LED		PORTC &= (uint8_t)~LED_RED
+#define TOGGLE_RED_LED		PORTC ^= (uint8_t) LED_RED
 
-#define SET_GREEN_LED		PORTC |=  LED_GREEN
-#define CLEAR_GREEN_LED		PORTC &= ~LED_GREEN
-#define TOGGLE_GREEN_LED	PORTC ^=  LED_GREEN
+#define SET_GREEN_LED		PORTC |= (uint8_t) LED_GREEN
+#define CLEAR_GREEN_LED		PORTC &= (uint8_t)~LED_GREEN
+#define TOGGLE_GREEN_LED	PORTC ^= (uint8_t) LED_GREEN
 
 #endif
