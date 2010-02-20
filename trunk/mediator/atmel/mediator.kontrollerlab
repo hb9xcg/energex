@@ -1,49 +1,49 @@
 <!DOCTYPE KontrollerLab>
-<PROJECT VERSION="0.8.0-beta1" >
+<PROJECT VERSION="0.1" >
   <FILES>
-    <FILE VIEWS="4,25,400,300,4," SHOWN="TRUE" NAME="adc.c" />
-    <FILE VIEWS="27,48,960,666,4," SHOWN="TRUE" NAME="adc.h" />
-    <FILE VIEWS="50,71,960,666,4," SHOWN="TRUE" NAME="delay.h" />
-    <FILE VIEWS="73,94,921,682,4," SHOWN="TRUE" NAME="delay.c" />
-    <FILE VIEWS="96,117,921,682,4," SHOWN="TRUE" NAME="os_utils.h" />
-    <FILE VIEWS="119,140,960,666,4," SHOWN="TRUE" NAME="os_thread.h" />
-    <FILE VIEWS="142,163,921,682,4," SHOWN="TRUE" NAME="os_thread.c" />
-    <FILE VIEWS="165,186,921,682,4," SHOWN="TRUE" NAME="os_scheduler.h" />
-    <FILE VIEWS="188,209,921,682,4," SHOWN="TRUE" NAME="os_scheduler.c" />
-    <FILE VIEWS="211,232,921,682,4," SHOWN="TRUE" NAME="timer.h" />
-    <FILE VIEWS="234,255,921,682,4," SHOWN="TRUE" NAME="timer.c" />
-    <FILE VIEWS="257,278,960,666,4," SHOWN="TRUE" NAME="global.h" />
-    <FILE VIEWS="280,301,921,682,4," SHOWN="TRUE" NAME="i2c.h" />
-    <FILE VIEWS="303,324,921,682,4," SHOWN="TRUE" NAME="i2c.c" />
-    <FILE VIEWS="326,347,921,682,4," SHOWN="TRUE" NAME="timer-low.c" />
-    <FILE VIEWS="349,370,921,682,4," SHOWN="TRUE" NAME="uart.c" />
-    <FILE VIEWS="372,393,921,682,4," SHOWN="TRUE" NAME="uart.h" />
-    <FILE VIEWS="395,416,921,682,4," SHOWN="TRUE" NAME="fifo.c" />
-    <FILE VIEWS="418,439,960,666,4," SHOWN="TRUE" NAME="fifo.h" />
-    <FILE VIEWS="441,462,960,666,4," SHOWN="TRUE" NAME="command.h" />
-    <FILE VIEWS="464,485,960,666,4," SHOWN="TRUE" NAME="charge.c" />
-    <FILE VIEWS="487,508,960,666,4," SHOWN="TRUE" NAME="charge.h" />
-    <FILE VIEWS="510,531,633,389,4," SHOWN="TRUE" NAME="balancer.h" />
-    <FILE VIEWS="533,554,960,666,4," SHOWN="TRUE" NAME="protocol.h" />
-    <FILE VIEWS="556,577,921,683,4," SHOWN="TRUE" NAME="battery.h" />
-    <FILE VIEWS="579,600,921,682,4," SHOWN="TRUE" NAME="mediator.h" />
-    <FILE VIEWS="602,623,1120,707,4," SHOWN="TRUE" NAME="mediator.c" />
-    <FILE VIEWS="625,646,921,682,4," SHOWN="TRUE" NAME="battery.c" />
-    <FILE VIEWS="648,25,917,682,4," SHOWN="TRUE" NAME="command.c" />
-    <FILE VIEWS="671,48,921,682,4," SHOWN="TRUE" NAME="protocol.c" />
-    <FILE VIEWS="694,71,921,682,4," SHOWN="TRUE" NAME="io.h" />
-    <FILE VIEWS="717,94,921,682,4," SHOWN="TRUE" NAME="ow.h" />
-    <FILE VIEWS="740,117,960,666,4," SHOWN="TRUE" NAME="ow.c" />
-    <FILE VIEWS="0,0,960,665,5," SHOWN="TRUE" NAME="sensors.c" />
-    <FILE VIEWS="786,163,960,666,4," SHOWN="TRUE" NAME="sensors.h" />
-    <FILE VIEWS="809,186,960,666,4," SHOWN="TRUE" NAME="data.c" />
-    <FILE VIEWS="832,209,960,666,4," SHOWN="TRUE" NAME="data.h" />
-    <FILE VIEWS="855,232,960,666,4," SHOWN="TRUE" NAME="crc8.c" />
-    <FILE VIEWS="878,255,960,666,4," SHOWN="TRUE" NAME="crc8.h" />
+    <FILE SHOWN="TRUE" NAME="adc.c" />
+    <FILE SHOWN="TRUE" NAME="adc.h" />
+    <FILE SHOWN="TRUE" NAME="delay.h" />
+    <FILE SHOWN="TRUE" NAME="delay.c" />
+    <FILE SHOWN="TRUE" NAME="os_utils.h" />
+    <FILE SHOWN="TRUE" NAME="os_thread.h" />
+    <FILE SHOWN="TRUE" NAME="os_thread.c" />
+    <FILE SHOWN="TRUE" NAME="os_scheduler.h" />
+    <FILE SHOWN="TRUE" NAME="os_scheduler.c" />
+    <FILE SHOWN="TRUE" NAME="timer.h" />
+    <FILE SHOWN="TRUE" NAME="timer.c" />
+    <FILE SHOWN="TRUE" NAME="global.h" />
+    <FILE SHOWN="TRUE" NAME="i2c.h" />
+    <FILE SHOWN="TRUE" NAME="i2c.c" />
+    <FILE SHOWN="TRUE" NAME="timer-low.c" />
+    <FILE SHOWN="TRUE" NAME="uart.c" />
+    <FILE SHOWN="TRUE" NAME="uart.h" />
+    <FILE SHOWN="TRUE" NAME="fifo.c" />
+    <FILE SHOWN="TRUE" NAME="fifo.h" />
+    <FILE SHOWN="TRUE" NAME="command.h" />
+    <FILE SHOWN="TRUE" NAME="charge.c" />
+    <FILE SHOWN="TRUE" NAME="charge.h" />
+    <FILE SHOWN="TRUE" NAME="balancer.h" />
+    <FILE SHOWN="TRUE" NAME="protocol.h" />
+    <FILE SHOWN="TRUE" NAME="battery.h" />
+    <FILE SHOWN="TRUE" NAME="mediator.h" />
+    <FILE SHOWN="TRUE" NAME="mediator.c" />
+    <FILE SHOWN="TRUE" NAME="battery.c" />
+    <FILE SHOWN="TRUE" NAME="command.c" />
+    <FILE SHOWN="TRUE" NAME="protocol.c" />
+    <FILE SHOWN="TRUE" NAME="io.h" />
+    <FILE SHOWN="TRUE" NAME="ow.h" />
+    <FILE SHOWN="TRUE" NAME="ow.c" />
+    <FILE SHOWN="TRUE" NAME="sensors.c" />
+    <FILE SHOWN="TRUE" NAME="sensors.h" />
+    <FILE SHOWN="TRUE" NAME="data.c" />
+    <FILE SHOWN="TRUE" NAME="data.h" />
+    <FILE SHOWN="TRUE" NAME="crc8.c" />
+    <FILE SHOWN="TRUE" NAME="crc8.h" />
+    <FILE SHOWN="TRUE" NAME="ko.c" />
   </FILES>
   <SETTINGS>
     <ASSEMBLER_COMMAND VALUE="avr-gcc" />
-    <BUILD_SYSTEM VALUE="BUILT_IN_BUILD" />
     <CLOCK VALUE="1.6e+07" />
     <COMPILER_CALL_PROLOGUES VALUE="FALSE" />
     <COMPILER_COMMAND VALUE="avr-gcc" />
@@ -56,13 +56,9 @@
     <HEX_FILE VALUE="project.hex" />
     <LINKER_COMMAND VALUE="avr-gcc" />
     <LINKER_FLAGS VALUE="" />
-    <MAKE_CLEAN_TARGET VALUE="clean" />
-    <MAKE_COMMAND VALUE="make" />
-    <MAKE_DEFAULT_TARGET VALUE="all" />
     <MAP_FILE VALUE="project.map" />
     <OBJCOPY_COMMAND VALUE="avr-objcopy" />
   </SETTINGS>
-  <DEBUGGER_SETTINGS/>
   <PROGRAMMERCONFIG>
     <AVRDUDE_COUNT_ERASE VALUE="FALSE" />
     <AVRDUDE_DISABLE_AUTO_ERASE VALUE="FALSE" />

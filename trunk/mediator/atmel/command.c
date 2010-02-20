@@ -31,7 +31,6 @@
 #include <stdlib.h> 
 #include <avr/io.h>
 #include <avr/wdt.h> 
-#include <avr/pgmspace.h>
 
 
 
@@ -45,12 +44,6 @@
 #include "ow.h"
 #include "sensors.h"
 #include "data.h"
-#include "ntc.h"
-#include "ko.h"
-#ifdef BALANCER
-	#include "ltc6802.h"
-	#include "balancer.h"
-#endif
 
 #define COMMAND_STACK_SIZE 384
 #define CMD_LINE   128
@@ -77,26 +70,15 @@ static void cmd_help(void);
 static void cmd_temperatur(void);
 static void cmd_voltage(void);
 static void cmd_current(void);
-static void cmd_ko(void);
 static void cmd_capacity(void);
 static void cmd_reset(void);
-static void cmd_offset(void);
 static void cmd_reboot(void);
+static void cmd_offset(void);
 static void cmd_power(const char* cmd);
 static void cmd_onewire(const char* cmd);
 static void cmd_sensor(const char* cmd);
 static void cmd_eeprom(const char* cmd);
 static void cmd_stack_memory(void);
-static void cmd_cell(void);
-static void cmd_flash(void);
-static void cmd_flush(void);
-static void cmd_supervisor_temperature(void);
-static void cmd_load(void);
-
-static void cmd_print_signed_float(int16_t value);
-static void cmd_print_unsigned_float(uint16_t value);
-static void cmd_print_signed_fix(int16_t value);
-static void cmd_print_unsigned_fix(uint16_t value);
 
 
 void cmd_init(void)
@@ -131,7 +113,6 @@ void cmd_dispatcher(void)
 		if (uart_data_available() > 0)
 		{
 			uart_read( &character, sizeof(character) );
-
 			
 			// Check debug escape sequence "^pd"
 			if (lastCharacter==FRAME)
@@ -139,7 +120,6 @@ void cmd_dispatcher(void)
 				if (character=='d') 
 				{
 					eMode = eDebug;
-					mediator_force_busy(1);
 					character = '?';
 				}
 				else if(character==FRAME)
@@ -157,21 +137,11 @@ void cmd_dispatcher(void)
 			}
 			if (eMode == eTwike)
 			{
-				mediator_busy();
 				protocol_receive_byte(character);
 			}
 			else
 			{
-				if(character==FRAME)
-				{
-					eMode = eTwike;
-					mediator_force_busy(0);
-					protocol_receive_byte(character);
-				}
-				else
-				{
-					cmd_receive_byte(character);
-				}
+				cmd_receive_byte(character);
 			}
 		}
 		else
@@ -201,8 +171,7 @@ void cmd_receive_byte(uint8_t character)
 		DEBUG("\r\n");
 		cmd_line[lineIdx] = '\0';
 		cmd_process((char*)cmd_line);
-		strcpy_P(cmd_line, PSTR("\r\n> "));
-		cmd_flush();
+		DEBUG("\r\n> ");
 		lineIdx=0;
 		cmd_line[lineIdx] = '\0';
 	}
@@ -224,22 +193,11 @@ void cmd_process( const char* cmd )
 		case 'b':
 			cmd_reboot();
 		break;
-		case 'c':
-			cmd_cell();
 		case 'e':
 			cmd_eeprom(cmd);
 		break;
-		case 'f':
-			cmd_flash();
-		break;
 		case 'i':
 			cmd_current();
-		break;
-		case 'k':
-			cmd_ko();
-		break;
-		case 'l':
-			cmd_load();
 		break;
 		case 'm':
 			cmd_stack_memory();
@@ -260,7 +218,7 @@ void cmd_process( const char* cmd )
 			cmd_sensor(cmd);
 		break;
 		case 't':
-			cmd_supervisor_temperature();
+			cmd_temperatur();
 		break;
 		case 'u':
 			cmd_voltage();
@@ -270,48 +228,41 @@ void cmd_process( const char* cmd )
 		break;
 		case 'x':
 			eMode = eTwike;
-			mediator_force_busy(0);
 		break;
 		case '?':
 			cmd_help();
 		break;
 		default:
-			strcpy_P(cmd_line, PSTR("<Unknown command, try ? for help."));
+			strcpy(cmd_line, "<Unknown command, try ? for help.");
 	}
-	cmd_flush();
+	uart_write( (uint8_t*)cmd_line, strlen(cmd_line) );
 }
 
 void cmd_help(void)
 {
-	strcpy_P(cmd_line, PSTR("\n\rAvailable commands:\n\r"));
-	cmd_flush();
-	strcpy_P(cmd_line, PSTR("b:\tReboot\n\r"));
-	cmd_flush();
-	strcpy_P(cmd_line, PSTR("i:\tCurrent\n\r"));
-	cmd_flush();
-	strcpy_P(cmd_line, PSTR("m\tMemory info\n\r"));
-	cmd_flush();
-	strcpy_P(cmd_line, PSTR("p:\tPower state {full|save|off}\n\r"));
-	cmd_flush();
-	strcpy_P(cmd_line, PSTR("q:\tCapacity\n\r"));
-	cmd_flush();
-	strcpy_P(cmd_line, PSTR("r:\tReset\n\r"));
-	cmd_flush();
-	strcpy_P(cmd_line, PSTR("s:\tSensor\n\r"));
-	cmd_flush();
-	strcpy_P(cmd_line, PSTR("t:\tTemperatur\n\r"));
-	cmd_flush();
-	strcpy_P(cmd_line, PSTR("u:\tVoltage\n\r"));
-	cmd_flush();
-	strcpy_P(cmd_line, PSTR("x:\tExit\n\r"));
-	cmd_flush();
-	strcpy_P(cmd_line, PSTR("?:\tHelp\n\r"));
-}
-
-void cmd_flush(void)
-{
+	strcpy(cmd_line, "\n\rAvailable commands:\n\r");
 	uart_write( (uint8_t*)cmd_line, strlen(cmd_line) );
-	uart_flush();
+	strcpy(cmd_line, "b:\tReboot\n\r");
+	uart_write( (uint8_t*)cmd_line, strlen(cmd_line) );
+	strcpy(cmd_line, "i:\tCurrent\n\r");
+	uart_write( (uint8_t*)cmd_line, strlen(cmd_line) );
+	strcpy(cmd_line, "m\tMemory info\n\r");
+	uart_write( (uint8_t*)cmd_line, strlen(cmd_line) );
+	strcpy(cmd_line, "p:\tPower state {full|save|off}\n\r");
+	uart_write( (uint8_t*)cmd_line, strlen(cmd_line) );
+	strcpy(cmd_line, "q:\tCapacity\n\r");
+	uart_write( (uint8_t*)cmd_line, strlen(cmd_line) );
+	strcpy(cmd_line, "r:\tReset\n\r");
+	uart_write( (uint8_t*)cmd_line, strlen(cmd_line) );
+	strcpy(cmd_line, "s:\tSensor\n\r");
+	uart_write( (uint8_t*)cmd_line, strlen(cmd_line) );
+	strcpy(cmd_line, "t:\tTemperatur\n\r");
+	uart_write( (uint8_t*)cmd_line, strlen(cmd_line) );
+	strcpy(cmd_line, "u:\tVoltage\n\r");
+	uart_write( (uint8_t*)cmd_line, strlen(cmd_line) );
+	strcpy(cmd_line, "x:\tExit\n\r");
+	uart_write( (uint8_t*)cmd_line, strlen(cmd_line) );
+	strcpy(cmd_line, "?:\tHelp\n\r");
 }
 
 void cmd_eeprom(const char* cmd)
@@ -319,12 +270,12 @@ void cmd_eeprom(const char* cmd)
 	if (strstr( cmd, "load") )
 	{
 		data_load();	
-		strcpy_P(cmd_line, PSTR("Persistent data loaded."));
+		strcpy(cmd_line, "Persistent data loaded.");
 	}
 	else if (strstr( cmd, "save") )
 	{
 		data_save();
-		strcpy_P(cmd_line, PSTR("Persistent data saved."));
+		strcpy(cmd_line, "Persistent data saved.");
 	}
 	else if (strstr( cmd, "inct") )
 	{
@@ -346,32 +297,33 @@ void cmd_temperatur(void)
 
 	temperature = mediator_get_temperature();
 
-	strcpy_P( cmd_line, PSTR("Mediator temperatur: "));
-	cmd_print_signed_float(temperature);
-	strcpy_P( cmd_line, PSTR("°C"));
+	sprintf( cmd_line, "Mediator temperatur: %d.%02d°C", temperature/100, abs(temperature)%100);
 }
 
 
 void cmd_voltage(void)
 {
-	uint16_t voltage;
+	int16_t voltage;
 
 	voltage = battery_get_voltage();	
 	
-	strcpy_P( cmd_line, PSTR("Mediator voltage: "));
-	cmd_print_unsigned_float(voltage);	
-	strcat_P( cmd_line, PSTR("V"));
+	sprintf( cmd_line, "Mediator voltage: %d.%02dV", voltage/100, voltage%100);
 }
 
 void cmd_current(void)
 {
 	int16_t current;
+	int8_t sign = ' ';
 
 	current = charge_get_current();
 
-	strcpy_P( cmd_line, PSTR("Mediator current: "));
-	cmd_print_signed_float(current);
-	strcat_P( cmd_line, PSTR("A"));
+	if (current<0) 
+	{
+		sign = '-';
+		current = -current;
+	}
+
+	sprintf( cmd_line, "Mediator current: %c%d.%02dA", sign, current/100, current%100);
 }
 
 void cmd_offset(void)
@@ -380,15 +332,12 @@ void cmd_offset(void)
 	
 	offset = adc_get_offset(CH_CHARGE_10);
 	
-	strcpy_P( cmd_line, PSTR("Mediator ADC charge offset: "));
-	cmd_print_signed_fix(offset);
-	strcat_P(cmd_line, PSTR("\n\r"));
-	cmd_flush();
+	sprintf( cmd_line, "Mediator ADC charge offset: %d\n\r", offset);
+	uart_write( (uint8_t*)cmd_line, strlen(cmd_line) );
 
 	offset = adc_get_offset(CH_DISCHARGE_10);
 	
-	strcpy_P( cmd_line, PSTR("Mediator ADC discharge offset: "));
-	cmd_print_signed_fix(offset);
+	sprintf( cmd_line, "Mediator ADC discharge offset: %d", offset);
 
 	//adc_calibrate_offset(CH_CHARGE_10);
 }
@@ -396,19 +345,23 @@ void cmd_offset(void)
 void cmd_capacity(void)
 {
 	int16_t capacity;
+	int8_t sign = ' ';
 
    	capacity = charge_get_capacity();
 
-	strcpy_P( cmd_line, PSTR("Mediator capacity: "));
-	cmd_print_signed_float(capacity);
-	strcat_P( cmd_line, PSTR("Ah"));
+	if (capacity<0) {
+		sign = '-';
+		capacity = -capacity;
+	}
+
+	sprintf( cmd_line, "Mediator capacity: %c%d.%02dAh", sign, capacity/100, capacity%100);
 }
 
 void cmd_reset(void)
 {
 	charge_reset();
 
-	strcpy_P( cmd_line, PSTR("Mediator resetted capacity to 0mAh"));
+	sprintf( cmd_line, "Mediator resetted capacity to 0mAh");
 }
 
 static void cmd_sensor(const char* cmd)
@@ -417,8 +370,8 @@ static void cmd_sensor(const char* cmd)
 	uint8_t idx, serial[8];
 	int16_t temp;
 
-	strcpy_P(cmd_line, PSTR("device serial number      temperatur\n\r"));
-	cmd_flush();
+	char* header = "device serial number      temperatur\n\r";
+	uart_write( (uint8_t*)header, strlen(header) );
 	
 	nbr_of_sensors = sensors_get_nbr_of_devices();
 	for(idx=0; idx<nbr_of_sensors; idx++)
@@ -426,7 +379,7 @@ static void cmd_sensor(const char* cmd)
 		temp = 0;
 		sensors_get_temperatur( idx, &temp);
 		sensors_get_serial( idx, serial);
-		sprintf_P( cmd_line, PSTR("%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x      %d.%01d°C\r\n"),
+		sprintf( cmd_line, "%02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x      %d.%01d°C\r\n",
 				serial[0], 
 				serial[1], 
 				serial[2],
@@ -438,10 +391,10 @@ static void cmd_sensor(const char* cmd)
 				temp/100,
 				temp%100);
 
-		cmd_flush();
+		uart_write( (uint8_t*)cmd_line, strlen(cmd_line) );
 		uart_flush();
 	}
-	strcpy_P(cmd_line, PSTR("===================================="));
+	strcpy(cmd_line, "====================================");
 }
 
 void cmd_power(const char* cmd)
@@ -449,21 +402,21 @@ void cmd_power(const char* cmd)
 	if( strstr( cmd, "off") )
 	{
 		ePowerSoll = ePowerOff;
-		strcpy_P(cmd_line, PSTR("Switched to power state \'off\'"));
+		strcpy(cmd_line, "Switched to power state \'off\'");
 	}
 	else if( strstr( cmd, "full") )
 	{
 		ePowerSoll = ePowerFull;
-		strcpy_P(cmd_line, PSTR("Switched to power state \'full\'"));
+		strcpy(cmd_line, "Switched to power state \'full\'");
 	}
 	else if( strstr( cmd, "save") )
 	{
 		ePowerSoll = ePowerSave;
-		strcpy_P(cmd_line, PSTR("Switched to power state \'save\'"));
+		strcpy(cmd_line, "Switched to power state \'save\'");
 	}
 	else
 	{
-		strcpy_P(cmd_line, PSTR("Use \'full\', \'save\' or \'off\' as argument"));
+		strcpy(cmd_line, "Use \'full\', \'save\' or \'off\' as argument");
 	}
 }
 
@@ -474,12 +427,12 @@ void cmd_onewire(const char* cmd)
 	if( strstr( cmd, "restart") )
 	{
 		result = ow_restart();
-		sprintf_P( cmd_line, PSTR("ow_restart returned %d"), result);
+		sprintf( cmd_line, "ow_restart returned %d", result);
 	}
 	else if (strstr( cmd, "reset") )
 	{
 		result = ow_reset();
-		sprintf_P( cmd_line, PSTR("ow_reset returned %d"), result);
+		sprintf( cmd_line, "ow_reset returned %d", result);
 	}
 	else if (strstr( cmd, "search"))
 	{
@@ -494,9 +447,9 @@ void cmd_onewire(const char* cmd)
 			SET_GREEN_LED;
 
 			result = ow_search( 0, &last_device, snum);
-			sprintf_P( cmd_line, PSTR("one wire dev: %02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x\r\n"),
+			sprintf( cmd_line, "one wire dev: %02x:%02x:%02x:%02x:%02x:%02x:%02x:%02x\r\n",
 				snum[0], snum[1], snum[2], snum[3], snum[4], snum[5], snum[6], snum[7]);
-			cmd_flush();
+			uart_write( (uint8_t*)cmd_line, strlen(cmd_line) );
 			
 			CLEAR_GREEN_LED;;
 
@@ -511,191 +464,21 @@ void cmd_onewire(const char* cmd)
 			}
 		}
 		
-		sprintf_P( cmd_line, PSTR("ow_search found %d one wire device%s"), nbr_of_dev, nbr_of_dev>1 ? "s" : "");
+		sprintf( cmd_line, "ow_search found %d one wire device%s", nbr_of_dev, nbr_of_dev>1 ? "s" : "");
 	}
 	else
 	{
-		strcpy_P(cmd_line, PSTR("Use \'restart\', \'reset\' or \'search\' as argument"));
+		strcpy(cmd_line, "Use \'restart\', \'reset\' or \'search\' as argument");
 	}
 }
 
 void cmd_stack_memory(void)
 {
 	uint16_t result = cmd_get_max_stack_usage();
-	
-	strcpy_P(cmd_line, PSTR("command_thread's max stack usage: "));
-	cmd_print_unsigned_fix(result);
-	strcat_P(cmd_line, PSTR(" bytes\r\n"));
-	cmd_flush();
+
+	sprintf( cmd_line, "command_thread's max stack usage: %3d bytes\r\n", result);
+	uart_write( (uint8_t*)cmd_line, strlen(cmd_line) );
 
 	result = sensors_get_max_stack_usage();
-	strcpy_P(cmd_line, PSTR("sensors_thread's max stack usage: "));
-	cmd_print_unsigned_fix(result);
-	strcat_P(cmd_line, PSTR(" bytes\r\n"));
-	cmd_flush();
-#ifdef BALANCER
-	result = balancer_get_max_stack_usage();
-	strcpy_P(cmd_line, PSTR("balancer_thread's max stack usage: "));
-	cmd_print_unsigned_fix(result);
-	strcat_P(cmd_line, PSTR(" bytes\r\n"));
-#endif
+	sprintf( cmd_line, "sensors_thread's max stack usage: %3d bytes", result);
 }
-
-void cmd_flash(void)
-{
-#ifdef BALANCER
-	for (uint8_t flash=0; flash<12; flash++)
-	{
-		for (uint8_t i=0; i<BALANCER_NBR_OF_CELLS; i++)
-		{
-			ltc_set_load(i, 1);
-		}
-		
-		ltc_write_config();
-		os_thread_sleep(500);
-		TOGGLE_GREEN_LED;
-		
-		for (uint8_t i=0; i<BALANCER_NBR_OF_CELLS; i++)
-		{
-			ltc_set_load(i, 0);
-		}
-		
-		ltc_write_config();
-		os_thread_sleep(500);
-	}
-#endif
-	strcpy_P(cmd_line, PSTR("finished"));
-}
-
-void cmd_cell(void)
-{
-#ifdef BALANCER
-	int8_t i;
-
-	ltc_start_voltage_conversion();
-
-	ltc_read_voltage();
-
-	for (i=0; i<BALANCER_NBR_OF_CELLS; i++)
-	{
-		uint16_t voltage = ltc_get_voltage(i);
-		sprintf_P(cmd_line, PSTR("Cell  %d:\t%dmV\r\n"), i, ltc_adc_voltage(voltage));
-		cmd_flush();
-	}
-#endif
-	cmd_line[0] = 0;
-}
-
-void cmd_supervisor_temperature()
-{
-#ifdef BALANCER	
-	uint8_t i;
-	static const prog_char unit[] = {0xC2,0xB0,'C','\r','\n','\0'};
-//	static const prog_char unit[] = {0xB0,0xC2,'C','\r','\n','\0'};
-//	static const prog_char unit[] = {'°','C','\r','\n','\0'};
-
-	ltc_tmpr_t t[2];
-
-	ltc_start_temperature_conversion();
-
-	ltc_read_temperature(t, 2);
-
-	for (i=0; i<2; i++)
-	{
-		int16_t temp = ntc_get_temp(t[0].etmp1);
-		strcpy_P( cmd_line, PSTR("External temperature 1 = "));
-		cmd_print_signed_float(temp);
-		strcat_P( cmd_line, unit);
-		cmd_flush();
-		
-		temp = ntc_get_temp(t[0].etmp2);
-		strcpy_P( cmd_line, PSTR("External temperature 2 = "));
-		cmd_print_signed_float(temp);
-		strcat_P( cmd_line, unit);
-		cmd_flush();
-		
-		strcpy_P( cmd_line, PSTR("Internal temperature = "));
-		cmd_print_signed_float(t[0].itmp);
-		strcat_P( cmd_line, PSTR("\r\n"));
-	}
-#endif
-}
-
-void cmd_ko(void)
-{
-	ko_print();
-}
-
-void cmd_load(void)
-{
-	static uint8_t on;
-
-	on ^= 1;
-	balancer_enable(on);
-	if (on)
-	{
-		strcpy_P(cmd_line, PSTR("Enabled balancer"));
-	}
-	else
-	{
-		strcpy_P(cmd_line, PSTR("Disabled balancer"));
-	}
-}
-
-void cmd_print_signed_float(int16_t value)
-{
-	if (value<0)
-        {
-                value = -value;
-                strcat_P(cmd_line, PSTR("-"));
-        }
-	else
-	{
-		strcat_P(cmd_line, PSTR(" "));
-	}
-
-	cmd_print_unsigned_float(value);
-}
-
-void cmd_print_unsigned_float(uint16_t value)
-{
-	char temp[4];
-
-	uint8_t high = value / 100;
-	uint8_t low  = value % 100;
-
-	strcat(cmd_line, itoa(high, temp, 10));
-	strcat_P(cmd_line, PSTR("."));
-	if (low>9)
-	{
-		strcat(cmd_line, itoa(low, temp, 10));
-	}
-	else
-	{
-		strcat_P(cmd_line, PSTR("0"));
-		strcat(cmd_line, itoa(low, temp, 10));
-	}
-}
-
-void cmd_print_signed_fix(int16_t value)
-{
-	if (value<0)
-        {
-                value = -value;
-                strcat_P(cmd_line, PSTR("-"));
-        }
-	else
-	{
-		strcat_P(cmd_line, PSTR(" "));
-	}
-
-	cmd_print_unsigned_fix(value);
-}
-
-void cmd_print_unsigned_fix(uint16_t value)
-{
-	char temp[6];
-
-	strcat(cmd_line, itoa(value, temp, 10));
-}
-
