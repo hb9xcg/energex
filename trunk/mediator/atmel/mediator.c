@@ -33,6 +33,7 @@
 #include "mediator.h"
 #include <avr/eeprom.h>
 #include "i2c.h"
+#include "spi.h"
 #include "adc.h"
 #include "uart.h"
 #include "timer.h"
@@ -44,6 +45,10 @@
 #include "battery.h"
 #include "charge.h"
 #include "data.h"
+#ifdef BALANCER
+	#include "ltc6802.h"
+	#include "balancer.h"
+#endif
 
 #define V              100UL
 #define GRAD           100L
@@ -65,24 +70,34 @@ typedef enum
 	eCheckInvalid
 } ECheckState;
 
+typedef enum
+{
+	eSilent,
+	eAlive = 100, // 10 seconds timeout
+	eForced
+	
+} ELiveness;
+
 
 static EDriveState eDriveState = eConverterOff;
 static EDriveState eLastState  = eConverterOff;
 EPowerState ePowerIst;
 int16 mediator_temperature;
+ELiveness mediator_alive = eAlive;
 
 static void wait_for_power(void);
-static void mediator_check_power();
-static void mediator_check_drive_voltage();
-static void mediator_check_charge_voltage();
-static void mediator_check_current();
-static void mediator_check_min_charge_temperature();
-static void mediator_check_max_charge_temperature();
-static void mediator_check_min_drive_temperature();
-static void mediator_check_max_drive_temperature();
-static void mediator_limit_sym_current();
-static void mediator_check_end_of_charge();
-static void mediator_check_capacity();
+static void mediator_check_liveness(void);
+static void mediator_check_power(void);
+static void mediator_check_drive_voltage(void);
+static void mediator_check_charge_voltage(void);
+static void mediator_check_current(void);
+static void mediator_check_min_charge_temperature(void);
+static void mediator_check_max_charge_temperature(void);
+static void mediator_check_min_drive_temperature(void);
+static void mediator_check_max_drive_temperature(void);
+static void mediator_limit_sym_current(void);
+static void mediator_check_end_of_charge(void);
+static void mediator_check_capacity(void);
 
 int main(void)
 {
@@ -102,9 +117,9 @@ int main(void)
 	}
 	wdt_disable();	// Watchdog aus!
 
-
-	os_create_thread((uint8_t *)SP, NULL);	// main Hauptthread anlegen mit höchster Priorität.
-
+	// main Hauptthread anlegen mit höchster Priorität.
+	os_create_thread((uint8_t *)SP, NULL);		
+	
 	timer_2_init();
 	
 	/* Ist das ein Power on Reset? */
@@ -147,9 +162,17 @@ int main(void)
 
 	i2c_init(100000); // 100kHz Speed
 
+#ifdef BALANCER	
+	{
+		spi_speed_t speed = SPI_SPEED_250KHZ;
+		spi_master_init(speed);
+	}
+	balancer_init();
+#endif
 	delay(10); // Give One wire power supply some time
 
 	sensors_init();
+
 
 	ePowerIst = ePowerOff;
 	battery_info_set(BAT_REL_OPEN);    // Atomic update of battery info
@@ -161,6 +184,7 @@ int main(void)
 
 	while(1)
 	{
+		mediator_check_liveness();
 		mediator_check_power();
 
 		switch(eDriveState)
@@ -218,6 +242,7 @@ int main(void)
 		eLastState = eDriveState;
 		os_thread_sleep(100);
 		//uart_write("Hallo\n\r", 7);
+		//TOGGLE_GREEN_LED;
 	}
 	return 0;
 }
@@ -261,6 +286,39 @@ void mediator_check_binfo(void)
 			break;
 	}
 }
+	
+void mediator_busy(void)
+{
+	mediator_alive = eAlive;
+}
+
+void mediator_force_busy(int8_t on)
+{
+	if (on)
+	{
+		mediator_alive = eForced;
+	}
+	else
+	{
+		mediator_alive = eAlive;
+	}
+}
+
+void mediator_check_liveness()
+{
+	if (mediator_alive == eSilent && ePowerSoll != ePowerOff)
+	{
+		SET_RED_LED;
+		data_save();
+		ePowerSoll = ePowerOff;
+		wdt_enable(WDTO_4S); // reboot into wait for power. 
+		CLEAR_RED_LED;
+	}
+	else if (mediator_alive != eForced)
+	{
+		mediator_alive--;
+	}
+}
 
 void mediator_check_power()
 {
@@ -295,12 +353,12 @@ void mediator_check_drive_voltage()
 {
 	uint16_t voltage = battery_get_voltage();
 
-	if (voltage < 310*V)
+	if (voltage < 320*V)
 	{
 		battery_info_set(VOLTAGE_TO_LO);
 		battery_info_clear(VOLTAGE_TO_HI);
 	}
-	else if (voltage < 400*V)
+	else if (voltage < 380*V)
 	{
 		battery_info_clear(VOLTAGE_TO_LO);
 		battery_info_clear(VOLTAGE_TO_HI);
@@ -309,6 +367,7 @@ void mediator_check_drive_voltage()
 	{
 		battery_info_clear(VOLTAGE_TO_LO);
 		battery_info_set(VOLTAGE_TO_HI);
+		// TODO: Test REKUPERATION_NOK
 	}
 }
 
@@ -321,7 +380,7 @@ void mediator_check_charge_voltage()
 		battery_info_set(VOLTAGE_TO_LO);
 		battery_info_clear(VOLTAGE_TO_HI);
 	}
-	else if (voltage < 435*V)
+	else if (voltage < 430*V)
 	{
 		battery_info_clear(VOLTAGE_TO_LO);
 		battery_info_clear(VOLTAGE_TO_HI);
@@ -339,10 +398,11 @@ void mediator_check_current()
 
 	if (current > 280) // > 2.8A charge current
 	{
-		battery_info_set(CHARGE_CUR_TO_HI);
+//		battery_info_set(CHARGE_CUR_TO_HI);
+		battery_info_clear(CHARGE_CUR_TO_HI);
 		battery_info_clear(DRIVE_CUR_TO_HI);
 	}
-	else if (current > -15*A) //  1A...-10A discharge current
+	else if (current > -20*A) //  1A...-10A discharge current
 	{
 		battery_info_clear(CHARGE_CUR_TO_HI);
 		battery_info_clear(DRIVE_CUR_TO_HI);
@@ -493,6 +553,8 @@ EDriveState mediator_get_drive_state(void)
  */
 ISR (INT0_vect)
 {
+	SET_RED_LED;
 	data_save();
 	ePowerSoll = ePowerOff;
+	CLEAR_RED_LED;
 }

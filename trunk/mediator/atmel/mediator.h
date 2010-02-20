@@ -67,5 +67,7 @@ void mediator_set_drive_state(EDriveState eState);
 EDriveState mediator_get_drive_state(void);
 void mediator_check_binfo(void);
 extern int16 mediator_temperature;
+void mediator_busy(void);
+void mediator_force_busy(int8_t on);
 
 #endif

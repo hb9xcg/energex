@@ -203,9 +203,9 @@
 #define	 REKUPERATION_NOK    0 // Rekuperation nicht erlaubt
 #define	 CHARGE_NOK          1 // Ladung nicht erlaubt
 #define	 DRIVE_NOK           2 // Fahren nicht erlaubt
-#define	 CHARGE_CUR_TO_HI    3 // Zu hoher Ladestrom
-#define	 DRIVE_CUR_TO_HI     4 // Zu hoher Fahrstrom
-#define	 VOLTAGE_TO_HI       5 // Zu hohe Ladespannung
+#define	 CHARGE_CUR_TO_HI    3 // Zu hoher Ladestrom, reduziert Ladestrom
+#define	 DRIVE_CUR_TO_HI     4 // Zu hoher Fahrstrom, reduziert Fahrstrom
+#define	 VOLTAGE_TO_HI       5 // Zu hohe Ladespannung, aktiviert U-Ladung
 #define	 VOLTAGE_TO_LO       6 // Zu tiefe Fahrspannung
 #define	 BAT_REL_OPEN        7 // Batterie Relais offen
 #define	 BAT_FULL            8 // Batterie voll

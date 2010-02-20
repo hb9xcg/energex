@@ -74,17 +74,6 @@ static int8_t   ko_min_buffer_idx = 2;
 
 void ko_sample(int16_t* sample)
 {
-	static int8_t subsampling;
-
-	if (mediator_get_drive_state() == eDrive)
-	{
-		if (--subsampling>0)
-		{
-			return;
-		}
-		subsampling = 25; // 10ms
-	}
-
 	ko_samples[ko_rec_buffer_idx][ko_sample_idx] = *sample;
 
 	ko_sample_idx++;
