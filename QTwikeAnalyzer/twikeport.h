@@ -50,7 +50,7 @@ public slots:
     void dummy();
 
 signals:
-    void receiveData(qint8 data);
+    void receiveData(char data);
 };
 
 #endif // TWIKEPORT_H
