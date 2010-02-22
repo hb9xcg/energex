@@ -54,7 +54,7 @@ signals:
     void appendReceivedData(qint8 data);
 
 public slots:
-    void receiveData(qint8 data);
+    void receiveData(char data);
     void startDownload();
 
 private:

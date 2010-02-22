@@ -223,6 +223,21 @@ void TwikeAnalyzer::on_actionRecord_triggered()
 
     decoder->resetTime();
 
+    connect(decoder, SIGNAL(battery1(int,float,float)),
+            battery1, SLOT(addPower(int,float,float)) );
+    connect(decoder, SIGNAL(temperature1(int,int,float)),
+            battery1, SLOT(temperature(int,int,float)) );
+
+    connect(decoder, SIGNAL(battery2(int,float,float)),
+            battery2, SLOT(addPower(int,float,float)) );
+    connect(decoder, SIGNAL(temperature2(int,int,float)),
+            battery2, SLOT(temperature(int,int,float)) );
+
+    connect(decoder, SIGNAL(battery3(int,float,float)),
+            battery3, SLOT(addPower(int,float,float)) );
+    connect(decoder, SIGNAL(temperature3(int,int,float)),
+            battery3, SLOT(temperature(int,int,float)) );
+
     connect(port, SIGNAL(receiveData(char)), rawStorage, SLOT(receiveData(char)));
     connect(port, SIGNAL(receiveData(char)), decoder, SLOT(receiveByte(char)));
     connect(decoder, SIGNAL(receiveMessage(QString, QString, QString, QString, QString, QString)),
@@ -252,6 +267,9 @@ void TwikeAnalyzer::on_actionPlay_triggered()
 void TwikeAnalyzer::on_actionStop_triggered()
 {
     rawStorage->disconnect();
+    battery1->disconnect();
+    battery2->disconnect();
+    battery3->disconnect();
     decoder->disconnect();
     disconnect(this, SIGNAL(appendRow(QString, QString, QString, QString, QString, QString)));
 

@@ -134,8 +134,7 @@ void TwikePort::run()
             char byte;
             if (port->read(&byte, 1) > 0)
             {
-                qint8 data = static_cast<qint8>(byte);
-                emit receiveData(data);
+                emit receiveData(byte);
             }
         }
         else

@@ -53,12 +53,13 @@ Downloader::Downloader(DownloadDialog* dialog, TwikePort* port)
 
     QObject::moveToThread(this);
 
-    connect(port, SIGNAL(receiveData(qint8)),   this, SLOT(receiveData(qint8)), Qt::DirectConnection);
+    connect(port, SIGNAL(receiveData(char)),   this, SLOT(receiveData(char)), Qt::DirectConnection);
     connect(this, SIGNAL(sendData(QByteArray)), port, SLOT(sendData(QByteArray)),Qt::DirectConnection);
 }
 
-void Downloader::receiveData(qint8 data)
+void Downloader::receiveData(char byte)
 {
+    char data = static_cast<char>(byte);
     emit appendReceivedData(data);
 
     switch(state)
