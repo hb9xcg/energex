@@ -46,3 +46,9 @@ LIBS += -lqextserialport
 LIBS += -lqwt
 unix:DEFINES = _TTY_POSIX_
 win32:DEFINES = _TTY_WIN_
+
+unix {
+	target.path = /usr/bin
+	INSTALLS += target
+}
+
