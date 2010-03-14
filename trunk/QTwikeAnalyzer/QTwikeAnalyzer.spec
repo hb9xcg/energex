@@ -3,7 +3,6 @@
 # package are under the same license as the package itself.
 #
 
-# norootforbuild
 
 Name:           QTwikeAnalyzer
 Version:	0.4
@@ -12,9 +11,7 @@ Summary:	Twike Application
 Group:		Development/Tools/Other
 License:	GPL
 Url:		http://energex.origo.ethz.ch/wiki/energex
-PreReq:		libqextserialport1
-PreReq:		libqwt5
-# BuildRequires:
+BuildRequires:  libqt4-devel qwt-devel libqextserialport1-devel
 Source:		QTwikeAnalyzer-0.4.tar.gz
 # Patch:
 BuildRoot:      %{_tmppath}/%{name}-%{version}-build
@@ -37,19 +34,19 @@ qmake QTwikeAnalyzer.pro
 make %{?jobs:-j%jobs}
 
 %install
-%makeinstall
+%__mkdir_p %{buildroot}%{_bindir}
+make INSTALL_ROOT=%{buildroot} install
+
 
 %clean
 rm -rf $RPM_BUILD_ROOT
 
-%post
-%postun
-
 %files
 %defattr(-,root,root)
 %doc ChangeLog README COPYING
+%{_bindir}/QTwikeAnalyzer
 
 %changelog
 * Sun Mar 14 2010 markus.walser@gmail.com
-Initial C++ version.
+- Initial C++ version.
 
