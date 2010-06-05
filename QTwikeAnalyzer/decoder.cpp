@@ -223,12 +223,13 @@ void Decoder::transmitData(void)
 
     strRaw += QString("%1").arg(FRAME, 2, 16, QLatin1Char('0')) + " ";
     strRaw += QString("%1").arg(address, 2, 16, QLatin1Char('0')) + " ";
-    strRaw += QString("%1").arg(TRM_GROUP, 2, 16, QLatin1Char('0')) + " ";
+    strRaw += QString("%1").arg(TRM_DATA, 2, 16, QLatin1Char('0')) + " ";
 
     for(int idx=0; idx<4; idx++)
     {
         strRaw += QString("%1").arg(data[idx], 2, 16, QLatin1Char('0')) + " ";
     }
+    strRaw += QString("%1").arg(checksum, 2, 16, QLatin1Char('0'));
 
     strType = "TrmData";
 
