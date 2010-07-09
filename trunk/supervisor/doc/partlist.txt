@@ -1,62 +1,160 @@
 Partlist
 
-Exported from cell-supervisor.brd at 15.04.2008 18:16:00 
+Exported from supervisor.sch at 09.07.10 15:18
 
-EAGLE Version 4.16r2 Copyright (c) 1988-2006 CadSoft
+EAGLE Version 5.8.0 Copyright (c) 1988-2010 CadSoft
 
-Part     Value          Package      Library        Position (inch)       Orientation
+Part     Value          Device             Package      Library         Sheet
 
-C1       100nF          C0504        rcl            (2.975 2.975)         R270
-C2       100nF          C0504        rcl            (2.6 2.9)             R90
-C3       100nF          C0504        rcl            (3.425 2.8)           R270
-C4       1uF            C0603K       rcl            (1.7 3.05)            R180
-C6       100nF          C0504        rcl            (2.075 2.925)         R270
-C7       100nF          C0504        rcl            (1.925 2.75)          R270
-C9       10nF           C0504        rcl            (1.925 3.125)         R90
-C10      1uF            C0603K       rcl            (1.675 3.15)          R270
-D1       5V6            SMB          diode          (0.5 3.075)           R270
-IC1      TINY26LS       SO20L        atmel          (2.325 2.9)           R90
-IC2                     SOT23-5      v-reg-micrel   (1.8 3.15)            R270
-L2       10uH           L3225M       rcl            (2.05 3.125)          R90
-LED1     Green          CHIPLED_0805 led            (2.6 3.05)            R180
-LED2     Red            CHIPLED_0805 led            (1.675 2.9)           R180
-OK1      TLP283         MINI-FLAT-4  optocoupler    (3.2 3.125)           R180
-R1       100k           M0805        rcl            (3.8 2.875)           R270
-R2       150            R1206        rcl            (1.25 2.775)          R90
-R3       150            R1206        rcl            (0.65 3.05)           R90
-R4       150            R1206        rcl            (0.75 3.05)           R90
-R5       150            R1206        rcl            (0.85 3.05)           R90
-R6       100k           M0805        rcl            (1.925 2.9)           R270
-R7       100k           M0805        rcl            (3.7 2.875)           R90
-R8       150            R1206        rcl            (0.95 3.05)           R90
-R9       150            R1206        rcl            (1.05 3.05)           R90
-R10      150            R1206        rcl            (1.15 3.05)           R90
-R11      150            R1206        rcl            (1.25 3.05)           R90
-R12      100k           M0805        rcl            (1.825 2.75)          R270
-R13      100k           M0805        rcl            (2.275 2.625)         R180
-R14      150            R1206        rcl            (1.35 3.05)           R90
-R15      150            R1206        rcl            (1.45 3.05)           R90
-R16      150            R1206        rcl            (0.85 2.775)          R90
-R17      150            R1206        rcl            (0.95 2.775)          R90
-R18      150            R1206        rcl            (1.05 2.775)          R90
-R19      150            R1206        rcl            (1.15 2.775)          R90
-R20      150            R1206        rcl            (1.35 2.775)          R90
-R21      150            R1206        rcl            (1.45 2.775)          R90
-R22      150            R1206        rcl            (1.55 2.775)          R90
-R23      150            R1206        rcl            (0.75 2.775)          R90
-R24      150            R1206        rcl            (0.65 2.775)          R90
-R25      180            M0805        rcl            (2.675 3.175)         R180
-R26      100k           M0805        rcl            (2.775 2.95)          R270
-R27      100k           M0805        rcl            (2.7 2.95)            R270
-R35      150            R1206        rcl            (1.55 3.05)           R90
-R45      2.5A           SMS-WAV      resistor-shunt (0.175 3.15)          R0
-R46      180            M0805        rcl            (1.65 2.75)           R90
-R49      180            M0805        rcl            (2.875 3.15)          R0
-R50      180            M0805        rcl            (2.85 2.95)           R270
-R51      680            M0805        rcl            (3.35 3)              R270
-SV1                     MA03-2       con-lstb       (2.75 2.75)           R0
-T1       FDN337N        SOT23        transistor-fet (0.475 2.775)         R270
-U$2      WAGO2-233-102  233-102      con-wago       (0.125 2.85)          R0
-U$3      ADUM1250       SO8          analog-devices (3.175 2.8)           R270
-U$4      LM61SOT23      SOT23        linear         (3.025 2.65)          R270
-X2                      FSIDE-8      con-amp        (3.675 3.1)           R180
+C1       100n           C-EUC0603          C0603        resistor        1
+C2       100n           C-EUC0603          C0603        resistor        1
+C3       100n           C-EUC0603          C0603        resistor        1
+C4       100n           C-EUC0603          C0603        resistor        1
+C5       100n           C-EUC0603          C0603        resistor        1
+C6       100n           C-EUC0603          C0603        resistor        1
+C7       100n           C-EUC0603          C0603        resistor        1
+C8       100n           C-EUC0603          C0603        resistor        1
+C9       100n           C-EUC0603          C0603        resistor        1
+C10      100n           C-EUC0603          C0603        resistor        1
+C11      100n           C-EUC0603          C0603        resistor        1
+C12      100n           C-EUC0603          C0603        resistor        1
+C13      100n           C-EUC0603          C0603        resistor        1
+C14      1u             C-EUC0603          C0603        resistor        1
+C15      1u             C-EUC0603          C0603        resistor        1
+C16      1u             C-EUC0603          C0603        resistor        1
+C17      1u             C-EUC0603          C0603        resistor        1
+CON1     IN             CON06L             CON06L       con-harting     1
+CON2     OUT            CON06L             CON06L       con-harting     1
+D1       12V            MM3Z12VT1          SOD323-R     icontroller     1
+D2       6V2            BZT52C6V2S         SOD323-R     icontroller     1
+D3       12V            MM3Z12VT1          SOD323-R     icontroller     1
+D4       6V2            BZT52C6V2S         SOD323-R     icontroller     1
+D5       12V            MM3Z12VT1          SOD323-R     icontroller     1
+D6       6V2            BZT52C6V2S         SOD323-R     icontroller     1
+D7       12V            MM3Z12VT1          SOD323-R     icontroller     1
+D8       6V2            BZT52C6V2S         SOD323-R     icontroller     1
+D9       12V            MM3Z12VT1          SOD323-R     icontroller     1
+D10      6V2            BZT52C6V2S         SOD323-R     icontroller     1
+D11      12V            MM3Z12VT1          SOD323-R     icontroller     1
+D12      6V2            BZT52C6V2S         SOD323-R     icontroller     1
+D13      12V            MM3Z12VT1          SOD323-R     icontroller     1
+D14      6V2            BZT52C6V2S         SOD323-R     icontroller     1
+D15      12V            MM3Z12VT1          SOD323-R     icontroller     1
+D16      6V2            BZT52C6V2S         SOD323-R     icontroller     1
+D17      12V            MM3Z12VT1          SOD323-R     icontroller     1
+D18      6V2            BZT52C6V2S         SOD323-R     icontroller     1
+D19      12V            MM3Z12VT1          SOD323-R     icontroller     1
+D20      6V2            BZT52C6V2S         SOD323-R     icontroller     1
+D21      12V            MM3Z12VT1          SOD323-R     icontroller     1
+D22      6V2            BZT52C6V2S         SOD323-R     icontroller     1
+D23      12V            MM3Z12VT1          SOD323-R     icontroller     1
+D24      6V2            BZT52C6V2S         SOD323-R     icontroller     1
+D25      RS01J          RS1J               SMA-DO214AC  icontroller     1
+D26      RS01J          RS1J               SMA-DO214AC  icontroller     1
+D27      RS01J          RS1J               SMA-DO214AC  icontroller     1
+D28      BAT46          DIODE-MINIMELF     MINIMELF     diode           1
+D29      BAT46          DIODE-MINIMELF     MINIMELF     diode           1
+D30      BAT46          DIODE-MINIMELF     MINIMELF     diode           1
+D31      BAT46          DIODE-MINIMELF     MINIMELF     diode           1
+D32      BAT46          DIODE-MINIMELF     MINIMELF     diode           1
+D33      BAT46          DIODE-MINIMELF     MINIMELF     diode           1
+D34      TZM5265B-GS08  DIODE-MINIMELF     MINIMELF     diode           1
+D35      CM1223-04SO    CM1223-04SOSOT23-6 SOT23-6      icontroller     1
+IC1                     LTC6802-1          SSOP44DL     ltc6802         1
+JP1      BOS            JP2E               JP2          jumper          1
+JP2      TOS            JP2E               JP2          jumper          1
+L1       FBMJ3216HS800  SM-1206            SM-1206      inductor-neosid 1
+LED1     RED            LEDCHIPLED_0805    CHIPLED_0805 led             1
+LED2     RED            LEDCHIPLED_0805    CHIPLED_0805 led             1
+LED3     RED            LEDCHIPLED_0805    CHIPLED_0805 led             1
+LED4     RED            LEDCHIPLED_0805    CHIPLED_0805 led             1
+LED5     RED            LEDCHIPLED_0805    CHIPLED_0805 led             1
+LED6     RED            LEDCHIPLED_0805    CHIPLED_0805 led             1
+LED7     RED            LEDCHIPLED_0805    CHIPLED_0805 led             1
+LED8     RED            LEDCHIPLED_0805    CHIPLED_0805 led             1
+LED9     RED            LEDCHIPLED_0805    CHIPLED_0805 led             1
+LED10    RED            LEDCHIPLED_0805    CHIPLED_0805 led             1
+LED11    RED            LEDCHIPLED_0805    CHIPLED_0805 led             1
+LED12    RED            LEDCHIPLED_0805    CHIPLED_0805 led             1
+R1       100            R-EU_R0603         R0603        resistor        1
+R2       470            R-EU_R0603         R0603        resistor        1
+R3       15             R-EU_0411/12       0411/12      resistor        1
+R4       3k3            R-EU_R0603         R0603        resistor        1
+R5       100            R-EU_R0603         R0603        resistor        1
+R6       470            R-EU_R0603         R0603        resistor        1
+R7       15             R-EU_0411/12       0411/12      resistor        1
+R8       3k3            R-EU_R0603         R0603        resistor        1
+R9       100            R-EU_R0603         R0603        resistor        1
+R10      470            R-EU_R0603         R0603        resistor        1
+R11      15             R-EU_0411/12       0411/12      resistor        1
+R12      3k3            R-EU_R0603         R0603        resistor        1
+R13      100            R-EU_R0603         R0603        resistor        1
+R14      470            R-EU_R0603         R0603        resistor        1
+R15      15             R-EU_0411/12       0411/12      resistor        1
+R16      3k3            R-EU_R0603         R0603        resistor        1
+R17      100            R-EU_R0603         R0603        resistor        1
+R18      470            R-EU_R0603         R0603        resistor        1
+R19      15             R-EU_0411/12       0411/12      resistor        1
+R20      3k3            R-EU_R0603         R0603        resistor        1
+R21      100            R-EU_R0603         R0603        resistor        1
+R22      470            R-EU_R0603         R0603        resistor        1
+R23      15             R-EU_0411/12       0411/12      resistor        1
+R24      3k3            R-EU_R0603         R0603        resistor        1
+R25      100            R-EU_R0603         R0603        resistor        1
+R26      470            R-EU_R0603         R0603        resistor        1
+R27      15             R-EU_0411/12       0411/12      resistor        1
+R28      3k3            R-EU_R0603         R0603        resistor        1
+R29      100            R-EU_R0603         R0603        resistor        1
+R30      470            R-EU_R0603         R0603        resistor        1
+R31      15             R-EU_0411/12       0411/12      resistor        1
+R32      3k3            R-EU_R0603         R0603        resistor        1
+R33      100            R-EU_R0603         R0603        resistor        1
+R34      470            R-EU_R0603         R0603        resistor        1
+R35      15             R-EU_0411/12       0411/12      resistor        1
+R36      3k3            R-EU_R0603         R0603        resistor        1
+R37      100            R-EU_R0603         R0603        resistor        1
+R38      470            R-EU_R0603         R0603        resistor        1
+R39      15             R-EU_0411/12       0411/12      resistor        1
+R40      3k3            R-EU_R0603         R0603        resistor        1
+R41      100            R-EU_R0603         R0603        resistor        1
+R42      470            R-EU_R0603         R0603        resistor        1
+R43      15             R-EU_0411/12       0411/12      resistor        1
+R44      3k3            R-EU_R0603         R0603        resistor        1
+R45      100            R-EU_R0603         R0603        resistor        1
+R46      470            R-EU_R0603         R0603        resistor        1
+R47      15             R-EU_0411/12       0411/12      resistor        1
+R48      3k3            R-EU_R0603         R0603        resistor        1
+R49      100            R-EU_R0603         R0603        resistor        1
+R50      100            R-EU_R0603         R0603        resistor        1
+R51      20             R-EU_R0603         R0603        resistor        1
+R52      100            R-EU_R0603         R0603        resistor        1
+R53      20             R-EU_R0603         R0603        resistor        1
+R54      1M             R-EU_R0603         R0603        resistor        1
+R55      1M             R-EU_R0603         R0603        resistor        1
+R56      1M             R-EU_R0603         R0603        resistor        1
+R57      1M             R-EU_R0603         R0603        resistor        1
+R58      1M             R-EU_R0603         R0603        resistor        1
+R59      1M             R-EU_R0603         R0603        resistor        1
+R60      100k           R-EU_R0603         R0603        resistor        1
+R61      100k           R-EU_R0603         R0603        resistor        1
+R62      22             R-EU_R0603         R0603        resistor        1
+R63      100            R-EU_R0603         R0603        resistor        1
+R64      100            R-EU_R0603         R0603        resistor        1
+T1       SI2351DS       SI2351DS           SOT23        icontroller     1
+T1A      WIREPAD1,6/0,8 WIREPAD1,6/0,8     1,6/0,8      wirepad         1
+T1B      WIREPAD1,6/0,8 WIREPAD1,6/0,8     1,6/0,8      wirepad         1
+T2       SI2351DS       SI2351DS           SOT23        icontroller     1
+T2A      WIREPAD1,6/0,8 WIREPAD1,6/0,8     1,6/0,8      wirepad         1
+T2B      WIREPAD1,6/0,8 WIREPAD1,6/0,8     1,6/0,8      wirepad         1
+T3       SI2351DS       SI2351DS           SOT23        icontroller     1
+T4       SI2351DS       SI2351DS           SOT23        icontroller     1
+T5       SI2351DS       SI2351DS           SOT23        icontroller     1
+T6       SI2351DS       SI2351DS           SOT23        icontroller     1
+T7       SI2351DS       SI2351DS           SOT23        icontroller     1
+T8       SI2351DS       SI2351DS           SOT23        icontroller     1
+T9       SI2351DS       SI2351DS           SOT23        icontroller     1
+T10      SI2351DS       SI2351DS           SOT23        icontroller     1
+T11      SI2351DS       SI2351DS           SOT23        icontroller     1
+T12      SI2351DS       SI2351DS           SOT23        icontroller     1
+X2                      233-503            233-503      con-wago        1
+X3                      233-510            233-510      con-wago        1
