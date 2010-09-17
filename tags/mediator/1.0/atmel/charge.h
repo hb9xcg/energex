@@ -1,0 +1,45 @@
+/***************************************************************************
+ *   Energex                                                               *
+ *                                                                         *
+ *   Copyright (C) 2008-2009 by Markus Walser                              *
+ *   markus.walser@gmail.com                                               *
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ *   This program is distributed in the hope that it will be useful,       *
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of        *
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         *
+ *   GNU General Public License for more details.                          *
+ *                                                                         *
+ *   You should have received a copy of the GNU General Public License     *
+ *   along with this program; if not, write to the                         *
+ *   Free Software Foundation, Inc.,                                       *
+ *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
+ ***************************************************************************/
+
+/*! 
+ * @file 	charge.h
+ * @brief 	Measures and integrates current.
+ * @author 	Markus Walser (markus.walser@gmail.com)
+ * @date 	11.02.08
+ */
+
+#ifndef _CHARGE_H_
+#define _CHARGE_H_
+
+#include "mediator.h"
+
+int16_t charge_get_current(void);
+
+void charge_sample(void);
+int16_t charge_get_capacity(void);
+void charge_set_capacity(int16_t newCapacity);
+void charge_reset(void);
+uint16_t charge_get_total_charge(void);
+void charge_set_total_discharge(uint16_t new_total);
+uint16_t charge_get_total_discharge(void);
+
+#endif
