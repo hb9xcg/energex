@@ -1,0 +1,87 @@
+<!DOCTYPE KontrollerLab>
+<PROJECT VERSION="0.1" >
+  <FILES>
+    <FILE SHOWN="TRUE" NAME="adc.c" />
+    <FILE SHOWN="TRUE" NAME="adc.h" />
+    <FILE SHOWN="TRUE" NAME="delay.h" />
+    <FILE SHOWN="TRUE" NAME="delay.c" />
+    <FILE SHOWN="TRUE" NAME="os_utils.h" />
+    <FILE SHOWN="TRUE" NAME="os_thread.h" />
+    <FILE SHOWN="TRUE" NAME="os_thread.c" />
+    <FILE SHOWN="TRUE" NAME="os_scheduler.h" />
+    <FILE SHOWN="TRUE" NAME="os_scheduler.c" />
+    <FILE SHOWN="TRUE" NAME="timer.h" />
+    <FILE SHOWN="TRUE" NAME="timer.c" />
+    <FILE SHOWN="TRUE" NAME="global.h" />
+    <FILE SHOWN="TRUE" NAME="i2c.h" />
+    <FILE SHOWN="TRUE" NAME="i2c.c" />
+    <FILE SHOWN="TRUE" NAME="timer-low.c" />
+    <FILE SHOWN="TRUE" NAME="uart.c" />
+    <FILE SHOWN="TRUE" NAME="uart.h" />
+    <FILE SHOWN="TRUE" NAME="fifo.c" />
+    <FILE SHOWN="TRUE" NAME="fifo.h" />
+    <FILE SHOWN="TRUE" NAME="command.h" />
+    <FILE SHOWN="TRUE" NAME="charge.c" />
+    <FILE SHOWN="TRUE" NAME="charge.h" />
+    <FILE SHOWN="TRUE" NAME="balancer.h" />
+    <FILE SHOWN="TRUE" NAME="protocol.h" />
+    <FILE SHOWN="TRUE" NAME="battery.h" />
+    <FILE SHOWN="TRUE" NAME="mediator.h" />
+    <FILE SHOWN="TRUE" NAME="mediator.c" />
+    <FILE SHOWN="TRUE" NAME="battery.c" />
+    <FILE SHOWN="TRUE" NAME="command.c" />
+    <FILE SHOWN="TRUE" NAME="protocol.c" />
+    <FILE SHOWN="TRUE" NAME="io.h" />
+    <FILE SHOWN="TRUE" NAME="ow.h" />
+    <FILE SHOWN="TRUE" NAME="ow.c" />
+    <FILE SHOWN="TRUE" NAME="sensors.c" />
+    <FILE SHOWN="TRUE" NAME="sensors.h" />
+    <FILE SHOWN="TRUE" NAME="data.c" />
+    <FILE SHOWN="TRUE" NAME="data.h" />
+    <FILE SHOWN="TRUE" NAME="crc8.c" />
+    <FILE SHOWN="TRUE" NAME="crc8.h" />
+    <FILE SHOWN="TRUE" NAME="ko.c" />
+  </FILES>
+  <SETTINGS>
+    <ASSEMBLER_COMMAND VALUE="avr-gcc" />
+    <CLOCK VALUE="1.6e+07" />
+    <COMPILER_CALL_PROLOGUES VALUE="FALSE" />
+    <COMPILER_COMMAND VALUE="avr-gcc" />
+    <COMPILER_F_CPU VALUE="TRUE" />
+    <COMPILER_GDEBUG VALUE="FALSE" />
+    <COMPILER_OPT_LEVEL VALUE="2" />
+    <COMPILER_STRICT_PROTOTYPES VALUE="FALSE" />
+    <COMPILER_WALL VALUE="TRUE" />
+    <CPU VALUE="ATMega644p" />
+    <HEX_FILE VALUE="project.hex" />
+    <LINKER_COMMAND VALUE="avr-gcc" />
+    <LINKER_FLAGS VALUE="" />
+    <MAP_FILE VALUE="project.map" />
+    <OBJCOPY_COMMAND VALUE="avr-objcopy" />
+  </SETTINGS>
+  <PROGRAMMERCONFIG>
+    <AVRDUDE_COUNT_ERASE VALUE="FALSE" />
+    <AVRDUDE_DISABLE_AUTO_ERASE VALUE="FALSE" />
+    <AVRDUDE_OVERRIDE_INVALID_SIGNATURE VALUE="FALSE" />
+    <AVRDUDE_TEST_MODE VALUE="FALSE" />
+    <PROGRAMMER_COMMAND VALUE="uisp" />
+    <PROGRAMMER_NAME VALUE="UISP" />
+    <UISP_PARALLEL_AT89S VALUE="FALSE" />
+    <UISP_PARALLEL_DISABLE_RETRIES VALUE="FALSE" />
+    <UISP_PARALLEL_EEPROM_MAX_WRITE_DELAY VALUE="6250" />
+    <UISP_PARALLEL_FLASH_MAX_WRITE_DELAY VALUE="3125" />
+    <UISP_PARALLEL_NO_DATA_POLLING VALUE="FALSE" />
+    <UISP_PARALLEL_PORT VALUE="/dev/parport0" />
+    <UISP_PARALLEL_RESET_HIGH_TIME VALUE="5" />
+    <UISP_PARALLEL_SCK_HIGH_LOW_TIME VALUE="2" />
+    <UISP_PARALLEL_VOLTAGE VALUE="5" />
+    <UISP_PROGRAMMER_TYPE VALUE="stk200" />
+    <UISP_SERIAL_PORT VALUE="" />
+    <UISP_SERIAL_SPEED VALUE="9600" />
+    <UISP_SPECIFY_PART VALUE="FALSE" />
+    <UISP_STK500_AREF_VOLTAGE VALUE="0" />
+    <UISP_STK500_OSCILLATOR_FREQUENCY VALUE="14.1" />
+    <UISP_STK500_USE_HIGH_VOLTAGE VALUE="FALSE" />
+    <UISP_STK500_VTARGET_VOLTAGE VALUE="0" />
+  </PROGRAMMERCONFIG>
+</PROJECT>
