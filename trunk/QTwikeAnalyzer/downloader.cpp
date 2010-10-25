@@ -26,10 +26,12 @@
 
 const char Downloader::NOTHING[]= {};
 const char Downloader::EXIT[]   = {'x'};
-const char Downloader::ESCAPE[] = {0x10,'d'};
+const char Downloader::ESCAPE_MEDIATOR[] = {0x10,'d'};
+const char Downloader::ESCAPE_PLC[]      = {0x10,'p'};
 const char Downloader::RETURN[] = {'\n','\r'};
 const char Downloader::REBOOT[] = {'b','\r'};
-const char Downloader::PASSWORD[] = {'A','V','R','U','B'};
+const char Downloader::PASSWORD_MEDIATOR[] = {'A','V','R','U','B'};
+const char Downloader::PASSWORD_PLC[] = {'A','V','R','P','L'};
 
 const char Downloader::XMODEM_NUL = 0x00;
 const char Downloader::XMODEM_SOH = 0x01;
@@ -105,12 +107,23 @@ bool Downloader::loaded()
     return !dataBuffer.isEmpty();
 }
 
-void Downloader::startDownload()
+void Downloader::startPlc()
 {
-    char frameBuffer[FRAME_LENGTH + 5];
-    char crcBuffer[FRAME_LENGTH];
+    rebootPlc();
+    connectPlc();
+    download();
+}
 
-    emit appendLog("Rebooting...");
+void Downloader::startMediator()
+{
+    rebootMediator();
+    connectMediator();
+    download();
+}
+
+void Downloader::rebootPlc()
+{
+    emit appendLog("Rebooting PLC...");
 
     emit setProgress(0);
 
@@ -126,24 +139,54 @@ void Downloader::startDownload()
 
     if (waitForCommand(500) == false)
     {
-        sendCommand(QByteArray(ESCAPE, sizeof(ESCAPE)));
+        sendCommand(QByteArray(ESCAPE_PLC, sizeof(ESCAPE_PLC)));
         waitForCommand(1000);
     }
-
 
     sendCommand(QByteArray(REBOOT, sizeof(REBOOT)));
 
     QThread::msleep(200);
     port->close();
+}
 
-    emit appendLog("Connecting Bootloader...");
+void Downloader::rebootMediator()
+{
+    emit appendLog("Rebooting Mediator...");
+
+    emit setProgress(0);
+
+    if (port->isOpen())
+    {
+            port->close();
+    }
+    port->openTwike();
+
+    state = eReboot;
+
+    sendCommand(QByteArray(NOTHING, sizeof(NOTHING)));
+
+    if (waitForCommand(500) == false)
+    {
+        sendCommand(QByteArray(ESCAPE_MEDIATOR, sizeof(ESCAPE_MEDIATOR)));
+        waitForCommand(1000);
+    }
+
+    sendCommand(QByteArray(REBOOT, sizeof(REBOOT)));
+
+    QThread::msleep(200);
+    port->close();
+}
+
+void Downloader::connectPlc()
+{
+    emit appendLog("Connecting PLC Bootloader...");
     port->openBootloader();
 
     int loginCounter = 0;
     QThread::msleep(200);
     state = eConnect;
 
-    emit sendData(QByteArray(PASSWORD, sizeof(PASSWORD)));
+    emit sendData(QByteArray(PASSWORD_PLC, sizeof(PASSWORD_PLC)));
 
     do
     {
@@ -157,7 +200,37 @@ void Downloader::startDownload()
     while (state != eDownload);
 
     emit appendLog("Connected!");
+}
 
+void Downloader::connectMediator()
+{
+    emit appendLog("Connecting Mediator Bootloader...");
+    port->openBootloader();
+
+    int loginCounter = 0;
+    QThread::msleep(200);
+    state = eConnect;
+
+    emit sendData(QByteArray(PASSWORD_MEDIATOR, sizeof(PASSWORD_MEDIATOR)));
+
+    do
+    {
+        QThread::msleep(100);
+        if (++loginCounter>15)
+        {
+            emit appendLog("Login failed.");
+            return;
+        }
+    }
+    while (state != eDownload);
+
+    emit appendLog("Connected!");
+}
+
+void Downloader::download()
+{
+    char frameBuffer[FRAME_LENGTH + 5];
+    char crcBuffer[FRAME_LENGTH];
     int frameCounter = 0;
     int retransmissionCount = 0;
     qint8 retransmissionNbr = 0;
@@ -241,8 +314,9 @@ void Downloader::startDownload()
             break;
         }
 
-        //Sent all data?
-        if (frameCounter > (dataBuffer.length() / FRAME_LENGTH))
+        // Sent all data?
+        // Align to 256bytes in order to match ATMega644p page size.
+        if (frameCounter/2 > (dataBuffer.length() / FRAME_LENGTH)/2)
         {
             //send finish
             char endBuffer[1];

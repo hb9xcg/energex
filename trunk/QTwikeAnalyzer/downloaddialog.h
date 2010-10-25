@@ -46,12 +46,12 @@ public:
 signals:
     void closeDownload();
     void startThread();
-    void startDownload();
 
 
 public slots:
     void on_buttonFile_clicked();
-    void on_buttonStart_clicked();
+    void on_buttonStartMediator_clicked();
+    void on_buttonStartPlc_clicked();
     void appendLog(QString text);
     void appendSentData(QByteArray);
     void setProgress(qint32 percentage);
