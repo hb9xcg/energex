@@ -55,9 +55,16 @@ signals:
 
 public slots:
     void receiveData(char data);
-    void startDownload();
+    void startPlc();
+    void startMediator();
 
 private:
+    void rebootPlc();
+    void rebootMediator();
+    void connectPlc();
+    void connectMediator();
+    void download();
+
     TwikePort* port;
 
     enum EState
@@ -83,10 +90,12 @@ private:
 
     static const char NOTHING[];
     static const char EXIT[];
-    static const char ESCAPE[];
+    static const char ESCAPE_MEDIATOR[];
+    static const char ESCAPE_PLC[];
     static const char RETURN[];
     static const char REBOOT[];
-    static const char PASSWORD[];
+    static const char PASSWORD_MEDIATOR[];
+    static const char PASSWORD_PLC[];
 
     static const char XMODEM_NUL;
     static const char XMODEM_SOH;

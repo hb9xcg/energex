@@ -50,7 +50,8 @@ DownloadDialog::DownloadDialog(QWidget* parent, TwikePort* port) :
     connect(downloader, SIGNAL(sendData(QByteArray)), this, SLOT(appendSentData(QByteArray)));
 
     connect(downloader, SIGNAL(setProgress(int)), m_ui->progressBar, SLOT(setValue(int)));
-    connect(this, SIGNAL(startDownload()), downloader, SLOT(startDownload()));
+    connect(m_ui->buttonStartMediator, SIGNAL(clicked()), downloader, SLOT(startMediator()));
+    connect(m_ui->buttonStartPlc,      SIGNAL(clicked()), downloader, SLOT(startPlc()));
     connect(downloader, SIGNAL(appendLog(QString)), this, SLOT(appendLog(QString)));
 
     connect(this, SIGNAL(closeDownload()), downloader, SLOT(quit()));
@@ -61,7 +62,8 @@ DownloadDialog::DownloadDialog(QWidget* parent, TwikePort* port) :
 
     openFile(fileName);
 
-    m_ui->buttonStart->setEnabled( downloader->loaded() );
+    m_ui->buttonStartMediator->setEnabled( downloader->loaded() );
+    m_ui->buttonStartPlc->setEnabled( downloader->loaded() );
 }
 
 DownloadDialog::~DownloadDialog()
@@ -96,13 +98,18 @@ void DownloadDialog::on_buttonFile_clicked()
     fileName = QFileDialog::getOpenFileName(this, tr("Open Raw Logfile"), QDir::homePath(), filter );
 
     openFile(fileName);
-    m_ui->buttonStart->setEnabled( downloader->loaded() );
+    m_ui->buttonStartMediator->setEnabled( downloader->loaded() );
+    m_ui->buttonStartPlc->setEnabled( downloader->loaded() );
 }
 
-void DownloadDialog::on_buttonStart_clicked()
+void DownloadDialog::on_buttonStartMediator_clicked()
 {
     time.start();
-    emit startDownload();
+}
+
+void DownloadDialog::on_buttonStartPlc_clicked()
+{
+    time.start();
 }
 
 void DownloadDialog::appendLog(QString text)
