@@ -113,7 +113,7 @@ void charge_subsample(const int16_t sample)
 	static int16_t counter_charged_Ah;
 	static int16_t counter_discharged_Ah;
 
-	charge_current = sample;
+	charge_current = -sample;
 
 	charge_barrel_1mAh += charge_current;
 
@@ -225,6 +225,8 @@ int16_t charge_get_current()
 
 	// div 8.419
 	current <<= 6;
-	return current/539; 
+	current  /= 539;
+
+	return current;
 }
 

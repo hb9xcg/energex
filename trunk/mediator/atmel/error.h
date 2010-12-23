@@ -38,6 +38,7 @@
 #define ERROR_DS1307_WRITE		5
 #define ERROR_DS1307_READ		6
 #define ERROR_INVALID_ADDRESS		7
+#define ERROR_CURRENT_TO_HI             8
 
 void fatal(uint8_t code);
 void error(uint8_t code);

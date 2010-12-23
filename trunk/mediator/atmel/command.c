@@ -687,17 +687,10 @@ void cmd_stack_memory(void)
 	strcat_P(cmd_line, PSTR(" bytes\r\n"));
 	cmd_flush();
 
-	result = sensors_get_max_stack_usage();
-	strcpy_P(cmd_line, PSTR("sensors_thread's max stack usage: "));
-	cmd_print_unsigned_fix(result);
-	strcat_P(cmd_line, PSTR(" bytes\r\n"));
-	cmd_flush();
-#ifdef BALANCER
 	result = balancer_get_max_stack_usage();
 	strcpy_P(cmd_line, PSTR("balancer_thread's max stack usage: "));
 	cmd_print_unsigned_fix(result);
 	strcat_P(cmd_line, PSTR(" bytes\r\n"));
-#endif
 }
 
 void cmd_flash(void)
@@ -728,7 +721,6 @@ void cmd_flash(void)
 
 void cmd_cell(void)
 {
-#ifdef BALANCER
 	int8_t i;
 		
 	sprintf_P(cmd_line, PSTR(" Cell | Block A | Block B\r\n"));
@@ -779,9 +771,6 @@ void cmd_cell(void)
 		  ltc_adc_voltage(max), ltc_adc_voltage(avg), ltc_adc_voltage(min));
 
 	cmd_flush();
-
-#else
-#endif
 
 	cmd_line[0] = 0;
 }
