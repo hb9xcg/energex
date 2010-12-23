@@ -28,12 +28,14 @@
  */
 
 #include <string.h>
+#include <stdlib.h>
 #include "balancer.h"
 #include "os_thread.h"
 #include "delay.h"
 #include "ltc6802.h"
 #include "error.h"
 #include "io.h"
+#include "charge.h"
 //#define DEBUG
 #ifdef DEBUG
   #include <uart.h>
@@ -51,7 +53,7 @@
     #define TRACE(x)
 #endif
 
-#define BALANCER_STACK_SIZE              160
+#define BALANCER_STACK_SIZE              256
 #define BALANCER_MAX_CELL_VOLTAGE       4150 // We charge just to 4.10mV
 #define BALANCER_MIN_CURRENT            2500 // End of charge current 2.5A
 
@@ -97,6 +99,8 @@ void balancer_set_state(uint8_t on)
 void balancer_loop(void)
 {
 	static uint8_t counter;
+	EDriveState eDriveState;
+	int16_t current;
 
 	ltc_init();
 	
@@ -107,6 +111,8 @@ void balancer_loop(void)
 		{
 		case BALANCER_ACTIVE:
 		{
+			io_toggle_green_led();
+
 			ltc_update_data();
 			balancer_twike_report();
 
@@ -119,7 +125,6 @@ void balancer_loop(void)
 		
 			balancer_switch_load();
 			
-			io_toggle_green_led();
 			
 			balancer_check_voltage();
 			break;
@@ -127,8 +132,19 @@ void balancer_loop(void)
 
 		case BALANCER_SURVEILLANCE:
 		{
+			delay(500);
+			eDriveState = mediator_get_drive_state();
+			current = charge_get_current();
+			if (abs(current) > 50 || 
+			    eDriveState == eICharge || 
+			    eDriveState == eUCharge )
+			{
+				// Avoid EMI problems for now
+				break;
+			}
 			ltc_update_data();
 			balancer_twike_report();
+			io_toggle_green_led();
 
 			if (counter != 0)
 			{
@@ -168,29 +184,30 @@ void balancer_twike_report(void)
 
 	if (balancer_state==BALANCER_ACTIVE)
 	{
-		// Report 50°C higher temperature to switch on fan of battery 1 and 3:
-		min += 5000;
-		max += 5000;
+		// Report 35°C temperature to switch on fan of battery 1 and 3:
+		min = 3500;
+		max = 3500;
 	}
 
 	battery_set_parameter_value(BATTERIE_TEMP, BATTERY_1, min);
 	battery_set_parameter_value(BATTERIE_TEMP, BATTERY_2, avg);
 	battery_set_parameter_value(BATTERIE_TEMP, BATTERY_3, max);
 }
-
+#if 0
 void balancer_check_voltage(void)
 {
 	static uint8_t errors;
 	switch (ltc_poll_interrupt(500))
 	{
 		case LTC_POLL_INTERRUPT:
+			errors=0;
 			// Under voltage or over voltage condition!
 			mediator_cell_limit_reached();
 			break;
 
 		case LTC_POLL_DISCONNECTED:
 			errors++;
-			if (errors>10)
+			if (errors>100)
 			{
 				error(ERROR_CABLE_BREAK);
 			}
@@ -201,7 +218,42 @@ void balancer_check_voltage(void)
 			mediator_cell_limit_ok();
 	}
 }
+#else
+void balancer_check_voltage(void)
+{
+	uint16_t u;
 
+	switch(balancer_state)
+	{
+	case BALANCER_SURVEILLANCE:
+		u = ltc_get_min_voltage();
+		if (u < 3500)
+		{
+// TODO 21.12.2010 Uncomment me
+//			mediator_cell_limit_reached();
+		}
+		else
+		{
+			mediator_cell_limit_ok();
+		}
+		break;
+	case BALANCER_ACTIVE:
+		u = ltc_get_max_voltage();
+		if (u > 4000)
+		{
+			mediator_cell_limit_reached();
+		}
+		else
+		{
+			mediator_cell_limit_ok();
+		}
+		break;
+	default:
+		break;
+	}	
+	delay(500);
+}
+#endif
 void balancer_recalculate(void)
 {
 	uint16_t min_voltage, max_voltage;

@@ -38,7 +38,6 @@
 #include "timer.h"
 #include "os_thread.h"
 #include "command.h"
-#include "sensors.h"
 #include "delay.h"
 #include "protocol.h"
 #include "battery.h"
@@ -136,8 +135,8 @@ int main(void)
 
 	uart_init();
 
-//	spi_speed_t speed = SPI_SPEED_125KHZ;
-	spi_speed_t speed = SPI_SPEED_250KHZ;
+	spi_speed_t speed = SPI_SPEED_125KHZ;
+//	spi_speed_t speed = SPI_SPEED_250KHZ;
 //	spi_speed_t speed = SPI_SPEED_1MHZ;
 	spi_master_init(speed);
 	
@@ -180,12 +179,7 @@ int main(void)
 	ltc_update_data();
 	mediator_calibrate_gauge();
 
-#ifdef BALANCER	
 	balancer_init(); // Lowest thread priority
-#else
-	delay(10); // Give One wire power supply some time
-	sensors_init();	 // Lowest thread priority
-#endif
 
 	battery_info_set(BAT_REL_OPEN);    // Atomic update of battery info
 
@@ -236,7 +230,8 @@ int main(void)
 			if (eDriveState == eUCharge &&
 			     eLastState != eUCharge)
 			{
-				balancer_set_state(BALANCER_ACTIVE);
+// TODO Remove comment
+//				balancer_set_state(BALANCER_ACTIVE);
 			}
 			mediator_check_end_of_charge();
 			mediator_check_capacity();
@@ -271,6 +266,7 @@ int main(void)
 	}
 	return 0;
 }
+
 
 void wait_for_power()
 {
@@ -312,9 +308,24 @@ void mediator_check_binfo(void)
 
 void mediator_calibrate_gauge(void)
 {
-	uint16_t min_cell_voltage = ltc_get_min_voltage();
-	int16_t capacity = gauge_get_capacity(min_cell_voltage);
+	int16_t min, avg, max, capacity;
+	
+	ltc_get_voltage_min_avg_max(&min, &avg, &max);
+	
+	// Calculate initial capacity base on lowest cell voltage
+	capacity = gauge_get_capacity(ltc_adc_voltage(min));
 	charge_set_capacity(capacity);
+	
+	// Set also initial sym volages
+	battery_set_parameter_value(SYM_SPANNUNG, BATTERY_1, ltc_adc_voltage(min)/10);
+	battery_set_parameter_value(SYM_SPANNUNG, BATTERY_2, ltc_adc_voltage(avg)/10);
+	battery_set_parameter_value(SYM_SPANNUNG, BATTERY_3, ltc_adc_voltage(max)/10);
+
+	// and initial temperatures
+	ltc_get_temperature_min_avg_max(&min, &avg, &max);
+	battery_set_parameter_value(BATTERIE_TEMP, BATTERY_1, min);
+	battery_set_parameter_value(BATTERIE_TEMP, BATTERY_2, avg);
+	battery_set_parameter_value(BATTERIE_TEMP, BATTERY_3, max);
 }
 	
 void mediator_busy(void)
@@ -395,7 +406,7 @@ void mediator_check_drive_voltage()
 		battery_info_set(VOLTAGE_TO_LO);
 		battery_info_clear(VOLTAGE_TO_HI);
 	}
-	else if (voltage < 384*V)
+	else if (voltage < 375*V)
 	{
 		battery_info_clear(VOLTAGE_TO_LO);
 		battery_info_clear(VOLTAGE_TO_HI);
@@ -426,7 +437,7 @@ void mediator_check_charge_voltage()
 		battery_info_set(VOLTAGE_TO_LO);
 		battery_info_clear(VOLTAGE_TO_HI);
 	}
-	else if (voltage < 384*V)
+	else if (voltage < 375*V)
 	{
 		battery_info_clear(VOLTAGE_TO_LO);
 		battery_info_clear(VOLTAGE_TO_HI);
@@ -453,7 +464,7 @@ void mediator_check_current()
 		battery_info_clear(CHARGE_CUR_TO_HI);
 		battery_info_clear(DRIVE_CUR_TO_HI);
 	}
-	else //  > 10A discharge
+	else //  > 20A discharge
 	{
 		battery_info_clear(CHARGE_CUR_TO_HI);
 		battery_info_set(DRIVE_CUR_TO_HI);
@@ -474,7 +485,8 @@ void mediator_check_max_cell_voltage(void)
 {
 	if (battery_info_get(CHARGE_CUR_TO_HI))
 	{
-		balancer_set_state(BALANCER_ACTIVE);
+// TODO Remove comment
+//		balancer_set_state(BALANCER_ACTIVE);
 	}
 }
 
@@ -496,7 +508,7 @@ void mediator_check_max_charge_temperature()
 {
 	int16_t bat_temp;
 
-	sensors_get_max_temperatur(&bat_temp);
+	bat_temp = ltc_get_temperature_max();
 
 	if (bat_temp < 45*GRAD) // 0...45°C
 	{
@@ -512,7 +524,7 @@ void mediator_check_max_drive_temperature()
 {
 	int16_t bat_temp;
 
-	sensors_get_max_temperatur(&bat_temp);
+	bat_temp = ltc_get_temperature_max();
 
 	if (bat_temp < 55*GRAD)
 	{
@@ -529,7 +541,7 @@ void mediator_check_min_charge_temperature()
 {
 	int16_t bat_temp;
 
-	sensors_get_min_temperatur(&bat_temp);
+	bat_temp = ltc_get_temperature_min();
 
 	if (bat_temp < 0*GRAD)
 	{
@@ -545,7 +557,7 @@ void mediator_check_min_drive_temperature()
 {
 	int16_t bat_temp;
 
-	sensors_get_min_temperatur(&bat_temp);
+	bat_temp = ltc_get_temperature_min();
 
 	if (bat_temp < -20*GRAD)
 	{
@@ -644,7 +656,7 @@ void mediator_cell_limit_ok(void)
 {
 	if (eDriveState!=eDrive)
 	{
-		battery_info_set(CHARGE_CUR_TO_HI);
+		battery_info_clear(CHARGE_CUR_TO_HI);
 	}
 }
 

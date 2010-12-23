@@ -40,6 +40,20 @@
 #define TRUE	1
 #define FALSE	0
 
+#define WRCFG	0x01	// Write configuration register group.
+#define RDCFG	0x02	// Read configuration register group.
+#define RDCV	0x04	// Read cell voltage register group.
+#define RDFLG	0x06	// Read flag register group.
+#define RDTMP	0x08	// Read temperature register group.
+#define STCVAD	0x10	// Start cell voltage A/D conversions and poll status .
+#define STOWAD	0x20	// Start open wire A/D conversions and poll status.
+#define STTMPAD	0x30	// Start temperature A/D conversions and poll status.
+#define PLADC	0x40	// Poll A/D converter status.
+#define PLINT	0x50	// Poll interrupt status.
+#define STCVDC	0x60	// Start cell voltage conversions and poll status, 
+			// with discharge permitted.
+#define STOWDC	0x70	// Start open wire A/D conversions and poll status,
+			// with discharge permitted.
 
 #define LTC_CS	(1<<PB4)	// 0x10 // Chip select
 #define LTC_SDI	(1<<PB6)	// 0x05	// LTC6802 -> ATMega
@@ -189,25 +203,28 @@ void ltc_start_voltage_conversion(void)
 
 void ltc_read_voltage(void)
 {
-	ltc_crv_t backup;
+	ltc_crv_t new_value;
 
 	ltc_chip_select(TRUE);
 	spi_master_transmit(RDCV);
 	for (uint8_t block=0; block<LTC_STACK_SIZE; block++)
 	{
-		backup = ltc_voltages[block];
 		ltc_bytes_ok += sizeof(ltc_crv_t);
 		for (uint8_t idx=0; idx<sizeof(ltc_crv_t); idx++)
 		{
-			uint8_t byte = spi_master_receive();
-			ltc_voltages[block].crv[idx] = byte;
+			new_value.crv[idx] = spi_master_receive();;
 		}
 		uint8_t pec = spi_master_receive();
-		uint8_t crc = ltc_crc(ltc_voltages[block].crv, sizeof(ltc_crv_t));
-		if (pec != crc)
+		uint8_t crc = ltc_crc(new_value.crv, sizeof(ltc_crv_t));
+		if (pec == crc)
+		{
+			os_enterCS();
+			ltc_voltages[block] = new_value;
+			os_exitCS();
+		}
+		else
 		{
 			ltc_bytes_bad += sizeof(ltc_crv_t);
-			ltc_voltages[block] = backup;
 		}
 	}
 	ltc_chip_select(FALSE);
@@ -223,24 +240,28 @@ void ltc_start_temperature_conversion(void)
 
 void ltc_read_temperature()
 {
-	ltc_tmpr_t backup;
+	ltc_tmpr_t new_value;
 
 	ltc_chip_select(TRUE);
 	spi_master_transmit(RDTMP);
 	for (uint8_t block=0; block<LTC_STACK_SIZE; block++)
 	{
-		backup = ltc_temperatures[block];
 		ltc_bytes_ok += sizeof(ltc_tmpr_t);
 		for (uint8_t idx=0; idx<sizeof(ltc_tmpr_t); idx++)
 		{
-			ltc_temperatures[block].tmpr[idx] = spi_master_receive();
+			new_value.tmpr[idx] = spi_master_receive();
 		}
 		uint8_t pec = spi_master_receive();
-		uint8_t crc = ltc_crc(ltc_temperatures[block].tmpr, sizeof(ltc_tmpr_t));
-		if (pec != crc)
+		uint8_t crc = ltc_crc(new_value.tmpr, sizeof(ltc_tmpr_t));
+		if (pec == crc)
+		{
+			os_enterCS();
+			ltc_temperatures[block] = new_value;
+			os_exitCS();
+		}
+		else
 		{
 			ltc_bytes_bad += sizeof(ltc_tmpr_t);
-			ltc_temperatures[block] = backup;
 		}
 	}
 	ltc_chip_select(FALSE);
@@ -250,7 +271,9 @@ void ltc_read_temperature()
 int16_t ltc_get_internal_temperature(uint8_t index)
 {
 
+	os_enterCS();
 	int32_t temp = ltc_temperatures[index].itmp;
+	os_exitCS();
 	temp *= 150;
 	temp >>= 3;
 	temp -= 27315;
@@ -263,6 +286,7 @@ int16_t ltc_get_external_temperature(uint8_t index)
 
 	int16_t temp;
        
+	os_enterCS();
 	if (index & 0x1)
 	{
 		temp = ltc_temperatures[index>>1].etmp2;
@@ -271,8 +295,7 @@ int16_t ltc_get_external_temperature(uint8_t index)
 	{
 		temp = ltc_temperatures[index>>1].etmp1;
 	}
-
-//	return temp;
+	os_exitCS();
 
 	return ntc_get_temp(temp);
 }
@@ -319,6 +342,57 @@ void ltc_get_temperature_min_avg_max(int16_t *out_min, int16_t *out_avg, int16_t
 	*out_max = ntc_get_temp(min);
 }
 
+int16_t ltc_get_temperature_min(void)
+{
+	uint16_t min=65535;
+
+	os_enterCS();
+	
+	for (int8_t idx=0; idx<LTC_STACK_SIZE; idx++)
+	{
+		const ltc_tmpr_t* chip = &ltc_temperatures[idx];
+
+		if (chip->etmp1 < min)
+		{
+			min = chip->etmp1 ;
+		}
+		
+		if (chip->etmp2 < min)
+		{
+			min = chip->etmp2;
+		}
+	}
+
+	os_exitCS();
+
+	return ntc_get_temp(min);
+}
+
+int16_t ltc_get_temperature_max(void)
+{
+	uint16_t max=0;
+
+	os_enterCS();
+	
+	for (int8_t idx=0; idx<LTC_STACK_SIZE; idx++)
+	{
+		const ltc_tmpr_t* chip = &ltc_temperatures[idx];
+
+		if (chip->etmp1 > max)
+		{
+			max = chip->etmp1 ;
+		}
+		
+		if (chip->etmp2 > max)
+		{
+			max = chip->etmp2;
+		}
+	}
+
+	os_exitCS();
+
+	return ntc_get_temp(max);
+}
 uint8_t ltc_crc(uint8_t const buffer[], const uint8_t size)
 {
     uint8_t crc = 0;
@@ -351,7 +425,7 @@ uint16_t ltc_get_voltage(const uint8_t cell)
 uint16_t ltc_get_voltage_internal(const ltc_crv_t* voltage, uint8_t cell)
 {
 	uint16_t u;
-
+	
 	switch(cell)
 	{
 	case  0:	u = voltage->c1v;	break;
@@ -495,9 +569,11 @@ void ltc_set_load(const int8_t cell, const uint8_t status)
 		}
 	}
 	
-	uint16_t dcc = ltc_config[block].dcc;
-//	TRACE(dcc);
 	uint16_t mask = 1<<(cell+12-j);
+	uint16_t dcc;
+
+	os_enterCS();
+	dcc = ltc_config[block].dcc;
 	if (status)
 	{
 		dcc |= mask;
@@ -507,13 +583,13 @@ void ltc_set_load(const int8_t cell, const uint8_t status)
 		dcc &= ~mask;
 	}
 	ltc_config[block].dcc = dcc;
-//	TRACE(ltc_config[block].dcc);
+	os_exitCS();
 }
 
 uint8_t ltc_poll_interrupt(uint16_t ms)
 {
 	uint8_t last8, now8;
-	uint8_t filter=1;
+	uint16_t filter=1;
 
 	ltc_chip_select(TRUE);
 	spi_master_transmit(PLINT);
@@ -529,12 +605,13 @@ uint8_t ltc_poll_interrupt(uint16_t ms)
 		if ((uint8)now != now8) now = TIMER_GET_TICKCOUNT_32;
 		if (last8 != now8)
 		{
+			// every 400us
 			filter <<= 1;
 			if (PINB & LTC_SDI)
 			{
 				filter |= 0x1;;
 			}
-			if (filter == 0xff)
+			if (filter == 0xffff)
 			{
 				// cable break!
 				ltc_chip_select(FALSE);
@@ -573,6 +650,7 @@ uint8_t ltc_poll_adc(uint8_t ms)
 		if ((uint8)now != now8) now = TIMER_GET_TICKCOUNT_32;
 		if (last8 != now8)
 		{
+			// every 400us
 			filter <<= 1;
 			if (PINB & LTC_SDI)
 			{
@@ -584,7 +662,7 @@ uint8_t ltc_poll_adc(uint8_t ms)
 				ltc_chip_select(FALSE);
 				return LTC_POLL_DISCONNECTED;
 			}
-			if (filter == 0)
+			if ((filter & 0xe0) == 0xa0)
 			{
 				// interrupt!
 				ltc_chip_select(FALSE);
@@ -600,15 +678,22 @@ uint8_t ltc_poll_adc(uint8_t ms)
 
 void ltc_update_data()
 {
+	uint8_t ret;
 	ltc_start_temperature_conversion();
-	ltc_poll_adc(30);
-	ltc_read_temperature();
+	ret = ltc_poll_adc(100);
+	if (ret == LTC_POLL_ADC)
+	{
+		ltc_read_temperature();
+	}
 
 	delay(30);
 
 	ltc_start_voltage_conversion();
-	ltc_poll_adc(30);
-	ltc_read_voltage();
+	ret = ltc_poll_adc(100);
+	if (ret==LTC_POLL_ADC)
+	{
+		ltc_read_voltage();
+	}
 }
 
 inline uint16_t ltc_adc_voltage(uint16_t adc)

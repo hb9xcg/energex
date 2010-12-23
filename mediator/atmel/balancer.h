@@ -38,6 +38,7 @@ extern void balancer_init(void);
 #define BALANCER_SURVEILLANCE	1
 #define BALANCER_ACTIVE 	2
 #define BALANCER_OFF	 	3
+
 extern void balancer_set_state(uint8_t state);
 extern void balance_sample(void);
 extern uint16_t balancer_get_max_stack_usage(void);

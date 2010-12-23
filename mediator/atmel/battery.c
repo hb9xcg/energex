@@ -19,21 +19,29 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
+//#define PC
 #include <assert.h>
 #include <stdio.h>
+#ifndef PC
 #include <avr/io.h>
 #include "mediator.h"
-#include "battery.h"
-#include "sensors.h"
-#include "adc.h"
 #include "charge.h"
-#include "protocol.h"
+#include "data.h"
+#include "ltc6802.h"
 #include "os_thread.h"
+#else
+#define os_enterCS() {								\
+}
+#define os_exitCS() {								\
+}
+
+#endif
+#include "battery.h"
+#include "adc.h"
+#include "protocol.h"
 #include "delay.h"
 #include "error.h"
-#include "data.h"
 #include "io.h"
-#include "ltc6802.h"
 
 
 #define ADC_MAX_VALUE		(1<<ADC_RESOLUTION)
@@ -48,6 +56,7 @@ battery_t battery;
 static uint16_t battery_voltage; // [ADC bits]
 int8_t battery_enable_sampling = 0;
 
+#ifndef PC
 
 // gets called every 400us from the timer interrupt 
 void battery_sample(void)
@@ -86,7 +95,7 @@ void battery_sample(void)
 		adc_read_int( CH_VOLTAGE, &voltage_sample);
 	}
 }
-
+#endif
 void battery_init(void)
 {
 	battery.binfo       = 0;
@@ -96,6 +105,7 @@ void battery_init(void)
 	battery_enable_sampling = 1;
 }
 
+#ifndef PC
 uint16_t battery_get_voltage(void)
 {
 	uint32_t voltage32;
@@ -108,7 +118,6 @@ uint16_t battery_get_voltage(void)
 
 	return voltage32;
 }
-
 void battery_calibrate(uint16_t targetVoltage)
 {
 	uint16_t currentVoltage = battery_get_voltage();
@@ -159,9 +168,12 @@ int16_t battery_get_temperature(void)
 */
 void battery_command(uint16_t relais_state)
 {
-	if (relais_state) {
+	if (relais_state)
+	{
 		ePowerSoll = ePowerFull;
-	} else {
+	} 
+	else 
+	{
 		ePowerSoll = ePowerSave;
 	}
 }
@@ -174,7 +186,21 @@ uint8_t battery_get_index(uint8_t address)
                 error(ERROR_INVALID_ADDRESS);
         }
 
-	return address - BATTERY_1;
+	uint8_t index;
+
+	switch(address)
+	{
+	case BATTERY_1:	index = 0;
+			break;
+	case BATTERY_2:	index = 1;
+			break;
+	case BATTERY_3:	index = 2;
+			break;
+	default:	error(ERROR_INVALID_ADDRESS);
+			index = 0;
+	}
+
+	return index;
 }
 
 void battery_set_parameter_value(uint8_t parameter, uint8_t address, uint16_t value)
@@ -215,15 +241,8 @@ void battery_set_parameter_value(uint8_t parameter, uint8_t address, uint16_t va
 int16_t battery_get_parameter_value(uint8_t parameter, uint8_t address)
 {
 	uint16_t value;
+	uint8_t index;
 	
-	if (address < BATTERY_1 ||
-	    address > BATTERY_3 )
-	{
-		error(ERROR_INVALID_ADDRESS);
-	}
-	
-	address -= BATTERY_1;
-
 	os_enterCS();
 
 	switch(parameter)
@@ -259,9 +278,11 @@ int16_t battery_get_parameter_value(uint8_t parameter, uint8_t address)
 						NBR_OF_BATTERIES;	break;
 	case Q:				value = -1400;				break;
 	case LEISTUNG:			value = battery_get_power();		break;
-	case BATTERIE_TEMP:		value = battery.temperature[address];	break;
+	case BATTERIE_TEMP:		index = battery_get_index(address);
+					value = battery.temperature[index];	break;
 	case FINFO:			value = 0;				break;
-	case SYM_SPANNUNG:		value = battery.sym_voltage[address];	break;
+	case SYM_SPANNUNG:		index = battery_get_index(address);
+					value = battery.sym_voltage[index];	break;
 				
 	case TEILSPANNUNG1:		value = 5100;	break;
 	case TEILSPANNUNG2:		value = 5100;	break;
@@ -287,7 +308,8 @@ int16_t battery_get_parameter_value(uint8_t parameter, uint8_t address)
 	case TEMPERATUR14:		value = ltc_get_external_temperature(13);  break;
 	
 	case PC_CALIBR_TEMP:		value = 0x5678;			break;
-	case MAX_BAT_TEMP:		sensors_get_max_temperatur((int16_t*)&value);	break;
+	case MAX_BAT_TEMP:		index = battery_get_index(address);
+					value = battery.temperature[index];	break;
 	case UMGEBUNGS_TEMP:		value = mediator_get_temperature();		break;
 	case MAX_LADETEMP:		value = 4500;			break;
 	case MIN_LADETEMP:		value = 0;			break;
@@ -396,27 +418,35 @@ int16_t battery_get_parameter_value(uint8_t parameter, uint8_t address)
 
 	return value;
 }
-
+#endif
 void battery_info_set(uint8_t bitNo)
 {
+	uint16_t mask = 1;
+	mask <<= bitNo;
+
 	os_enterCS();
-	battery.binfo |= (1<<bitNo);
+	battery.binfo |= mask;
 	os_exitCS();
 }
 
 void battery_info_clear(uint8_t bitNo)
 {
+	uint16_t mask = 1;
+	mask <<= bitNo;
+
 	os_enterCS();
-	battery.binfo &= ~(1<<bitNo);
+	battery.binfo &= ~mask;
 	os_exitCS();
 }
 
 uint8_t battery_info_get(uint8_t bitNo)
 {
 	uint8_t result;
+	uint16_t mask = 1;
+	mask <<= bitNo;
 
 	os_enterCS();
-	result = (battery.binfo & (1<<bitNo)) != 0;
+	result = ((battery.binfo & mask) != 0);
 	os_exitCS();
 
 	return result;
@@ -432,4 +462,32 @@ uint16_t battery_get_info(void)
 
 	return result;
 }
+#ifdef PC
+void print_binfo(void)
+{
+	printf("BINFO: 0x%04x\n\r", battery_get_info());
+}
+
+int main(int argc, char* argv[])
+{
+	battery_init();
+	printf("BINFO: 0x%04x\n\r", battery_get_info());
+	battery_info_set(REKUPERATION_NOK);
+	battery_info_set(DRIVE_TEMP_TO_HI);
+	printf("BINFO: 0x%04x\n\r", battery_get_info());
+	battery_info_clear(DRIVE_TEMP_TO_HI);
+	printf("BINFO: 0x%04x\n\r", battery_get_info());
+	battery_info_set(VOLTAGE_NOK);
+	printf("BINFO: 0x%04x\n\r", battery_get_info());
+	if (battery_info_get(VOLTAGE_NOK))
+	{
+		puts("VOLTAGE_NOK set\r\n");
+	}
+	else
+	{
+		puts("VOLTAGE_NOK not set\r\n");
+	}
+	
+}
+#endif
 

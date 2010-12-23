@@ -32,20 +32,6 @@
  * @date        14.11.2009
  */
 
-#define WRCFG	0x01	// Write configuration register group.
-#define RDCFG	0x02	// Read configuration register group.
-#define RDCV	0x04	// Read cell voltage register group.
-#define RDFLG	0x06	// Read flag register group.
-#define RDTMP	0x08	// Read temperature register group.
-#define STCVAD	0x10	// Start cell voltage A/D conversions and poll status .
-#define STOWAD	0x20	// Start open wire A/D conversions and poll status.
-#define STTMPAD	0x30	// Start temperature A/D conversions and poll status.
-#define PLADC	0x40	// Poll A/D converter status.
-#define PLINT	0x50	// Poll interrupt status.
-#define STCVDC	0x60	// Start cell voltage conversions and poll status, 
-			// with discharge permitted.
-#define STOWDC	0x70	// Start open wire A/D conversions and poll status,
-			// with discharge permitted.
 
 #define LTC_STACK_SIZE 8
 
@@ -143,6 +129,8 @@ extern void ltc_read_temperature(void);
 extern int16_t ltc_get_internal_temperature(uint8_t index);
 extern int16_t ltc_get_external_temperature(uint8_t index);
 extern void ltc_get_temperature_min_avg_max(int16_t *min, int16_t *avg, int16_t *max);
+extern int16_t ltc_get_temperature_max(void);
+extern int16_t ltc_get_temperature_min(void);
 
 extern uint16_t ltc_get_voltage(const uint8_t cell); 
 extern void ltc_get_voltage_limits(uint16_t* out_min, uint16_t* out_max);
