@@ -1,6 +1,12 @@
 /*
  * Energex
  * 
+ * Copyright (C) 2005-2007 by Benjamin Benz
+ * bbe@heise.de
+ *
+ * Copyright (C) 2008-2010 by Markus Walser
+ * markus.walser@gmail.com 
+ * 
  * This program is free software; you can redistribute it
  * and/or modify it under the terms of the GNU General
  * Public License as published by the Free Software
@@ -33,10 +39,18 @@
 #define CH_DISCHARGE_1    0x1
 #define CH_CHARGE_10      0xD
 #define CH_DISCHARGE_10   0x9
-#define CH_VOLTAGE        0x7
+
+#define CH_CURRENT_1	  	0x1B	// -  30A ... +30A
+#define CH_CURRENT_1_CALIB	0x1A
+#define CH_CURRENT_10	  	0x0D	// -   3A ... +3A
+#define CH_CURRENT_10_CALIB	0x0C
+#define CH_CURRENT_200    	0x0F	// -150mA ... +150mA
+#define CH_CURRENT_200_CALIB    0x0E
+
+#define CH_VOLTAGE        0x10	// ADC0+, ADC1-, V=1
+#define CH_VOLTAGE_CALIB  0x11	// ADC1+, ADC1-, 
 #define CH_TEMPERATURE    0x4
 
-extern int8_t adc_sampling;
 /*!
  * Misst interne Offsetspannung
  */
@@ -56,7 +70,7 @@ int8_t adc_get_resolution(int8_t channel);
  * Liesst pollend einen channel aus
  * @param channel 	Kanal - hex-Wertigkeit des Pins (0x01 fuer PA0; 0x02 fuer PA1, ..)
  */
-uint16_t adc_read_polled(uint8 channel);
+int16_t adc_read_polled(uint8 channel);
 
 /*!
  * @brief			Fuegt einen analogen Kanal in die ADC-Konvertierungsliste ein und wertet ihn per Interrupt aus
@@ -74,11 +88,8 @@ uint8 adc_get_active_channel(void);
 
 /*!
  * Initialisert den AD-Umsetzer. 
- * @param channel fuer jeden Kanal, den man nutzen moechte, 
- * muss das entsprechende Bit in channel gesetzt sein.
- * Bit0 = Kanal 0 usw.
  */
-void adc_init(uint8_t channel);
+void adc_init(void);
 
 
 #endif

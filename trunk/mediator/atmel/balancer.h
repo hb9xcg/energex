@@ -1,7 +1,7 @@
 /***************************************************************************
  *   Energex                                                               *
  *                                                                         *
- *   Copyright (C) 2008-2009 by Markus Walser                              *
+ *   Copyright (C) 2008-2010 by Markus Walser                              *
  *   markus.walser@gmail.com                                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -31,7 +31,17 @@
 
 #include "mediator.h"
 
+#define BALANCER_NBR_OF_CELLS             (LTC_STACK_SIZE*12)
+extern void balancer_init(void);
+
+#define BALANCER_STANDBY	0
+#define BALANCER_SURVEILLANCE	1
+#define BALANCER_ACTIVE 	2
+#define BALANCER_OFF	 	3
+extern void balancer_set_state(uint8_t state);
 extern void balance_sample(void);
+extern uint16_t balancer_get_max_stack_usage(void);
+extern void balancer_dump(void);
 
 
 #endif

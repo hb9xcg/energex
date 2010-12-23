@@ -1,7 +1,7 @@
 /***************************************************************************
  *   Energex                                                               *
  *                                                                         *
- *   Copyright (C) 2008-2009 by Markus Walser                              *
+ *   Copyright (C) 2008-2010 by Markus Walser                              *
  *   markus.walser@gmail.com                                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -29,6 +29,8 @@
  extern "C"
  {
 #endif
+	
+#define TIEFENTLADE_SPANNUNG 	29000 	// [10mV]
 
 typedef struct
 {
@@ -57,21 +59,23 @@ typedef struct
 	uint16_t	voltage;
 	int16_t		current;
 	int16_t		ah_counter;
-	int16_t		temerature;
+	int16_t		temperature[3];
 	uint8_t		address;
 	uint8_t		relais_state;
+	uint16_t        sym_voltage[3];
 	uint16_t	binfo;
 } battery_t;
 
 extern int8_t battery_enable_sampling;
 extern battery_t battery;
 
-void     battery_set_parameter_value(uint8_t parameter, uint16_t value);
-int16_t  battery_get_parameter_value(uint8_t parameter);
+void     battery_set_parameter_value(uint8_t parameter, uint8_t address, uint16_t value);
+int16_t  battery_get_parameter_value(uint8_t parameter, uint8_t address);
 void     battery_sample(void);
 void     battery_init(void);
 //int16_t  battery_get_temperature(void);
 uint16_t battery_get_voltage(void);
+void     battery_calibrate(uint16_t targetVoltage);
 uint16_t battery_get_info(void);
 void     battery_info_set(uint8_t bitNo);
 void     battery_info_clear(uint8_t bitNo);

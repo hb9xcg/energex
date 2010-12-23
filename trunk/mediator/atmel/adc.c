@@ -1,6 +1,12 @@
 /*
  * Energex
  * 
+ * Copyright (C) 2005-2007 by Benjamin Benz
+ * bbe@heise.de
+ *
+ * Copyright (C) 2008-2010 by Markus Walser
+ * markus.walser@gmail.com
+ *   
  * This program is free software; you can redistribute it
  * and/or modify it under the terms of the GNU General
  * Public License as published by the Free Software
@@ -32,14 +38,14 @@
 #include "io.h"
 #include "delay.h"
 
-#define OFFSET_OVERSAMPLING_LOG   5
+#define OFFSET_OVERSAMPLING_LOG   6
 #define ADC_NBR_OF_CHANNELS	  3
 
 #define CH_DISCHARGE_CALIB   0x8
 #define CH_CHARGE_CALIB      0xC
 
 
-#define IS_DIFFERENTIAL(x)   ((x) & 0x8)
+#define IS_DIFFERENTIAL(x)   ((x) > 7)
 
 typedef struct
 {
@@ -49,37 +55,31 @@ typedef struct
 
 static volatile int8 act_channel_idx = -1;
 static adc_channel_t channels[ADC_NBR_OF_CHANNELS];
-static int16_t adc_offset_ch1 = 0; // Charge channel 10x gain
-static int16_t adc_offset_ch3 = 0; // Dischange channel 10x gain
-int8_t adc_sampling = 0;
+static int16_t adc_offset_ch27 = 0; // Current channel 1x gain
+static int16_t adc_offset_ch13 = 0; // Current channel 10x gain
+static int16_t adc_offset_ch15 = 0; // Current channel 200x gain
+static int16_t adc_offset_ch16 = 0; // Voltage channel 1x gain
 
 /*!
  * Selektiert den Kanal
  */
 static inline void adc_select_channel(uint8 channel);
+static void adc_convert_differential(int16_t* value);
 
 /*!
  * Initialisert den AD-Umsetzer. 
- * @param channel Für jeden Kanal, den man nutzen möchte, 
- * muss das entsprechende Bit in channel gesetzt sein
- * Bit0 = Kanal 0 usw.
  */
-void adc_init(uint8 channel)
+void adc_init()
 {
-	DDRA  &= ~ (1<<channel);	// Pin als input
-	PORTA &= ~ (1<<channel);	// Alle Pullups aus.
+	DDRA  &= ~ 0xf;
+	PORTA &= ~ 0xf;
+
+//	DIDR0 |= 0xf;
 
 	ADCSRA= (1 <<ADPS2) | 
 		(1 <<ADPS1) |		// prescale faktor= 128 ADC laeuft
 		(1 <<ADPS0) |		// mit 16MHz/ 128 = 125kHz 
 		(1 <<ADEN);		// ADC an
-	
-	delay(5);
-	
-	adc_calibrate_offset(CH_CHARGE_CALIB);
-	adc_calibrate_offset(CH_DISCHARGE_CALIB);
-
-	adc_sampling = 1;
 }
 
 
@@ -89,7 +89,7 @@ void adc_init(uint8 channel)
  */
 void adc_calibrate_offset(int8_t channel)
 {
-	uint16 result = 0;
+	int16_t result = 0;
 	int8_t i;
 
 	adc_select_channel(channel);
@@ -104,37 +104,45 @@ void adc_calibrate_offset(int8_t channel)
 	// Real measurement 64 times oversampled
 	for (i=0; i<(1<<OFFSET_OVERSAMPLING_LOG); i++)
 	{
+		int16_t adc;	
+
 		ADCSRA |= (1 << ADSC); // Restart ADC
 
 		while ((ADCSRA&(1<<ADSC))!=0); // Wait for result
-
-		result += ADCL;
-		result += (ADCH<<8);
+		
+		adc  = ADCL;
+		adc += (ADCH<<8);
+		
+		adc_convert_differential(&adc);
+		result += adc;
 	}
 
 	result >>= OFFSET_OVERSAMPLING_LOG;
 
-	if (result & 0x200)
+	switch(channel)
 	{
-		if (channel==CH_CHARGE_CALIB)
-		{
-			adc_offset_ch1 = (int16_t)result - 1024;
-		}
-		if (channel==CH_DISCHARGE_CALIB)
-		{
-			adc_offset_ch3 = (int16_t)result - 1024;
-		}
-	}
-	else 
-	{
-		if (channel==CH_CHARGE_CALIB)
-		{
-			adc_offset_ch1 = result;
-		}
-		if (channel==CH_DISCHARGE_CALIB)
-		{
-			adc_offset_ch3 = result;
-		}
+	case CH_CURRENT_1:
+	case CH_CURRENT_1_CALIB:
+		adc_offset_ch27 = result;
+		break;
+
+	case CH_CURRENT_10:
+	case CH_CURRENT_10_CALIB:
+		adc_offset_ch13 = result;
+		break;
+
+	case CH_CURRENT_200:
+	case CH_CURRENT_200_CALIB:
+		adc_offset_ch15 = result;
+		break;
+
+	case CH_VOLTAGE:
+		adc_offset_ch16 = result;
+		break;
+	case CH_VOLTAGE_CALIB:
+		adc_offset_ch16 = result;
+		break;
+
 	}
 	
 	ADCSRA &= ~ADIF;
@@ -154,17 +162,13 @@ void adc_convert_differential(int16_t* value)
  */
 int8_t adc_get_offset(int8_t channel)
 {
-	if (channel==CH_CHARGE_10)
+	switch (channel)
 	{
-		return adc_offset_ch1;
-	}
-	else if (channel==CH_DISCHARGE_10)
-	{
-		return adc_offset_ch3;
-	}
-	else
-	{
-		return 0;
+	case CH_CURRENT_1:	return adc_offset_ch27;
+	case CH_CURRENT_10:	return adc_offset_ch13;
+	case CH_CURRENT_200:	return adc_offset_ch15;
+	case CH_VOLTAGE:	return adc_offset_ch16;
+	default:		return 0;
 	}
 }
 
@@ -175,7 +179,10 @@ int8_t adc_get_resolution(int8_t channel)
 {
 	switch(channel)
 	{
-	case CH_CHARGE_10:	return 1;   // 2.5V / 512  / 10
+	case CH_CURRENT_1:	return 200;
+	case CH_CURRENT_10:	return 10;
+	case CH_CURRENT_200:	return 1;
+
 	case CH_DISCHARGE_10:	return -1;  // 2.5V / 512  / 10
 	case CH_CHARGE_1:	return 5;   // 2.5V / 1024
 	case CH_DISCHARGE_1:	return -5;  // 2.5V / 1024
@@ -187,8 +194,8 @@ int8_t adc_get_resolution(int8_t channel)
  * Liesst pollend einen channel aus
  * @param channel 	Kanal - hex-Wertigkeit des Pins (0x01 fuer PA0; 0x02 fuer PA1, ..)
  */
-uint16_t adc_read_polled(uint8 channel) {
-	uint16 result = 0;
+int16_t adc_read_polled(uint8 channel) {
+	int16_t result = 0;
 	uint8_t i;
 
 	adc_select_channel( channel ); // externe 2.500V Refernzspannung AVCC, rechts Ausrichtung
@@ -215,13 +222,16 @@ uint16_t adc_read_polled(uint8 channel) {
 	// Echte 8-fache Messung
 	for (i=0; i<(1<<OFFSET_OVERSAMPLING_LOG); i++)	
 	{
-		
+		int16_t adc;	
 		ADCSRA |= (1 << ADSC); // Starte erneut diesmal nur 13 Zyklen -> 104us
 
 		while ((ADCSRA&(1<<ADSC))!=0);
 
-		result += ADCL;
-		result += (ADCH<<8);	// Ergebnis zusammenbauen
+		adc  = ADCL;
+		adc += (ADCH<<8);	// Ergebnis zusammenbauen
+
+		adc_convert_differential(&adc);
+		result += adc;
 	}
 
 	result >>= OFFSET_OVERSAMPLING_LOG;
@@ -233,12 +243,12 @@ uint16_t adc_read_polled(uint8 channel) {
 
 inline void adc_select_channel(uint8 channel)
 {
-	ADMUX = (channel & 0x0F);	// externe 2.5V Referenz, rechts Ausrichtung
+	ADMUX = (channel & 0x1F);	// externe 2.5V Referenz, rechts Ausrichtung
 					// und Kanal waehlen, nur single ended
 }
 
 /*!
- * @brief			Fuegt einen analogen Kanal in die ADC-Konvertierungsliste ein und wertet ihn per Interrupt aus
+ * @brief	Fuegt einen analogen Kanal in die ADC-Konvertierungsliste ein und wertet ihn per Interrupt aus
  * @param channel 	Kanal - hex-Wertigkeit des Pins (0x01 fuer PA0; 0x02 fuer PA1, ..)
  * @param p_sens	Zeiger auf den Sensorwert, der das Ergebnis enthalten soll
  */
@@ -253,7 +263,8 @@ void adc_read_int(uint8 channel, int16* p_sens)
 		return;	// es gibt nur 3 ADC-Channels
 
 	channels[next_channel_idx].value = p_sens;
-	channels[next_channel_idx++].channel = channel & 0xF;
+	channels[next_channel_idx].channel = channel & 0x1F;
+	next_channel_idx++;
 	if (act_channel_idx == -1)
 	{
 		act_channel_idx = 0;

@@ -1,7 +1,7 @@
 /***************************************************************************
  *   Energex                                                               *
  *                                                                         *
- *   Copyright (C) 2008-2009 by Markus Walser                              *
+ *   Copyright (C) 2008-2010 by Markus Walser                              *
  *   markus.walser@gmail.com                                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -27,11 +27,10 @@
  * @date 	11.02.08
  */
 
-#include <avr/io.h>
-#include <avr/interrupt.h>
 #include <avr/wdt.h>
+#include <avr/sleep.h>
+#include <avr/power.h>
 #include "mediator.h"
-#include <avr/eeprom.h>
 #include "i2c.h"
 #include "spi.h"
 #include "adc.h"
@@ -45,6 +44,10 @@
 #include "battery.h"
 #include "charge.h"
 #include "data.h"
+#include "ltc6802.h"
+#include "error.h"
+#include "io.h"
+#include "gauge.h"
 #ifdef BALANCER
 	#include "ltc6802.h"
 	#include "balancer.h"
@@ -84,10 +87,12 @@ static EDriveState eLastState  = eConverterOff;
 EPowerState ePowerIst;
 int16 mediator_temperature;
 ELiveness mediator_alive = eAlive;
+static uint8_t mediator_stop;
 
 static void wait_for_power(void);
 static void mediator_check_liveness(void);
 static void mediator_check_power(void);
+static void mediator_check_deep_discharge(void);
 static void mediator_check_drive_voltage(void);
 static void mediator_check_charge_voltage(void);
 static void mediator_check_current(void);
@@ -98,18 +103,16 @@ static void mediator_check_max_drive_temperature(void);
 static void mediator_limit_sym_current(void);
 static void mediator_check_end_of_charge(void);
 static void mediator_check_capacity(void);
+static void mediator_check_max_cell_voltage(void);
+static void mediator_update_statistics(void);
+static void mediator_debounce_stop(void);
+static void mediator_stop_pressed(void);
+static void mediator_stop_released(void);
+static void mediator_calibrate_gauge(void);
 
 int main(void)
 {
-	PORTA=0; DDRA=0;		//Alles Eingang alles Null
-	PORTB=0; DDRB=0;
-	PORTC=0; DDRC=0;
-	PORTD=0; DDRD=0;
-
-
-	// Disable JTag to allow normal usage of Port C.		
-	MCUCR = 1<< JTD;
-	MCUCR = 1<< JTD;
+	io_init();
 
 	if (MCUSR & 1<<WDRF) {
 		// We're comming from a soft reboot
@@ -131,54 +134,61 @@ int main(void)
 
 	delay(100);
 
-
-	DDRB  |=  RELAIS; 		// Output
-	DDRB  |=  IGBT; 		// Output
-	DDRD  &= ~STOP_SWITCH; 		// Input
-	PORTD |=  STOP_SWITCH; 		// Pullup enabled
-	DDRD  |=  POWER_ONE_WIRE; 	// Output
-	PORTD &= ~POWER_ONE_WIRE; 	// Power off
-
-	DDRC  |=  LED_RED;   // Output
-	DDRC  |=  LED_GREEN; // Output
-	PORTC &= ~LED_RED;   // Switch off red led.
-	PORTC &= ~LED_GREEN; // Switch off green led.
-
 	uart_init();
 
-	wait_for_power();
-
-	PORTD |= POWER_ONE_WIRE; // Power on
+//	spi_speed_t speed = SPI_SPEED_125KHZ;
+	spi_speed_t speed = SPI_SPEED_250KHZ;
+//	spi_speed_t speed = SPI_SPEED_1MHZ;
+	spi_master_init(speed);
 	
-//	adc_init(CH_TEMPERATURE); // Temperatur sensor
-	adc_init(CH_VOLTAGE);     // Voltage
-//	adc_init(CH_CHARGE);      // Current +
-//	adc_init(CH_DISCHARGE);   // Current -
+	adc_init();
+	
+	// Calibrate current ADC offset without any load
+	adc_calibrate_offset(CH_CURRENT_1);
+	adc_calibrate_offset(CH_CURRENT_10);
+	adc_calibrate_offset(CH_CURRENT_200);
 
+	
+/*	power_all_disable();
+	power_usart0_enable();
+	set_sleep_mode(SLEEP_MODE_IDLE);
+*/
+	ePowerIst = ePowerSave;
+
+	io_enable_igbt();              	// Power-up Twike DC/DC converter
+	io_release_emergency();	       	// Power-up board computer
+
+//	sleep_mode();
+
+	wait_for_power();		// Wait for board computer communication
+	
+//	power_all_enable();
+	
+	// Calibrate voltage offset at normal voltage
+	adc_calibrate_offset(CH_VOLTAGE_CALIB);
+
+	io_enable_interface_power();
+	
 	battery_init();
+
 	data_load();
 
 	cmd_init();
 
 	i2c_init(100000); // 100kHz Speed
 
+	ltc_update_data();
+	mediator_calibrate_gauge();
+
 #ifdef BALANCER	
-	{
-		spi_speed_t speed = SPI_SPEED_250KHZ;
-		spi_master_init(speed);
-	}
-	balancer_init();
-#endif
+	balancer_init(); // Lowest thread priority
+#else
 	delay(10); // Give One wire power supply some time
+	sensors_init();	 // Lowest thread priority
+#endif
 
-	sensors_init();
-
-
-	ePowerIst = ePowerOff;
 	battery_info_set(BAT_REL_OPEN);    // Atomic update of battery info
 
-	EICRA = (1<<ISC01) | (1<<ISC10); // Configure any change on pin INT0 for interrupt.
-	EIMSK = (1<<INT0);               // Enable INT0 interrupt
 
 	ePowerSoll = ePowerSave;
 
@@ -190,16 +200,22 @@ int main(void)
 		switch(eDriveState)
 		{
 		case 	eConverterOff: // InvOff           Umrichter aus
+			mediator_check_deep_discharge();
+			break;
 		case 	eConverterTest: // InvTest          Test-Modus
 		case 	eConverterProg: // InvProg          Programm-Modus
 		case 	eConverterIdle: // InvIdle          Umschaltungszustand vor dem Fahren
 		case 	eBreakDown: // BreakDown        Fehler des Umrichters 
 			break;
 		case 	eDrive: // Drive            Fahren
-			if (battery_info_get(BAT_FULL))
+			if (eLastState!=eDrive)
 			{
-				battery_info_clear(BAT_FULL);
-				charge_set_capacity(280); // 2.8Ah
+				if (battery_info_get(BAT_FULL) ||
+				    charge_get_capacity() > 2500)
+				{
+					battery_info_clear(BAT_FULL);
+					mediator_calibrate_gauge();
+				}
 			}	
 			break;
 		case 	eReadyCharge: // ReadyCharge      warten auf Netzspannung
@@ -207,13 +223,21 @@ int main(void)
 		case 	ePreCharge: // PreCharge        Vorladung
 			if (eLastState==eReadyCharge)
 			{
+				mediator_update_statistics();
 				charge_reset(); // Reset Ah counter
+				battery_info_clear(BAT_EMPTY);
 			}
 		case 	eClosePCRelais: // CloseVRelais     Vorladerelais schliessen
 			ePowerSoll = ePowerFull;
 			break;
 		case 	eICharge: // ICharge          I-Ladung
+			mediator_check_max_cell_voltage();
 		case 	eUCharge: // UCharge          U-Ladung
+			if (eDriveState == eUCharge &&
+			     eLastState != eUCharge)
+			{
+				balancer_set_state(BALANCER_ACTIVE);
+			}
 			mediator_check_end_of_charge();
 			mediator_check_capacity();
 			break; 
@@ -236,11 +260,12 @@ int main(void)
 		case 	eUnknown20:  // (?)
 			break;
 		default:
-			TOGGLE_RED_LED;
+			io_toggle_red_led();
 		break;
 		}
 		eLastState = eDriveState;
 		os_thread_sleep(100);
+		mediator_debounce_stop();
 		//uart_write("Hallo\n\r", 7);
 		//TOGGLE_GREEN_LED;
 	}
@@ -249,8 +274,6 @@ int main(void)
 
 void wait_for_power()
 {
-	PORTB |= IGBT;                             // Switch IGBT on
-
 	while (!uart_data_available());            // Wait until Twike DC/DC converter delivers power.
 }
 
@@ -286,6 +309,13 @@ void mediator_check_binfo(void)
 			break;
 	}
 }
+
+void mediator_calibrate_gauge(void)
+{
+	uint16_t min_cell_voltage = ltc_get_min_voltage();
+	int16_t capacity = gauge_get_capacity(min_cell_voltage);
+	charge_set_capacity(capacity);
+}
 	
 void mediator_busy(void)
 {
@@ -308,11 +338,12 @@ void mediator_check_liveness()
 {
 	if (mediator_alive == eSilent && ePowerSoll != ePowerOff)
 	{
-		SET_RED_LED;
+		io_set_red_led();
 		data_save();
+		balancer_set_state(BALANCER_STANDBY);
 		ePowerSoll = ePowerOff;
-		wdt_enable(WDTO_4S); // reboot into wait for power. 
-		CLEAR_RED_LED;
+		wdt_enable(WDTO_4S); // reboot into 'wait for power'. 
+		io_clear_red_led();
 	}
 	else if (mediator_alive != eForced)
 	{
@@ -322,28 +353,29 @@ void mediator_check_liveness()
 
 void mediator_check_power()
 {
-	if( ePowerSoll != ePowerIst)
+	if (ePowerSoll != ePowerIst)
 	{
-		if( ePowerSoll == ePowerFull )
+		if (ePowerSoll == ePowerFull)
 		{
-			PORTB |= IGBT;             // Switch IGBT on
-			PORTB |= RELAIS;           // Switch Relais on
-			os_thread_sleep(300);      // Relais delay time
+			io_enable_igbt();                  // Switch IGBT on
+
+			io_close_relais();                 // Switch Relais on
+			os_thread_sleep(300);              // Relais delay time
 			battery_info_clear(BAT_REL_OPEN);  // Atomic update of battery info
 		}
-		else if( ePowerSoll == ePowerSave )
+		else if (ePowerSoll == ePowerSave)
 		{
 			battery_info_set(BAT_REL_OPEN);    // Atomic update of battery info
-			PORTB |= IGBT;             // Switch IGBT on
-			PORTB &= ~RELAIS;          // Switch Relais off				
+			io_enable_igbt();                  // Switch IGBT on
+			io_open_relais();                  // Switch Relais off				
 		}
 		else
 		{
 			battery_info_set(BAT_REL_OPEN);    // Atomic update of battery info
-			PORTB &= ~RELAIS;          // Switch Relais off
-			os_thread_sleep(500);      // Relais spark quenching
-			PORTB &= ~IGBT;            // Switch IGBT off
-			os_thread_sleep(5000);     // Let IGBT cool down, in case we're still powered.
+			io_open_relais();                  // Switch Relais off
+			os_thread_sleep(500);              // Relais spark quenching
+			io_disable_igbt();                 // Switch IGBT off
+			os_thread_sleep(5000);             // Let IGBT cool down, in case we're still powered.
 		}
 		ePowerIst = ePowerSoll;
 	}
@@ -353,12 +385,17 @@ void mediator_check_drive_voltage()
 {
 	uint16_t voltage = battery_get_voltage();
 
-	if (voltage < 320*V)
+	if (voltage < 326*V)
 	{
+		ePowerSoll = ePowerOff;
+	}
+	else if (voltage < 336*V)
+	{
+		battery_info_set(BAT_EMPTY);
 		battery_info_set(VOLTAGE_TO_LO);
 		battery_info_clear(VOLTAGE_TO_HI);
 	}
-	else if (voltage < 380*V)
+	else if (voltage < 384*V)
 	{
 		battery_info_clear(VOLTAGE_TO_LO);
 		battery_info_clear(VOLTAGE_TO_HI);
@@ -367,7 +404,16 @@ void mediator_check_drive_voltage()
 	{
 		battery_info_clear(VOLTAGE_TO_LO);
 		battery_info_set(VOLTAGE_TO_HI);
-		// TODO: Test REKUPERATION_NOK
+	}
+}
+
+void mediator_check_deep_discharge()
+{
+	uint16_t voltage = battery_get_voltage();
+
+	if (voltage < 326*V)
+	{
+		ePowerSoll = ePowerOff;
 	}
 }
 
@@ -380,7 +426,7 @@ void mediator_check_charge_voltage()
 		battery_info_set(VOLTAGE_TO_LO);
 		battery_info_clear(VOLTAGE_TO_HI);
 	}
-	else if (voltage < 430*V)
+	else if (voltage < 384*V)
 	{
 		battery_info_clear(VOLTAGE_TO_LO);
 		battery_info_clear(VOLTAGE_TO_HI);
@@ -418,9 +464,17 @@ void mediator_check_capacity()
 {
 	int16_t charge = charge_get_capacity();
 
-	if (charge > 4*Ah) // > 4Ah capacity
+	if (charge > 26*Ah) // > 26Ah capacity
 	{
 		battery_info_set(BAT_FULL);
+	}
+}
+
+void mediator_check_max_cell_voltage(void)
+{
+	if (battery_info_get(CHARGE_CUR_TO_HI))
+	{
+		balancer_set_state(BALANCER_ACTIVE);
 	}
 }
 
@@ -521,20 +575,10 @@ int16_t mediator_get_temperature(void)
 
 void mediator_check_end_of_charge()
 {
-	static int16_t last_bat_temp = 45*GRAD;
-	static uint32_t last_time;
-	
-	if (timer_ms_passed(&last_time, 120000) )
+	if ( eDriveState == eUCharge &&
+	     charge_get_current() < 125)
 	{
-		// every two minutes...
-		int16_t bat_temp;
-		sensors_get_avg_temperatur(&bat_temp);
-
-		if (bat_temp - last_bat_temp > 1*GRAD)
-		{
-			battery_info_set(BAT_FULL);
-		}
-		last_bat_temp = bat_temp;
+		battery_info_set(BAT_FULL);
 	}
 }
 
@@ -548,13 +592,108 @@ EDriveState mediator_get_drive_state(void)
 	return eDriveState;
 }
 
-/*!
- * Interrupt-Handler fuer den Interrupt 0. Trennt den das ganze Twike von der Batterie.
- */
-ISR (INT0_vect)
+
+void mediator_update_statistics()
 {
-	SET_RED_LED;
-	data_save();
-	ePowerSoll = ePowerOff;
-	CLEAR_RED_LED;
+	if (battery_get_voltage() < TIEFENTLADE_SPANNUNG)
+	{
+		data_deep_discharge_cycles++;
+	}
+
+	int16_t discharged_capacity = data_nominal_capacity - charge_get_capacity();
+	if (discharged_capacity > data_max_capacity)
+	{
+		data_max_capacity = discharged_capacity;
+	}
+	if (discharged_capacity < data_min_capacity)
+	{
+		data_min_capacity = discharged_capacity;
+	}
+	
+	data_charge_cycles++;
+
+	int16_t gap = data_nominal_capacity / 10;
+	int16_t actual_capacity = charge_get_capacity();
+	int16_t border = data_nominal_capacity-gap;
+
+	for (int8_t stat=0; stat<12; stat++)
+	{
+		if (actual_capacity >= border)
+		{
+			data_stat.cycles[stat]++;
+			return;
+		}
+		border -= gap;
+	}
+	data_stat.cycles_over_110++;
 }
+
+void mediator_cell_limit_reached(void)
+{
+	if (eDriveState==eDrive)
+	{
+		battery_info_set(BAT_EMPTY);
+	}
+	else
+	{
+		battery_info_set(CHARGE_CUR_TO_HI);
+	}
+}
+
+void mediator_cell_limit_ok(void)
+{
+	if (eDriveState!=eDrive)
+	{
+		battery_info_set(CHARGE_CUR_TO_HI);
+	}
+}
+
+void mediator_debounce_stop(void)
+{
+	static uint8_t last_level;
+
+	mediator_stop <<= 1;
+	if (io_get_stop())
+	{
+		mediator_stop |= 0x1;;
+	}
+
+	mediator_stop &= 0xf;
+
+	if (mediator_stop == 0xf)
+	{
+		if (last_level != 1)
+		{
+			last_level = 1;
+			mediator_stop_released();
+		}
+
+	}
+	else if (mediator_stop == 0)
+	{
+		if (last_level != 0)
+		{
+			last_level = 0;
+			mediator_stop_pressed();
+		}
+	}
+}
+
+void mediator_stop_released(void)
+{
+}
+
+void mediator_stop_pressed(void)
+{
+	io_set_red_led();
+	data_save();
+	io_clear_red_led();
+	
+	io_raise_emergency();
+
+	ePowerSoll = ePowerSave;
+	io_disable_interface_power();
+	
+	mediator_set_drive_state(eConverterOff);
+}
+

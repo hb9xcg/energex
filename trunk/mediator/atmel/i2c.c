@@ -35,7 +35,7 @@
 #define I2C_PRESCALER 0				/*!< Prescaler fuer I2C-CLK */
 
 static uint8_t sl_addr = 0;			/*!< Adresse des Slaves */
-static uint8_t * pTxData = NULL;	/*!< Zeiger auf Puffer fuer Datenversand */
+static const uint8_t * pTxData = NULL;	/*!< Zeiger auf Puffer fuer Datenversand */
 static uint8_t * pRxData = NULL;	/*!< Zeiger auf Puffer fuer Datenempfang */
 static uint8_t txSize = 0;			/*!< Anzahl der zu sendenden Datenbytes */
 static uint8_t rxSize = 0;			/*!< Anzahl der zu lesenden Datenbytes */
@@ -154,7 +154,7 @@ void i2c_init(uint32_t bitrate) {
  * @param *pRx	Zeiger auf Puffer fuer zu lesende Daten
  * @param nRx	Anzahl der zu lesenden Bytes, [0; 255]
  */
-void i2c_write_read(uint8_t sla, uint8_t * pTx, uint8_t nTx, uint8_t * pRx, uint8_t nRx) {
+void i2c_write_read(uint8_t sla, const uint8_t * pTx, uint8_t nTx, uint8_t * pRx, uint8_t nRx) {
 	/* Inits */
 	i2c_complete = 0;
 	i2c_error = TW_NO_INFO;

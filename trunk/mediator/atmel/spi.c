@@ -41,7 +41,7 @@ void spi_master_init(spi_speed_t speed) {
 	ddrb &= ~(1<<DDB6);
 	DDRB = ddrb;
 	/* Enable SPI, Master, set clock rate */
-	uint8_t spcr = (1<<SPE) | (1<<MSTR);
+	uint8_t spcr = (1<<SPE) | (1<<MSTR) | (1<<CPOL) | (1<<CPHA);
 	uint8_t tmp = speed.raw & 0x3;
 	spcr |= tmp;
 	SPCR = spcr;

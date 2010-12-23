@@ -53,7 +53,7 @@ TARGET = mediator
 
 
 # List C source files here. (C dependencies are automatically generated.)
-SRC = mediator.c ow.c adc.c balancer.c battery.c charge.c command.c crc8.c data.c delay.c fifo.c i2c.c os_scheduler.c os_thread.c protocol.c sensors.c supervisor.c timer.c timer-low.c uart.c spi.c ltc6802.c ntc.c
+SRC = mediator.c ow.c adc.c balancer.c battery.c charge.c command.c crc8.c data.c delay.c fifo.c i2c.c os_scheduler.c os_thread.c protocol.c sensors.c supervisor.c timer.c timer-low.c uart.c spi.c ltc6802.c ntc.c ko.c error.c ds1307.c io.c gauge.c
 
 
 # List Assembler source files here.
@@ -114,6 +114,7 @@ CFLAGS += $(patsubst %,-I%,$(EXTRAINCDIRS))
 CFLAGS += $(CSTANDARD)
 CFLAGS += -DF_OSC=$(F_OSC)
 CFLAGS += -DF_CPU=$(F_OSC)
+CFLAGS += -DBALANCER
 
 
 

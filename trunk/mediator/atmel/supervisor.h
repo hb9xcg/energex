@@ -36,8 +36,8 @@ typedef struct {
 } cell_t;
 
 void supervisor_init(void);
-void supervisor_activate();
-void supervisor_deactivate();
+void supervisor_activate(void);
+void supervisor_deactivate(void);
 int8_t supervisor_get_nbr_of_info(void);
 void supervisor_get_info(int8_t idx, cell_t* info);
 

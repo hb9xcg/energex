@@ -1,6 +1,12 @@
 /*
  * Energex
  *
+ * Copyright (C) 2003-2007 by Timo Sandmann
+ * mail@timosandmann.de
+ *
+ * Copyright (C) 2008-2010 by Markus Walser
+ * markus.walser@gmail.com
+ *
  * This program is free software; you can redistribute it
  * and/or modify it under the terms of the GNU General
  * Public License as published by the Free Software
@@ -40,7 +46,9 @@ typedef union {
 
 #define SPI_SPEED_MAX		{{0, 0, 1}}	// !SPR0, !SPR1,  SPI2X -> F_CPU / 2 Hz
 #define SPI_SPEED_4MHZ		{{0, 0, 0}}	// !SPR0, !SPR1, !SPI2X
+#define SPI_SPEED_1MHZ		{{1, 0, 0}}	//  SPR0, !SPR1, !SPI2X -> F_CPU / 16
 #define SPI_SPEED_250KHZ	{{0, 1, 0}}	// !SPR0,  SPR1, !SPI2X -> F_CPU / 64 Hz
+#define SPI_SPEED_125KHZ	{{1, 1, 0}}	//  SPR0,  SPR1, !SPI2X -> F_CPU / 128 Hz
 
 /*!
  * Initialisiert und aktiviert das SPI-Modul

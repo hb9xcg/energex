@@ -1,6 +1,13 @@
 /*
  * Energex
  * 
+ * Copyright (C) 2005-2007 by Timo Sandmann
+ * mail@timosandmann.de
+ *
+ * Copyright (C) 2008-2010 by Markus Walser
+ * markus.walser@gmail.com
+ *
+ *
  * This program is free software; you can redistribute it
  * and/or modify it under the terms of the GNU General
  * Public License as published by the Free Software
@@ -15,13 +22,6 @@
  * Software Foundation, Inc., 59 Temple Place, Suite 330, Boston,
  * MA 02111-1307, USA.
  * 
- */
-
-/*! 
- * @file 	os_thread.h
- * @brief 	Threadmanagement fuer BotOS
- * @author 	Timo Sandmann (mail@timosandmann.de)
- * @date 	02.10.2007
  */
 
 #ifndef _THREAD_H

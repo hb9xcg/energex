@@ -1,5 +1,11 @@
 /*
  * Energex
+ *
+ * Copyright (C) 2005-2007 by Timo Sandmann
+ * mail@timosandmann.de
+ *
+ * Copyright (C) 2008-2010 by Markus Walser
+ * markus.walser@gmail.com
  * 
  * This program is free software; you can redistribute it
  * and/or modify it under the terms of the GNU General
@@ -17,20 +23,7 @@
  * 
  */
 
-/*! 
- * @file 	os_thread.c
- * @brief 	Threadmanagement fuer BotOS
- * @author 	Timo Sandmann (mail@timosandmann.de)
- * @date 	02.10.2007
- */
-
-/* 
- * Dokumentation: siehe Documentation/BotOS.html
- */
-
 #include "mediator.h"
-
-
 #include "os_thread.h"
 #include "os_utils.h"
 #include <stdlib.h>
