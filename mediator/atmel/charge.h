@@ -1,7 +1,7 @@
 /***************************************************************************
  *   Energex                                                               *
  *                                                                         *
- *   Copyright (C) 2008-2009 by Markus Walser                              *
+ *   Copyright (C) 2008-2010 by Markus Walser                              *
  *   markus.walser@gmail.com                                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -38,8 +38,11 @@ void charge_sample(void);
 int16_t charge_get_capacity(void);
 void charge_set_capacity(int16_t newCapacity);
 void charge_reset(void);
+void charge_set_total_charge(uint16_t new_total);
 uint16_t charge_get_total_charge(void);
 void charge_set_total_discharge(uint16_t new_total);
 uint16_t charge_get_total_discharge(void);
+int32_t charge_get_barrel(void);
+void charge_set_barrel(int32_t barrel);
 
 #endif

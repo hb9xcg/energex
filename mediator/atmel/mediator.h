@@ -1,7 +1,7 @@
 /***************************************************************************
  *   Energex                                                               *
  *                                                                         *
- *   Copyright (C) 2008-2009 by Markus Walser                              *
+ *   Copyright (C) 2008-2010 by Markus Walser                              *
  *   markus.walser@gmail.com                                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -69,5 +69,7 @@ void mediator_check_binfo(void);
 extern int16 mediator_temperature;
 void mediator_busy(void);
 void mediator_force_busy(int8_t on);
+void mediator_cell_limit_reached(void);
+void mediator_cell_limit_ok(void);
 
 #endif

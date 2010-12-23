@@ -1,7 +1,7 @@
 /***************************************************************************
  *   Energex                                                               *
  *                                                                         *
- *   Copyright (C) 2008-2009 by Markus Walser                              *
+ *   Copyright (C) 2008-2010 by Markus Walser                              *
  *   markus.walser@gmail.com                                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -28,10 +28,13 @@
  */
 
 #include "ntc.h"
+#include <avr/io.h>
+#include <avr/pgmspace.h>
 
 #define COUNT_OF(A) (sizeof(A)/sizeof(A[0]))
 
-static const uint16_t ntc_table[] = { /* Vref = 3.065V */
+prog_int16_t ntc_table[] =
+{         // Vref = 3.065V 
    1996,  // 1996.433   -40°C    0
    1978,  // 1977.544   -35°C    1
    1952,  // 1952.459   -30°C    2
@@ -65,46 +68,62 @@ static const uint16_t ntc_table[] = { /* Vref = 3.065V */
      77,  //   77.172   110°C   30 
      67,  //   66.730   115°C   31 
      58,  //   57.837   120°C   32 
-     50}; //   50.226   125°C   33 
+     50   //   50.226   125°C   33 
+};
 
-static int8_t ntc_binary_search(const uint16* adc, int8_t low, int8_t high);
+static int8_t ntc_log_search(const uint16 adc);
+static int16_t ntc_read_table(uint8_t idx);
 
 int16_t ntc_get_temp(const uint16 adc)
 {
-	if (adc > ntc_table[0])
+	if (adc > ntc_read_table(0))
 	{
 		return -4000;
 	}
-	else if (adc < ntc_table[COUNT_OF(ntc_table)-1])
+	else if (adc < ntc_read_table(COUNT_OF(ntc_table)-1))
 	{
 		return 12500;
 	}
 
-	int8_t idx = ntc_binary_search(&adc, 0, COUNT_OF(ntc_table));
-	
-	int16_t diff = ntc_table[idx] - ntc_table[idx+1]; // max 122, min 8
-	
-	uint16_t temp = 500 * (ntc_table[idx] - adc);
-        temp /= diff ;
+	int8_t idx = ntc_log_search(adc);
+
+	int16_t lower = ntc_read_table(idx);
+	int16_t diff = lower - ntc_read_table(idx+1);
+
+	uint16_t temp = 500 * (lower - adc);
+	temp /= diff ;
 	temp += 500*idx;
+
 	return (int16_t)temp - 4000;
 }
 
-int8_t ntc_binary_search(const uint16* adc, int8_t low, int8_t high)
+int16_t ntc_read_table(uint8_t idx)
 {
-	int8_t mid = low + ((high-low) >> 1);
+	return pgm_read_word(ntc_table + idx);
+}
 
-	if (ntc_table[mid] < *adc)
+int8_t ntc_log_search(const uint16 adc)
+{
+	int8_t mid;
+	int8_t low  = 0;
+	int8_t high = COUNT_OF(ntc_table)-1;
+	
+	for (;;)
 	{
-		return ntc_binary_search(adc, low, mid-1);
-	}
-	else if (ntc_table[mid+1] > *adc)
-	{
-		return ntc_binary_search(adc, mid+1, high);
-	}
-	else
-	{
-		return mid;
+		mid  = (low + high) >> 1;
+
+		if (ntc_read_table(mid) < adc)
+		{
+			high = mid - 1;
+		}
+		else if (ntc_read_table(mid+1) > adc)
+		{
+			low = mid + 1;
+		}
+		else
+		{
+			return mid;
+		}
 	}
 }
 

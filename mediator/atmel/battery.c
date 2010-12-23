@@ -1,7 +1,7 @@
 /***************************************************************************
  *   Energex                                                               *
  *                                                                         *
- *   Copyright (C) 2008-2009 by Markus Walser                              *
+ *   Copyright (C) 2008-2010 by Markus Walser                              *
  *   markus.walser@gmail.com                                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -30,22 +30,22 @@
 #include "protocol.h"
 #include "os_thread.h"
 #include "delay.h"
+#include "error.h"
+#include "data.h"
+#include "io.h"
+#include "ltc6802.h"
 
 
-
+#define ADC_MAX_VALUE		(1<<ADC_RESOLUTION)
 #define OVER_SAMPLING_LOG	6
 #define OVER_SAMPLING		(1<<OVER_SAMPLING_LOG)
-#define VOLTAGE_INV_R1		660000ULL    // [Ohm]
-#define VOLTAGE_INV_R2		3740ULL      // [Ohm]
 #define V_REF		   	2500ULL      // [mV]
-#define ADC_RESOLUTION		10
-#define ADC_MAX_VALUE		(1<<ADC_RESOLUTION)
-
+#define ADC_RESOLUTION		9
 #define NBR_OF_BATTERIES	3
 
 battery_t battery;
 
-uint16_t battery_voltage; // [ADC bits]
+static uint16_t battery_voltage; // [ADC bits]
 int8_t battery_enable_sampling = 0;
 
 
@@ -56,22 +56,33 @@ void battery_sample(void)
 	static uint16_t voltage_oversampling;
 	static int16_t voltage_sample;
 
-	charge_sample();
+	static int8_t toggle;
 
-
-	voltage_oversampling += voltage_sample;
-	
-	if (++idx >= OVER_SAMPLING )
+	toggle ^= 1;
+	if (toggle)
 	{
-		idx = 0;
-		battery_voltage = voltage_oversampling;
-		voltage_oversampling = 0;
-		voltage_sample = 0;
-
-		adc_read_int( CH_TEMPERATURE, &mediator_temperature);
+		charge_sample();
 	}
 	else
 	{
+		// Correct offset of raw sample
+		voltage_sample -= adc_get_offset(CH_VOLTAGE);
+		if (voltage_sample<7)
+		{
+			voltage_sample = 7;
+		}
+		voltage_oversampling += voltage_sample;
+
+		if (++idx >= OVER_SAMPLING )
+		{
+			idx = 0;
+			battery_voltage = voltage_oversampling;
+			voltage_oversampling = 0;
+			voltage_sample = 0;
+		}
+
+		adc_read_int( CH_VOLTAGE, &voltage_sample);
+		adc_read_int( CH_VOLTAGE, &voltage_sample);
 		adc_read_int( CH_VOLTAGE, &voltage_sample);
 	}
 }
@@ -90,10 +101,27 @@ uint16_t battery_get_voltage(void)
 	uint32_t voltage32;
 
 	voltage32   = battery_voltage;
-	voltage32  *= (V_REF/10ULL * (VOLTAGE_INV_R1+VOLTAGE_INV_R2) / VOLTAGE_INV_R2 );     // voltage32 *= 44117;
+	voltage32  *= data_voltage_calibration;
+
 	voltage32 >>= (OVER_SAMPLING_LOG + ADC_RESOLUTION);
+	voltage32  -= 500;
 
 	return voltage32;
+}
+
+void battery_calibrate(uint16_t targetVoltage)
+{
+	uint16_t currentVoltage = battery_get_voltage();
+
+	currentVoltage += 500;
+	targetVoltage  += 500;
+
+	uint32_t new_calibration = targetVoltage;
+
+        new_calibration	*= data_voltage_calibration;
+	new_calibration /= currentVoltage;
+
+	data_voltage_calibration = new_calibration;
 }
 
 uint16_t battery_get_power(void)
@@ -138,39 +166,63 @@ void battery_command(uint16_t relais_state)
 	}
 }
 
-void battery_set_parameter_value(uint8_t parameter, uint16_t value)
+uint8_t battery_get_index(uint8_t address)
 {
+	if (address < BATTERY_1 ||
+            address > BATTERY_3 )
+        {
+                error(ERROR_INVALID_ADDRESS);
+        }
+
+	return address - BATTERY_1;
+}
+
+void battery_set_parameter_value(uint8_t parameter, uint8_t address, uint16_t value)
+{
+	uint8_t index;
+
 	os_enterCS();
 
 	switch(parameter)
 	{
 	case DRIVE_STATE:	mediator_set_drive_state(value);
-		break;
+				break;
 	case COMMAND:		battery_command(value);
-		break;
-	case BUS_ADRESSE:	battery.address 	= value;
-		break;
-	case TOTAL_SPANNUNG:	battery.voltage 	= value;
-		break;
+				break;
+	case BUS_ADRESSE:	battery.address	= value;
+				break;
+	case TOTAL_SPANNUNG:	battery.voltage	= value;
+				break;
 	case AH_ZAEHLER:	charge_set_capacity(value);
-		break;
+				break;
+	case SYM_SPANNUNG:	index = battery_get_index(address);
+				battery.sym_voltage[index] = value;
+				break;
+	case BATTERIE_TEMP:	index = battery_get_index(address);
+				battery.temperature[index] = value;
+				break;
 	case GESCHWINDIGKEIT:
 	case TAGESKILOMETER:
-		break;
-
+				break;
 	default:
-		SET_RED_LED;
-		delay(5000);
-		CLEAR_RED_LED;
-		break;
+				error(ERROR_SET_UNKNOWN_PARAMETER);
+				break;
 	}
 
 	os_exitCS();
 }
 
-int16_t battery_get_parameter_value(uint8_t parameter)
+int16_t battery_get_parameter_value(uint8_t parameter, uint8_t address)
 {
 	uint16_t value;
+	
+	if (address < BATTERY_1 ||
+	    address > BATTERY_3 )
+	{
+		error(ERROR_INVALID_ADDRESS);
+	}
+	
+	address -= BATTERY_1;
 
 	os_enterCS();
 
@@ -180,10 +232,10 @@ int16_t battery_get_parameter_value(uint8_t parameter)
 	case PROGRAM_REV:		value = 530;			break;
 	case PAR_TAB_REV:		value = 530;			break;
 	
-	case NENNSPNG:			value = 33600;			break;
-	case NENNSTROM:			value = 280;			break;
-	case SERIE_NUMMER:		value = 40847;			break;
-	case REP_DATUM: 		value = 2;			break;
+	case NENNSPNG:			value = 35520;			break;
+	case NENNSTROM:			value = 2500;			break;
+	case SERIE_NUMMER:		value = 11178;			break;
+	case REP_DATUM: 		value = 0;			break;
 	case STANDZEIT:			value = 64;			break;
 	case FAHR_LADE_ZEIT:		value = 9;			break;
 	case LAST_ERROR:		value = 0;			break;
@@ -191,24 +243,25 @@ int16_t battery_get_parameter_value(uint8_t parameter)
 
 	case DRIVE_STATE:		value = mediator_get_drive_state();	break;
 	case COMMAND:			value = !battery_info_get(BAT_REL_OPEN);	break;
-	case PARAM_PROT:		value = 0;					break;
+	case PARAM_PROT:		value = 0;			break;
 
 	case BINFO:			value = battery_get_info();	break;
 	
 	// We simulate 3 batteries. Thus each of them reports one third of the real value.
 	case IST_STROM:			value = charge_get_current()/NBR_OF_BATTERIES;	break;
-	case LADESTROM:			value = 280;			break;
-	case FAHRSTROM:			value = -1000;			break;
+	case LADESTROM:			value = 400;			break;
+	case FAHRSTROM:			value = -800;			break;
 	case TOTAL_SPANNUNG:		value = battery_get_voltage();	break;
-	case SOLL_LADESPG:		value =	44000;			break;
+	case SOLL_LADESPG:		value =	40000;			break;
 	
 	 // We simulate 3 batteries. Thus each of them reports one third of the real value.
-	case AH_ZAEHLER:		value = charge_get_capacity()/NBR_OF_BATTERIES;	break;
-	case Q:				value = -1400;					break;
-	case LEISTUNG:			value = battery_get_power();			break;
-	case BATTERIE_TEMP:		sensors_get_avg_temperatur((int16_t*)&value);	break;
-	case FINFO:			value = 0;					break;
-	case SYM_SPANNUNG:		value = 26;					break;
+	case AH_ZAEHLER:		value = charge_get_capacity() /
+						NBR_OF_BATTERIES;	break;
+	case Q:				value = -1400;				break;
+	case LEISTUNG:			value = battery_get_power();		break;
+	case BATTERIE_TEMP:		value = battery.temperature[address];	break;
+	case FINFO:			value = 0;				break;
+	case SYM_SPANNUNG:		value = battery.sym_voltage[address];	break;
 				
 	case TEILSPANNUNG1:		value = 5100;	break;
 	case TEILSPANNUNG2:		value = 5100;	break;
@@ -218,20 +271,20 @@ int16_t battery_get_parameter_value(uint8_t parameter)
 	case TEILSPANNUNG6:		value = 5100;	break;
 	case TEILSPANNUNG7:		value = 5100;	break;
 			
-	case TEMPERATUR1:		sensors_get_temperatur( 0, (int16_t*)&value);	break;
-	case TEMPERATUR2:		sensors_get_temperatur( 1, (int16_t*)&value);	break;
-	case TEMPERATUR3:		sensors_get_temperatur( 2, (int16_t*)&value);	break;
-	case TEMPERATUR4:		sensors_get_temperatur( 3, (int16_t*)&value);	break;
-	case TEMPERATUR5:		sensors_get_temperatur( 4, (int16_t*)&value);	break;
-	case TEMPERATUR6:		sensors_get_temperatur( 5, (int16_t*)&value);	break;
-	case TEMPERATUR7:		sensors_get_temperatur( 6, (int16_t*)&value);	break;
-	case TEMPERATUR8:		sensors_get_temperatur( 7, (int16_t*)&value);	break;
-	case TEMPERATUR9:		sensors_get_temperatur( 8, (int16_t*)&value);	break;
-	case TEMPERATUR10:		sensors_get_temperatur( 9, (int16_t*)&value);	break;
-	case TEMPERATUR11:		sensors_get_temperatur(10, (int16_t*)&value);	break;
-	case TEMPERATUR12:		sensors_get_temperatur(11, (int16_t*)&value);	break;
-	case TEMPERATUR13:		sensors_get_temperatur(12, (int16_t*)&value);	break;
-	case TEMPERATUR14:		sensors_get_temperatur(13, (int16_t*)&value);	break;
+	case TEMPERATUR1:		value = ltc_get_external_temperature(0);  break;
+	case TEMPERATUR2:		value = ltc_get_external_temperature(1);  break;
+	case TEMPERATUR3:		value = ltc_get_external_temperature(2);  break;
+	case TEMPERATUR4:		value = ltc_get_external_temperature(3);  break;
+	case TEMPERATUR5:		value = ltc_get_external_temperature(4);  break;
+	case TEMPERATUR6:		value = ltc_get_external_temperature(5);  break;
+	case TEMPERATUR7:		value = ltc_get_external_temperature(6);  break;
+	case TEMPERATUR8:		value = ltc_get_external_temperature(7);  break;
+	case TEMPERATUR9:		value = ltc_get_external_temperature(8);  break;
+	case TEMPERATUR10:		value = ltc_get_external_temperature(9);  break;
+	case TEMPERATUR11:		value = ltc_get_external_temperature(10);  break;
+	case TEMPERATUR12:		value = ltc_get_external_temperature(11);  break;
+	case TEMPERATUR13:		value = ltc_get_external_temperature(12);  break;
+	case TEMPERATUR14:		value = ltc_get_external_temperature(13);  break;
 	
 	case PC_CALIBR_TEMP:		value = 0x5678;			break;
 	case MAX_BAT_TEMP:		sensors_get_max_temperatur((int16_t*)&value);	break;
@@ -245,30 +298,30 @@ int16_t battery_get_parameter_value(uint8_t parameter)
 
 	case MAX_KAPAZITAET:		value = 305;	break;
 	case MIN_KAPAZITAET:		value = 280;	break;
-	case GELADENE_AH:		value = 1000;	break;
+	case GELADENE_AH:		value = charge_get_total_charge()/NBR_OF_BATTERIES;	break;
 	case ENTLADENE_AH:		value = charge_get_total_discharge()/NBR_OF_BATTERIES;	break;
-	case LADEZYKLEN:		value = 100;	break;
-	case TIEFENTLADE_ZYKLEN:	value = 0;	break;
+	case LADEZYKLEN:		value = data_charge_cycles;		break;
+	case TIEFENTLADE_ZYKLEN:	value = data_deep_discharge_cycles;	break;
 	
-	case MAX_ENTLADE_STROM:		value = -1000;	break;
+	case MAX_ENTLADE_STROM:		value = -800;	break; // Times 3 blocks -> 24A
 				
-	case ZYKLUS_UEBER_110:		value = 0;	break;
-	case ZYKLUS_UEBER_100:		value = 10;	break;
-	case ZYKLUS_UEBER_90:		value = 0;	break;
-	case ZYKLUS_UEBER_80:		value = 0;	break;
-	case ZYKLUS_UEBER_70:		value = 0;	break;
-	case ZYKLUS_UEBER_60:		value = 0;	break;
-	case ZYKLUS_UEBER_50:		value = 0;	break;
-	case ZYKLUS_UEBER_40:		value = 0;	break;
-	case ZYKLUS_UEBER_30:		value = 0;	break;
-	case ZYKLUS_UEBER_20:		value = 0;	break;
-	case ZYKLUS_UEBER_10:		value = 0;	break;
-	case ZYKLUS_UNTER_10:		value = 0;	break;
+	case ZYKLUS_UEBER_110:		value = data_stat.cycles_over_110;	break;
+	case ZYKLUS_UEBER_100:		value = data_stat.cycles_over_100;	break;
+	case ZYKLUS_UEBER_90:		value = data_stat.cycles_over_90;	break;
+	case ZYKLUS_UEBER_80:		value = data_stat.cycles_over_80;	break;
+	case ZYKLUS_UEBER_70:		value = data_stat.cycles_over_70;	break;
+	case ZYKLUS_UEBER_60:		value = data_stat.cycles_over_60;	break;
+	case ZYKLUS_UEBER_50:		value = data_stat.cycles_over_50;	break;
+	case ZYKLUS_UEBER_40:		value = data_stat.cycles_over_40;	break;
+	case ZYKLUS_UEBER_30:		value = data_stat.cycles_over_30;	break;
+	case ZYKLUS_UEBER_20:		value = data_stat.cycles_over_20;	break;
+	case ZYKLUS_UEBER_10:		value = data_stat.cycles_over_10;	break;
+	case ZYKLUS_UNTER_10:		value = data_stat.cycles_under_10;	break;
 
-	case MAX_UEBERLADUNG:		value = 5000;	break;
+	case MAX_UEBERLADUNG:		value = 850;	break;
 	case MIN_LDG_F_VOLL:		value = -500;	break;
 	case STROM_ZUNAHME:		value = 40;	break;
-	case MAX_LADE_SPG:		value = 44000;	break;
+	case MAX_LADE_SPG:		value = 40000;	break;
 	case MIN_LADE_TEMP:		value = 0;	break;
 	case MAX_LADE_TEMP:		value = 4500;	break;
 	case MAX_TEMP_ZUNAHME:		value = 100;	break;
@@ -285,20 +338,20 @@ int16_t battery_get_parameter_value(uint8_t parameter)
 	case LADE_STR_UEBER_P45:	value = 28;	break;
 	case LADE_STR_UEBER_P50:	value = 28;	break;
 			
-	case LADE_SPG_UNTER_M10:	value = 44000;	break;
-	case LADE_SPG_UEBER_M10:	value = 44000;	break;
-	case LADE_SPG_UEBER_P00:	value = 44000;	break;
-	case LADE_SPG_UEBER_P10:	value = 44000;	break;
-	case LADE_SPG_UEBER_P20:	value = 44000;	break;
-	case LADE_SPG_UEBER_P30:	value = 42000;	break;
-	case LADE_SPG_UEBER_P40:	value = 40000;	break;
-	case LADE_SPG_UEBER_P45:	value = 38000;	break;
-	case LADE_SPG_UEBER_P50:	value = 36000;	break;
+	case LADE_SPG_UNTER_M10:	value = 40000;	break;
+	case LADE_SPG_UEBER_M10:	value = 40000;	break;
+	case LADE_SPG_UEBER_P00:	value = 40000;	break;
+	case LADE_SPG_UEBER_P10:	value = 40000;	break;
+	case LADE_SPG_UEBER_P20:	value = 40000;	break;
+	case LADE_SPG_UEBER_P30:	value = 40000;	break;
+	case LADE_SPG_UEBER_P40:	value = 37440;	break;
+	case LADE_SPG_UEBER_P45:	value = 36480;	break;
+	case LADE_SPG_UEBER_P50:	value = 35520;	break;
 			
-	case NOM_KAPAZITAET:		value = 280;	break;
+	case NOM_KAPAZITAET:		value = data_nominal_capacity/3;break;
 	case MIN_FAHR_SPANNUNG:		value = 31000;	break;
 	case SELBST_ENTL_STROM:		value = 28000;	break;
-	case TIEFENTLADE_SPG:		value = 25000;	break;
+	case TIEFENTLADE_SPG:		value = TIEFENTLADE_SPANNUNG;	break;
 	case MAX_SPANNUNG_DIFF:		value = 500;	break;
 	case MIN_FAHR_TEMP_B:		value = -2500;	break;
 	case MAX_FAHR_TEMP_B:		value = 6000;	break;
@@ -315,7 +368,7 @@ int16_t battery_get_parameter_value(uint8_t parameter)
 	case KAL_TEMP_11_10:		value = 0xFE00;	break;
 	case KAL_TEMP_9_8:		value = 0x0002;	break;
 
-	case SENSOR_MASK:		value = 0x0000;	break;
+	case SENSOR_MASK:		value = 0x3F00;	break;
 			
 	case OFFS_KLEIN_STL:		value = 1508;	break;
 	case OFFS_GROSS_STL:		value = 12523;	break;
@@ -336,9 +389,7 @@ int16_t battery_get_parameter_value(uint8_t parameter)
 	
 	default:
 		value = 0x0000;
-		SET_RED_LED;
-		delay(5000);
-		CLEAR_RED_LED;
+		error(ERROR_GET_UNKNOWN_PARAMETER);
 	}
 
 	os_exitCS();

@@ -1,7 +1,7 @@
 /***************************************************************************
  *   Energex                                                               *
  *                                                                         *
- *   Copyright (C) 2008-2009 by Markus Walser                              *
+ *   Copyright (C) 2008-2010 by Markus Walser                              *
  *   markus.walser@gmail.com                                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -36,6 +36,7 @@
 #include "delay.h"
 #include "uart.h"
 #include "crc8.h"
+#include "io.h"
 
 #define DS18S20_CMD_MATCH_ROM       0x55
 #define DS18S20_CMD_CONVERT         0x44
@@ -202,9 +203,9 @@ void sensors_thread(void)
 			continue;
 		}
 		sensors_start_conversion(sensors[device].serial);
-		CLEAR_GREEN_LED;
+		io_clear_green_led();
 		delay(750);
-		SET_GREEN_LED;
+		io_set_green_led();
 
 		sensors_fetch_conversion(sensors[device].serial, &sensors[device].temp);
 #ifdef DEBUG	
@@ -229,9 +230,9 @@ void sensors_search(void)
 	idx = 0;
 	while (idx < SENSORS_MAX_DEVICES)
 	{
-		SET_GREEN_LED;
+		io_clear_green_led();
 		ret = ow_search( 0, &last_device, sensors[idx].serial);
-		CLEAR_GREEN_LED;
+		io_set_green_led();
 
 		if( ret == eOWSuccess) {
 			sensors[idx].temp = SENSORS_USED;

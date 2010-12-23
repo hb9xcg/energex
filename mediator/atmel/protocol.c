@@ -1,7 +1,7 @@
 /***************************************************************************
  *   Energex                                                               *
  *                                                                         *
- *   Copyright (C) 2008-2009 by Markus Walser                              *
+ *   Copyright (C) 2008-2010 by Markus Walser                              *
  *   markus.walser@gmail.com                                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -199,7 +199,7 @@ void protocol_receiveData(void)
 	
 	value = data[3] | (data[2]<<8);
 	
-	battery_set_parameter_value(parameter, value);
+	battery_set_parameter_value(parameter, address, value);
 }
 
 void protocol_transmitData(void)
@@ -208,7 +208,7 @@ void protocol_transmitData(void)
 	int16_t value;
 	int8_t checksum=0, i;
 
-	value = battery_get_parameter_value(parameter);
+	value = battery_get_parameter_value(parameter, address);
 	
 	packet[ 0] = FRAME;
 	packet[ 1] = address;
@@ -236,9 +236,9 @@ void protocol_transmitGroup(void)
 
 	mediator_check_binfo();
 
-	value   = battery_get_parameter_value(parameter);
-	voltage = battery_get_parameter_value(TOTAL_SPANNUNG);
-	current = battery_get_parameter_value(IST_STROM);
+	value   = battery_get_parameter_value(parameter, address);
+	voltage = battery_get_parameter_value(TOTAL_SPANNUNG, address);
+	current = battery_get_parameter_value(IST_STROM, address);
 	binfo   = battery_get_info();
 	
 	packet[ 0] = FRAME;

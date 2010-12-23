@@ -1,7 +1,7 @@
 /***************************************************************************
  *   Energex                                                               *
  *                                                                         *
- *   Copyright (C) 2008-2009 by Markus Walser                              *
+ *   Copyright (C) 2008-2010 by Markus Walser                              *
  *   markus.walser@gmail.com                                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -45,8 +45,7 @@
 #define ADC_MAX_VALUE           (1<<ADC_RESOLUTION)
 #define OVER_SAMPLING           (25)
 #define OVER_DRIVE		(1)
-//#define BARREL		612580L // 42.2 Ohm
-#define BARREL			366601L // 68 Ohm
+#define BARREL			151542L 
 
 
 
@@ -54,51 +53,48 @@ static uint16_t charge_charged_Ah;
 static uint16_t charge_discharged_Ah; 
 static int16_t charge_counter_1mAh;
 
-static int16_t charge_current_sample;
 static int16_t charge_current;
-
+static int16_t charge_adc_sample;
 static int8_t  charge_channel;
+static int32_t charge_barrel_1mAh;
 
-enum EState
-{
-	eCharging,
-	eDischarging
-} eState;
 
-static enum EState charge_state = eCharging;
 
-uint8_t charge_select_channel(void);
+void charge_setup_channel(void);
 void charge_subsample(const int16_t sample);
 
 // gets called each 400us from the timer interrupt
 void charge_sample(void)
 {
-	static int32_t decimation_current;
+	static int32_t charge_decimation_current;
 	
-	charge_current_sample -= adc_get_offset(charge_channel);     // Correct offset of raw sample
-	charge_current_sample *= adc_get_resolution(charge_channel); // [488uV/LSB];
+	charge_adc_sample -= adc_get_offset(charge_channel);     // Correct offset of raw sample
 
-	if (charge_current_sample > 0)
+	// Create 16 bit dynamics [4.76837uV/LSB];
+	switch(charge_channel)
 	{
-		charge_state = eCharging;
+		case CH_CURRENT_1:	// mul 64.0
+			charge_adc_sample <<= 6;
+			break;
+		case CH_CURRENT_10:     // mul 6.4
+			charge_adc_sample <<= 5; 
+			charge_adc_sample  /= 5;
+			break;
+		case CH_CURRENT_200:	// div 3.125
+			charge_adc_sample *= 8;
+			charge_adc_sample /= 25;
+			break;
 	}
-	else if (charge_current_sample < 0)
-	{
-		charge_state = eDischarging;
-	}
-	else
-	{
-		charge_state = (charge_state==eCharging) ? eDischarging : eCharging;
-	}
+
+
 	
-
 	static int8_t idx=1;	
-	decimation_current += charge_current_sample;
+	charge_decimation_current += charge_adc_sample;
 	if (++idx >= OVER_SAMPLING)
 	{
 		idx = 0;
-		charge_subsample(decimation_current>>2);
-		decimation_current = 0;
+		charge_subsample(charge_decimation_current>>5);
+		charge_decimation_current = 0;
 	}
 	
 //	static int8_t ko=0;
@@ -108,25 +104,22 @@ void charge_sample(void)
 //		ko_sample(&charge_current_sample);
 //	}
 
-	charge_channel = charge_select_channel();
-	adc_read_int(charge_channel, &charge_current_sample);  // dummy to settle down Atmel's analog circuit
-	adc_read_int(charge_channel, &charge_current_sample);  // Real measurement
+	charge_setup_channel();
 }
 
-// Gets called every 10ms 16Bit resolution, 1LSB = 587.678uA -> 982uA
+// Gets called every 20ms 16Bit resolution, 1LSB = 1188uA
 void charge_subsample(const int16_t sample)
 {
-	static int32_t barrel_1mAh;
 	static int16_t counter_charged_Ah;
 	static int16_t counter_discharged_Ah;
 
 	charge_current = sample;
 
-	barrel_1mAh += charge_current;
+	charge_barrel_1mAh += charge_current;
 
-	if (barrel_1mAh>= BARREL)
+	if (charge_barrel_1mAh>= BARREL)
 	{
-		barrel_1mAh -= BARREL;
+		charge_barrel_1mAh -= BARREL;
 		charge_counter_1mAh++;
 		
 		if (++counter_discharged_Ah >= 1000)
@@ -135,9 +128,9 @@ void charge_subsample(const int16_t sample)
 			charge_discharged_Ah++;
 		}
 	}
-	else if (barrel_1mAh <= -BARREL)
+	else if (charge_barrel_1mAh <= -BARREL)
 	{
-		barrel_1mAh += BARREL;
+		charge_barrel_1mAh += BARREL;
 		charge_counter_1mAh--;
 
 		if (++counter_charged_Ah >= 1000)
@@ -150,32 +143,35 @@ void charge_subsample(const int16_t sample)
 //	ko_sample(&charge_current);
 }
 
-uint8_t charge_select_channel(void)
+void charge_setup_channel(void)
 {
-	static int8_t hysteresis = -35; // = 0.13A
-	uint8_t channel;
+	int16_t abs_adc_sample = abs(charge_adc_sample);
 
-	// charge_current_sample [488uV/LSB] (3.67mA/LSB) and limit at input 505 (=> 1.85A)
-
-	if (abs(charge_current_sample) < 470+hysteresis)
+	if (abs_adc_sample > 3000)	// > 2.6A
 	{
-		// if current is below ~1.7A we switch to differential channels
-		hysteresis = 35;
-		channel = (charge_state==eCharging) ? CH_CHARGE_10 : CH_DISCHARGE_10;
+		charge_channel = CH_CURRENT_1;
 	}
-	else
+	else if (abs_adc_sample > 115)  // 100mA ... 2.6A
 	{
-		// if current is above 2A we switch to single sided channels
-		hysteresis = -35;
-		channel = (charge_state==eCharging) ? CH_CHARGE_1 : CH_DISCHARGE_1;
+		charge_channel = CH_CURRENT_10;
+	}
+	else				// < 100mA
+	{
+		charge_channel = CH_CURRENT_200;
 	}
 	
-	return channel;
+	// first 2 dummies to settle down Atmel's analog circuit, then real measurement
+	adc_read_int(charge_channel, &charge_adc_sample);  
+	adc_read_int(charge_channel, &charge_adc_sample);
+	adc_read_int(charge_channel, &charge_adc_sample);
 }
 
 void charge_reset(void)
 {
 	charge_counter_1mAh = 0;
+	charge_charged_Ah = 0;
+	charge_discharged_Ah = 0;
+	charge_barrel_1mAh = 0;
 }
 
 void charge_set_capacity(int16_t newCapacity)
@@ -198,22 +194,37 @@ uint16_t charge_get_total_discharge(void)
 	return charge_discharged_Ah; 
 }
 
+void charge_set_total_charge(uint16_t new_total)
+{
+	charge_charged_Ah = new_total;
+}
+
 uint16_t charge_get_total_charge(void)
 {
 	return charge_charged_Ah; 
 }
 
+int32_t charge_get_barrel(void)
+{
+	return charge_barrel_1mAh;
+}
+
+void charge_set_barrel(int32_t barrel)
+{
+	charge_barrel_1mAh = barrel;
+}
+
 // Returns actual current [10mA]
 int16_t charge_get_current()
 {
-	int16_t current;
+	int32_t current;
 	
 	os_enterCS();
-	current = charge_current;
+	current = charge_current;	// 16Bit resolution, 1LSB = 1.03mA
 	os_exitCS();
 
-//	return current/17;	// 42.2 Ohm
-
-	return current/10 - current/400;	// 68 Ohm
+	// div 8.419
+	current <<= 6;
+	return current/539; 
 }
 

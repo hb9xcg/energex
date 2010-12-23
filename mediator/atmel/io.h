@@ -1,6 +1,9 @@
 /*
  * Energex
  * 
+ * Copyright (C) 2008-2010 by Markus Walser
+ * markus.walser@gmail.com
+ *
  * This program is free software; you can redistribute it
  * and/or modify it under the terms of the GNU General
  * Public License as published by the Free Software
@@ -27,20 +30,31 @@
 #ifndef IO_H_DEF
 #define IO_H_DEF
 
-#define IGBT   		0x04
-#define RELAIS 		0x02
-#define STOP_SWITCH	0x04
-#define LED_RED		0x08	// Port C
-#define LED_GREEN	0x10	// Port C
 #define TRANSMIT_ENABLE 0x08	// Port B
-#define POWER_ONE_WIRE  0x10	// Port D
 
-#define SET_RED_LED		PORTC |= (uint8_t) LED_RED
-#define CLEAR_RED_LED		PORTC &= (uint8_t)~LED_RED
-#define TOGGLE_RED_LED		PORTC ^= (uint8_t) LED_RED
+void io_init(void);
 
-#define SET_GREEN_LED		PORTC |= (uint8_t) LED_GREEN
-#define CLEAR_GREEN_LED		PORTC &= (uint8_t)~LED_GREEN
-#define TOGGLE_GREEN_LED	PORTC ^= (uint8_t) LED_GREEN
+void io_raise_emergency(void);
+void io_release_emergency(void);
 
+void io_enable_interface_power(void);
+void io_disable_interface_power(void);
+
+void io_enable_igbt(void);
+void io_disable_igbt(void);
+
+void io_close_relais(void);
+void io_open_relais(void);
+uint8_t io_is_relais_closed(void);
+
+void io_set_green_led(void);
+void io_clear_green_led(void);
+void io_toggle_green_led(void);
+
+void io_set_red_led(void);
+void io_clear_red_led(void);
+void io_toggle_red_led(void);
+
+void io_enable_stop_interrupt(void);
+uint8_t io_get_stop(void);
 #endif

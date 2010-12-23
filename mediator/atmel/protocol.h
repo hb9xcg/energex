@@ -1,7 +1,7 @@
 /***************************************************************************
  *   Energex                                                               *
  *                                                                         *
- *   Copyright (C) 2008-2009 by Markus Walser                              *
+ *   Copyright (C) 2008-2010 by Markus Walser                              *
  *   markus.walser@gmail.com                                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -200,7 +200,7 @@
 #define TAGESKILOMETER      0xFF
 
 // BatterieInfo / FahrInfo (BitNo)
-#define	 REKUPERATION_NOK    0 // Rekuperation nicht erlaubt
+#define	 REKUPERATION_NOK    0 // Rekuperation nicht erlaubt (hat bei FW 5.3 keinen Effekt)
 #define	 CHARGE_NOK          1 // Ladung nicht erlaubt
 #define	 DRIVE_NOK           2 // Fahren nicht erlaubt
 #define	 CHARGE_CUR_TO_HI    3 // Zu hoher Ladestrom, reduziert Ladestrom

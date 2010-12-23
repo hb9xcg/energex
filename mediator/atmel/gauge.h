@@ -21,35 +21,13 @@
  ***************************************************************************/
 
 /*! 
- * @file        sensors.h
- * @brief       OneWire DS18S20 Temperatursensor-Treiber
+ * @file        gauge.h
+ * @brief       Lithium polymer gauge.
  * @author      Markus Walser (markus.walser@gmail.com)
- * @date        23.11.2008
+ * @date        20.12.2010
  */
 
-#ifndef SENSORS_H_DEF
-#define SENSORS_H_DEF
+#include "global.h"
 
-#include "mediator.h"
+extern int16_t gauge_get_capacity(uint16_t voltage);
 
-typedef enum {
-	eDSSuccess         =  0,
-	eDSNoResponse      = -1,
-	eDSFailure         = -2,
-	eDSNoPresencePulse = -3,
-	eDSCrcError        = -4
-} EDSError;
-
-void     sensors_init(void);
-EDSError sensors_start_conversion(uint8_t serial[]);
-EDSError sensors_fetch_conversion(uint8_t serial[], int16_t* temp);
-void     sensors_wait_conversion(void);
-int8_t   sensors_get_nbr_of_devices(void);
-void     sensors_get_temperatur(int8_t index, int16_t* temp);
-void     sensors_get_min_temperatur(int16_t* temp);
-void     sensors_get_max_temperatur(int16_t* temp);
-void     sensors_get_avg_temperatur(int16_t* temp);
-void     sensors_get_serial(int8_t index, uint8_t serial[]);
-uint16_t sensors_get_max_stack_usage(void);
-
-#endif
