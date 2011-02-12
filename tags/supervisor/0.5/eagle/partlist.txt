@@ -1,0 +1,156 @@
+Partlist
+
+Exported from supervisor.sch at 11.01.11 19:48
+
+EAGLE Version 5.11.0 Copyright (c) 1988-2010 CadSoft
+
+Part     Value          Device          Package      Library         Sheet
+
+C1       100n           C-EUC0603       C0603        resistor        1 ok
+C2       100n           C-EUC0603       C0603        resistor        1 ok
+C3       100n           C-EUC0603       C0603        resistor        1 ok
+C4       100n           C-EUC0603       C0603        resistor        1 ok
+C5       100n           C-EUC0603       C0603        resistor        1 ok
+C6       100n           C-EUC0603       C0603        resistor        1 ok
+C7       100n           C-EUC0603       C0603        resistor        1 ok
+C8       100n           C-EUC0603       C0603        resistor        1 ok
+C9       100n           C-EUC0603       C0603        resistor        1 ok
+C10      100n           C-EUC0603       C0603        resistor        1 ok
+C11      100n           C-EUC0603       C0603        resistor        1 ok
+C12      100n           C-EUC0603       C0603        resistor        1 ok
+C13      100n           C-EUC0603       C0603        resistor        1 ok
+C14      1u             C-EUC0603       C0603        resistor        1  ok
+C15      1u             C-EUC0603       C0603        resistor        1  ok
+C16      1u             C-EUC0603       C0603        resistor        1  ok
+C17      1u             C-EUC0603       C0603        resistor        1  ok
+C18      100n           C-EUC0603       C0603        resistor        1 ok
+C19      100n           C-EUC0603       C0603        resistor        1 ok
+C20      100n           C-EUC0603       C0603        resistor        1 ok
+C21      100n           C-EUC0603       C0603        resistor        1 ok 17
+C22      1u             C-EUC0603       C0603        resistor        1  ok 5
+CON1     SPI            CON10           CON10        con-harting     1 ok 1
+D1       MM3Z12VT1G     MM3Z12VT1       SOD323-R     icontroller     1  ok
+D2       PDZ6.2B        BZT52C6V2S      SOD323-R     icontroller     1 ok
+D3       MM3Z12VT1G     MM3Z12VT1       SOD323-R     icontroller     1  ok
+D4       PDZ6.2B        BZT52C6V2S      SOD323-R     icontroller     1 ok
+D5       MM3Z12VT1G     MM3Z12VT1       SOD323-R     icontroller     1  ok
+D6       PDZ6.2B        BZT52C6V2S      SOD323-R     icontroller     1 ok
+D7       MM3Z12VT1G     MM3Z12VT1       SOD323-R     icontroller     1  ok
+D8       PDZ6.2B        BZT52C6V2S      SOD323-R     icontroller     1 ok
+D9       MM3Z12VT1G     MM3Z12VT1       SOD323-R     icontroller     1  ok
+D10      PDZ6.2B        BZT52C6V2S      SOD323-R     icontroller     1 ok
+D11      MM3Z12VT1G     MM3Z12VT1       SOD323-R     icontroller     1  ok
+D12      PDZ6.2B        BZT52C6V2S      SOD323-R     icontroller     1 ok
+D13      MM3Z12VT1G     MM3Z12VT1       SOD323-R     icontroller     1  ok
+D14      PDZ6.2B        BZT52C6V2S      SOD323-R     icontroller     1 ok
+D15      MM3Z12VT1G     MM3Z12VT1       SOD323-R     icontroller     1  ok
+D16      PDZ6.2B        BZT52C6V2S      SOD323-R     icontroller     1 ok
+D17      MM3Z12VT1G     MM3Z12VT1       SOD323-R     icontroller     1  ok
+D18      PDZ6.2B        BZT52C6V2S      SOD323-R     icontroller     1 ok
+D19      MM3Z12VT1G     MM3Z12VT1       SOD323-R     icontroller     1  ok
+D20      PDZ6.2B        BZT52C6V2S      SOD323-R     icontroller     1 ok
+D21      MM3Z12VT1G     MM3Z12VT1       SOD323-R     icontroller     1  ok
+D22      PDZ6.2B        BZT52C6V2S      SOD323-R     icontroller     1 ok
+D23      MM3Z12VT1G     MM3Z12VT1       SOD323-R     icontroller     1  ok 12
+D24      PDZ6.2B        BZT52C6V2S      SOD323-R     icontroller     1 ok 12
+D25      BAT46          DIODE-MINIMELF  MINIMELF     diode           1  ok
+D26      BAT46          DIODE-MINIMELF  MINIMELF     diode           1  ok
+D27      BZV55-C62      DIODE-MINIMELF  MINIMELF     diode           1 ok 1
+D29      BAT46          DIODE-MINIMELF  MINIMELF     diode           1  ok 3
+IC1      LTC6802-2      LTC6802-2       SSOP44DL     ltc6802         1 ok  linear
+IC2      ADuM1401       ADUM1401        SO16W        spisolator      1  ok farnel/distrelec
+JP2      TOS            JP2E            JP2          jumper          1 -
+JP3      A0             JP2E            JP2          jumper          1 -
+JP4      A1             JP2E            JP2          jumper          1 -
+JP5      A2             JP2E            JP2          jumper          1 -
+JP6      A3             JP2E            JP2          jumper          1 -
+L1       FBMJ3216HS800  SM-1206         SM-1206      inductor-neosid 1  ok farnel
+LED1     RED            LEDCHIPLED_0805 CHIPLED_0805 led             1 ok
+LED2     RED            LEDCHIPLED_0805 CHIPLED_0805 led             1 ok
+LED3     RED            LEDCHIPLED_0805 CHIPLED_0805 led             1 ok
+LED4     RED            LEDCHIPLED_0805 CHIPLED_0805 led             1 ok
+LED5     RED            LEDCHIPLED_0805 CHIPLED_0805 led             1 ok
+LED6     RED            LEDCHIPLED_0805 CHIPLED_0805 led             1 ok
+LED7     RED            LEDCHIPLED_0805 CHIPLED_0805 led             1 ok
+LED8     RED            LEDCHIPLED_0805 CHIPLED_0805 led             1 ok
+LED9     RED            LEDCHIPLED_0805 CHIPLED_0805 led             1 ok
+LED10    RED            LEDCHIPLED_0805 CHIPLED_0805 led             1 ok
+LED11    RED            LEDCHIPLED_0805 CHIPLED_0805 led             1 ok
+LED12    RED            LEDCHIPLED_0805 CHIPLED_0805 led             1 ok 12 mouser
+OK2      TLP283         TLP283          MINI-FLAT-4  optocoupler     1  ok
+R1       100            R-EU_R0603      R0603        resistor        1 ok
+R2       470            R-EU_R0603      R0603        resistor        1  ok
+R3       15             R-EU_0411/12    0411/12      resistor        1
+R4       3k3            R-EU_R0603      R0603        resistor        1    ok
+R5       100            R-EU_R0603      R0603        resistor        1 ok
+R6       470            R-EU_R0603      R0603        resistor        1  ok
+R7       15             R-EU_0411/12    0411/12      resistor        1
+R8       3k3            R-EU_R0603      R0603        resistor        1    ok
+R9       100            R-EU_R0603      R0603        resistor        1 ok
+R10      470            R-EU_R0603      R0603        resistor        1  ok
+R11      15             R-EU_0411/12    0411/12      resistor        1
+R12      3k3            R-EU_R0603      R0603        resistor        1    ok
+R13      100            R-EU_R0603      R0603        resistor        1 ok
+R14      470            R-EU_R0603      R0603        resistor        1  ok
+R15      15             R-EU_0411/12    0411/12      resistor        1
+R16      3k3            R-EU_R0603      R0603        resistor        1    ok
+R17      100            R-EU_R0603      R0603        resistor        1 ok
+R18      470            R-EU_R0603      R0603        resistor        1  ok
+R19      15             R-EU_0411/12    0411/12      resistor        1
+R20      3k3            R-EU_R0603      R0603        resistor        1    ok
+R21      100            R-EU_R0603      R0603        resistor        1 ok
+R22      470            R-EU_R0603      R0603        resistor        1  ok
+R23      15             R-EU_0411/12    0411/12      resistor        1
+R24      3k3            R-EU_R0603      R0603        resistor        1    ok
+R25      100            R-EU_R0603      R0603        resistor        1 ok
+R26      470            R-EU_R0603      R0603        resistor        1  ok
+R27      15             R-EU_0411/12    0411/12      resistor        1
+R28      3k3            R-EU_R0603      R0603        resistor        1    ok
+R29      100            R-EU_R0603      R0603        resistor        1 ok
+R30      470            R-EU_R0603      R0603        resistor        1  ok
+R31      15             R-EU_0411/12    0411/12      resistor        1
+R32      3k3            R-EU_R0603      R0603        resistor        1    ok
+R33      100            R-EU_R0603      R0603        resistor        1 ok
+R34      470            R-EU_R0603      R0603        resistor        1  ok
+R35      15             R-EU_0411/12    0411/12      resistor        1
+R36      3k3            R-EU_R0603      R0603        resistor        1    ok
+R37      100            R-EU_R0603      R0603        resistor        1 ok
+R38      470            R-EU_R0603      R0603        resistor        1  ok
+R39      15             R-EU_0411/12    0411/12      resistor        1
+R40      3k3            R-EU_R0603      R0603        resistor        1    ok
+R41      100            R-EU_R0603      R0603        resistor        1 ok
+R42      470            R-EU_R0603      R0603        resistor        1  ok
+R43      15             R-EU_0411/12    0411/12      resistor        1
+R44      3k3            R-EU_R0603      R0603        resistor        1    ok
+R45      100            R-EU_R0603      R0603        resistor        1 ok 12
+R46      470            R-EU_R0603      R0603        resistor        1  ok 12
+R47      15             R-EU_0411/12    0411/12      resistor        1
+R48      3k3            R-EU_R0603      R0603        resistor        1    ok 12
+R49      3k57           R-EU_R0603      R0603        resistor        1 ok (3k9)
+R50      3k57           R-EU_R0603      R0603        resistor        1 ok (3k9)
+R51      20             R-EU_R0603      R0603        resistor        1  ok
+R52      100k           R-EU_R0603      R0603        resistor        1 ok
+R57      1M             R-EU_R0603      R0603        resistor        1  ok
+R58      1M             R-EU_R0603      R0603        resistor        1  ok
+R59      1M             R-EU_R0603      R0603        resistor        1  ok
+R60      100k           R-EU_R0603      R0603        resistor        1 ok
+R61      100k           R-EU_R0603      R0603        resistor        1 ok
+T1       BSS308PE       SI2351DS        SOT23        icontroller     1  ok
+T1A      WIREPAD1,6/0,8 WIREPAD1,6/0,8  1,6/0,8      wirepad         1 -
+T1B      WIREPAD1,6/0,8 WIREPAD1,6/0,8  1,6/0,8      wirepad         1 -
+T2       BSS308PE       SI2351DS        SOT23        icontroller     1  ok
+T2A      WIREPAD1,6/0,8 WIREPAD1,6/0,8  1,6/0,8      wirepad         1 -
+T2B      WIREPAD1,6/0,8 WIREPAD1,6/0,8  1,6/0,8      wirepad         1 -
+T3       BSS308PE       SI2351DS        SOT23        icontroller     1  ok
+T4       BSS308PE       SI2351DS        SOT23        icontroller     1  ok
+T5       BSS308PE       SI2351DS        SOT23        icontroller     1  ok
+T6       BSS308PE       SI2351DS        SOT23        icontroller     1  ok
+T7       BSS308PE       SI2351DS        SOT23        icontroller     1  ok
+T8       BSS308PE       SI2351DS        SOT23        icontroller     1  ok
+T9       BSS308PE       SI2351DS        SOT23        icontroller     1  ok
+T10      BSS308PE       SI2351DS        SOT23        icontroller     1  ok
+T11      BSS308PE       SI2351DS        SOT23        icontroller     1  ok
+T12      BSS308PE       SI2351DS        SOT23        icontroller     1  ok 12
+T13      PMV30UN        FDN337N         SOT23        ltc6802         1 ok
+X2       11..12         233-503         233-503      con-wago        1 8 distrelec
+X3       1..10          233-510         233-510      con-wago        1 8 distrelec
