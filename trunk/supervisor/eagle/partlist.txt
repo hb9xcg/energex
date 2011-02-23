@@ -1,3 +1,9 @@
+Partlist
+
+Exported from supervisor.sch at 22.02.11 20:37
+
+EAGLE Version 5.11.0 Copyright (c) 1988-2010 CadSoft
+
 Part     Value          Device          Package      Library         Sheet
 
 C1       100n           C-EUC0603       C0603        resistor        1
@@ -125,6 +131,8 @@ R50      3k9            R-EU_R0603      R0603        resistor        1
 R51      20             R-EU_R0603      R0603        resistor        1
 R52      100k           R-EU_R0603      R0603        resistor        1
 R53      100k           R-EU_R0603      R0603        resistor        1
+R54      100k           R-EU_R0603      R0603        resistor        1
+R55      100k           R-EU_R0603      R0603        resistor        1
 R57      1M             R-EU_R0603      R0603        resistor        1
 R58      1M             R-EU_R0603      R0603        resistor        1
 R59      1M             R-EU_R0603      R0603        resistor        1
