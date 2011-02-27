@@ -174,6 +174,11 @@ void charge_reset(void)
 	charge_barrel_1mAh = 0;
 }
 
+void charge_start(void)
+{
+	charge_counter_1mAh = 0;
+}
+
 void charge_set_capacity(int16_t newCapacity)
 {
 	charge_counter_1mAh = newCapacity*10;
