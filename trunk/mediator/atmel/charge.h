@@ -38,6 +38,7 @@ void charge_sample(void);
 int16_t charge_get_capacity(void);
 void charge_set_capacity(int16_t newCapacity);
 void charge_reset(void);
+void charge_start(void);
 void charge_set_total_charge(uint16_t new_total);
 uint16_t charge_get_total_charge(void);
 void charge_set_total_discharge(uint16_t new_total);

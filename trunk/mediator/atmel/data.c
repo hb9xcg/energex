@@ -86,7 +86,7 @@ void data_save(void)
 	eeprom_busy_wait();
 	eeprom_write_word( &eeDischarged_Ah, charge_get_total_discharge() );
 	eeprom_busy_wait();
-	eeprom_write_word( &eeCharged_Ah, charge_get_total_discharge() );
+	eeprom_write_word( &eeCharged_Ah, charge_get_total_charge() );
 	eeprom_busy_wait();
 	eeprom_write_dword( &eeBarrel, charge_get_barrel());
 	eeprom_busy_wait();

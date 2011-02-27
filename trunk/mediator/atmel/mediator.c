@@ -218,7 +218,7 @@ int main(void)
 			if (eLastState==eReadyCharge)
 			{
 				mediator_update_statistics();
-				charge_reset(); // Reset Ah counter
+				charge_start(); // Reset Ah counter
 				battery_info_clear(BAT_EMPTY);
 			}
 		case 	eClosePCRelais: // CloseVRelais     Vorladerelais schliessen
