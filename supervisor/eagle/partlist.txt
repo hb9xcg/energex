@@ -1,6 +1,6 @@
 Partlist
 
-Exported from supervisor.sch at 22.02.11 20:37
+Exported from supervisor.sch at 28.02.11 23:37
 
 EAGLE Version 5.11.0 Copyright (c) 1988-2010 CadSoft
 
@@ -126,18 +126,18 @@ R45      100            R-EU_R0603      R0603        resistor        1
 R46      470            R-EU_R0603      R0603        resistor        1
 R47      15             R-EU_0411/12    0411/12      resistor        1
 R48      3k3            R-EU_R0603      R0603        resistor        1
-R49      3k9            R-EU_R0603      R0603        resistor        1
-R50      3k9            R-EU_R0603      R0603        resistor        1
+R49      3k9            R-EU_R0402      R0402        rcl             1
+R50      3k9            R-EU_R0402      R0402        rcl             1
 R51      20             R-EU_R0603      R0603        resistor        1
-R52      100k           R-EU_R0603      R0603        resistor        1
-R53      100k           R-EU_R0603      R0603        resistor        1
-R54      100k           R-EU_R0603      R0603        resistor        1
-R55      100k           R-EU_R0603      R0603        resistor        1
-R57      1M             R-EU_R0603      R0603        resistor        1
-R58      1M             R-EU_R0603      R0603        resistor        1
-R59      1M             R-EU_R0603      R0603        resistor        1
-R60      100k           R-EU_R0603      R0603        resistor        1
-R61      100k           R-EU_R0603      R0603        resistor        1
+R52      100k           R-EU_R0402      R0402        rcl             1
+R53      100k           R-EU_R0402      R0402        rcl             1
+R54      100k           R-EU_R0402      R0402        rcl             1
+R55      100k           R-EU_R0402      R0402        rcl             1
+R57      1M             R-EU_R0402      R0402        rcl             1
+R58      1M             R-EU_R0402      R0402        rcl             1
+R59      1M             R-EU_R0402      R0402        rcl             1
+R60      100k           R-EU_R0402      R0402        rcl             1
+R61      100k           R-EU_R0402      R0402        rcl             1
 T1       BSS308PE       SI2351DS        SOT23        icontroller     1
 T1A      WIREPAD1,6/0,8 WIREPAD1,6/0,8  1,6/0,8      wirepad         1
 T1B      WIREPAD1,6/0,8 WIREPAD1,6/0,8  1,6/0,8      wirepad         1
