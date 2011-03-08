@@ -1,0 +1,83 @@
+<project default="usage">
+	
+	<!--Import for junitpdf-->
+	<!--import file="./junitpdfreport/build-junitpdfreport.xml"/--> 
+	
+	<!--properties-->
+	<property name="bin" location="bin"/>
+	<property name="src" location="src"/>
+	<property name="manifest-classpath"
+		value="lib/qtjambi-4.4.0_01.jar lib/qtjambi-linux32-gcc-4.4.0_01.jar lib/RXTXcomm.jar"/>
+	<property name="manifest-mainclass"
+		value="energex.gui.TwikeAnalyzer"/>
+	<property name="tst-xml" location="./test/xml"/>
+	<property name="tst-html" location="./test/html"/>
+	<property name="TALK" value="true"/>
+	
+	<!--classpath to build-->
+	<path id="classpath.build">
+		<pathelement location="lib/qtjambi-4.4.0_01.jar"/>
+		<pathelement location="lib/qtjambi-linux32-gcc-4.4.0_01.jar"/>
+        <pathelement location="lib/RXTXcomm.jar"/>
+	</path>
+	
+	<!--target-clean-->
+	<target name="clean">
+		<delete includeemptydirs="true">
+			<fileset dir="${bin}" includes="**/*"/>
+			<fileset dir="${tst-xml}" includes="**/*"/>
+			<fileset dir="${tst-html}" includes="**/*"/>
+		</delete>
+		<delete file="QTwikeAnalyzer.zip"/>
+	</target>
+	
+	<!--build-target-->
+	<target name="build">
+		<javac srcdir="${src}" destdir="${bin}">
+			<classpath refid="classpath.build"/>
+		</javac>
+	</target>
+	
+	
+	<!--generate install zip-->
+	<target name="pack" >
+		<jar destfile="QTwikeAnalyzer.jar">
+			<manifest>
+				<attribute name="Built-By" value="${user.name}"/>
+				<attribute name="Main-Class" value="${manifest-mainclass}"/>
+				<attribute name="Class-Path" value="${manifest-classpath}"/>
+			</manifest>
+			<fileset dir="${bin}" excludes="**/CTest*.class,**/.svn*"/>
+		</jar>
+		<delete file="QTwikeAnalyzer.zip"/>
+		<zip destfile="QTwikeAnalyzer.zip">
+			<zipfileset dir="lib" prefix="twikeanalyzer/lib"  excludes="junit*"/>
+			<zipfileset dir="images" prefix="twikeanalyzer/images"/>
+			<zipfileset dir="." includes="QTwikeAnalyzer.jar" prefix="twikeanalyzer"/>
+		</zip>
+		<delete file="QTwikeAnalyzer.jar"/>
+	</target>
+	
+
+	<!--total target-->
+	<target name='all' depends='clean, build, pack'>
+		
+	</target>	
+	
+	<!-- usage -->
+	<target name="usage">
+	<echo>
+	usage of build environment for twikeanalyzer
+	---------------------------------------------
+
+	ant all		-make clean, build, test, report, doc and pack
+	
+	ant clean	-make the directories 'bin/' 'doc/' 'test/html' and 'test/xml' clean
+	
+	ant build	-compiles all '*.java'-files under 'src/' ant store the '*.class'-files in 'bin/'
+
+	ant pack	-make a zip-file (QTwikeAnalyzer.zip), for deployment the twikeanalyzer
+	</echo>
+	</target>
+	
+</project>
