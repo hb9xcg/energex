@@ -1,7 +1,7 @@
 /***************************************************************************
  *   Energex                                                               *
  *                                                                         *
- *   Copyright (C) 2008-2010 by Markus Walser                              *
+ *   Copyright (C) 2008-2011 by Markus Walser                              *
  *   markus.walser@gmail.com                                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -55,13 +55,15 @@
 #define STOWDC	0x70	// Start open wire A/D conversions and poll status,
 			// with discharge permitted.
 
+#define ADDRESS 0x80    // Base address for addressed commands.
+
 #define LTC_CS	(1<<PB4)	// 0x10 // Chip select
 #define LTC_SDI	(1<<PB6)	// 0x05	// LTC6802 -> ATMega
 #define LTC_SDO	(1<<PB5) 	// 0x06 // ATMega  -> LTC6802 
 #define LTC_CLK	(1<<PB7) 	// 0x07 // Clock
 
-//#define DEBUG
-#if 0
+#define DEBUG(str)  uart_write((uint8_t*)(str), sizeof(str) );
+#if 0 
     #include <string.h>
     #include <stdlib.h> 
     #include "uart.h"
@@ -178,20 +180,23 @@ void ltc_chip_select(uint8 state)
 void ltc_write_config()
 {
 	int8_t block;
-	ltc_chip_select(TRUE);
+	uint8_t address = ADDRESS;
 
-	spi_master_transmit(WRCFG);
-
-	for (block=LTC_STACK_SIZE-1; block>=0; block--)
+	for (block=0; block<LTC_STACK_SIZE; block++)
 	{
+		ltc_chip_select(TRUE);
+		spi_master_transmit(address++);
+		spi_master_transmit(WRCFG);
+
 		ltc_config_t* config = &ltc_config[block];
 		for (uint8 i=0; i<sizeof(ltc_config_t); i++)
 		{
 			spi_master_transmit(config->cfgr[i]);
 		}
+		ltc_chip_select(FALSE);
+		_delay_loop_2(16); // 4us
 	}
 
-	ltc_chip_select(FALSE);
 }
 
 void ltc_start_voltage_conversion(void)
@@ -204,15 +209,20 @@ void ltc_start_voltage_conversion(void)
 void ltc_read_voltage(void)
 {
 	ltc_crv_t new_value;
+	uint8_t address = ADDRESS;
 
-	ltc_chip_select(TRUE);
-	spi_master_transmit(RDCV);
+	io_clear_red_led();
+
 	for (uint8_t block=0; block<LTC_STACK_SIZE; block++)
 	{
+		ltc_chip_select(TRUE);
+		spi_master_transmit(address++);
+		spi_master_transmit(RDCV);
+
 		ltc_bytes_ok += sizeof(ltc_crv_t);
 		for (uint8_t idx=0; idx<sizeof(ltc_crv_t); idx++)
 		{
-			new_value.crv[idx] = spi_master_receive();;
+			new_value.crv[idx] = spi_master_receive();
 		}
 		uint8_t pec = spi_master_receive();
 		uint8_t crc = ltc_crc(new_value.crv, sizeof(ltc_crv_t));
@@ -225,10 +235,13 @@ void ltc_read_voltage(void)
 		else
 		{
 			ltc_bytes_bad += sizeof(ltc_crv_t);
+			io_set_red_led();
 		}
+		ltc_chip_select(FALSE);
+		_delay_loop_2(16); // 4us
 	}
-	ltc_chip_select(FALSE);
 	ltc_calc_ber();
+
 }
 
 void ltc_start_temperature_conversion(void)
@@ -241,11 +254,17 @@ void ltc_start_temperature_conversion(void)
 void ltc_read_temperature()
 {
 	ltc_tmpr_t new_value;
+	uint8_t address = ADDRESS;
+	
+	io_clear_red_led();
 
-	ltc_chip_select(TRUE);
-	spi_master_transmit(RDTMP);
 	for (uint8_t block=0; block<LTC_STACK_SIZE; block++)
 	{
+		ltc_chip_select(TRUE);
+
+		spi_master_transmit(address++);
+		spi_master_transmit(RDTMP);
+
 		ltc_bytes_ok += sizeof(ltc_tmpr_t);
 		for (uint8_t idx=0; idx<sizeof(ltc_tmpr_t); idx++)
 		{
@@ -262,9 +281,11 @@ void ltc_read_temperature()
 		else
 		{
 			ltc_bytes_bad += sizeof(ltc_tmpr_t);
+			io_set_red_led();
 		}
+		ltc_chip_select(FALSE);
+		_delay_loop_2(16); // 4us
 	}
-	ltc_chip_select(FALSE);
 	ltc_calc_ber();
 }
 
@@ -679,14 +700,13 @@ uint8_t ltc_poll_adc(uint8_t ms)
 void ltc_update_data()
 {
 	uint8_t ret;
+
 	ltc_start_temperature_conversion();
 	ret = ltc_poll_adc(100);
 	if (ret == LTC_POLL_ADC)
 	{
 		ltc_read_temperature();
 	}
-
-	delay(30);
 
 	ltc_start_voltage_conversion();
 	ret = ltc_poll_adc(100);
