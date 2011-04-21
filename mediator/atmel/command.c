@@ -1,7 +1,7 @@
 /***************************************************************************
  *   Energex                                                               *
  *                                                                         *
- *   Copyright (C) 2008-2009 by Markus Walser                              *
+ *   Copyright (C) 2008-2011 by Markus Walser                              *
  *   markus.walser@gmail.com                                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -99,6 +99,7 @@ static void cmd_load(void);
 static void cmd_date(void);
 static void cmd_alpha(const char* cmd);
 static void cmd_welcome(void);
+static void cmd_binfo(void);
 
 static void cmd_print_signed_float(int16_t value);
 static void cmd_print_unsigned_float(uint16_t value);
@@ -291,6 +292,9 @@ void cmd_process( const char* cmd )
 			eMode = eTwike;
 			mediator_force_busy(0);
 		break;
+		case 'B':
+			cmd_binfo();
+		break;
 		case '?':
 			cmd_help();
 		break;
@@ -305,6 +309,12 @@ void cmd_help(void)
 	strcpy_P(cmd_line, PSTR("\n\rAvailable commands:\n\r"));
 	cmd_flush();
 	strcpy_P(cmd_line, PSTR("b:\tReboot\n\r"));
+	cmd_flush();
+	strcpy_P(cmd_line, PSTR("B:\tBattery info\n\r"));
+	cmd_flush();
+	strcpy_P(cmd_line, PSTR("c:\tCell voltages\n\r"));
+	cmd_flush();
+	strcpy_P(cmd_line, PSTR("d:\tDate and time\n\r"));
 	cmd_flush();
 	strcpy_P(cmd_line, PSTR("i:\tCurrent\n\r"));
 	cmd_flush();
@@ -696,6 +706,9 @@ void cmd_stack_memory(void)
 void cmd_flash(void)
 {
 #ifdef BALANCER
+	balancer_set_state(BALANCER_OFF);
+	os_thread_sleep(750);
+
 	for (uint8_t flash=0; flash<12; flash++)
 	{
 		for (uint8_t i=0; i<BALANCER_NBR_OF_CELLS; i++)
@@ -715,6 +728,7 @@ void cmd_flash(void)
 		ltc_write_config();
 		os_thread_sleep(500);
 	}
+	balancer_set_state(BALANCER_SURVEILLANCE);
 #endif
 	strcpy_P(cmd_line, PSTR("finished"));
 }
@@ -778,15 +792,18 @@ void cmd_cell(void)
 void cmd_supervisor_temperature()
 {
 	uint8_t i;
-	int16_t tempA, tempB;
+	int16_t tempA=0, tempB=0;
 	
 	sprintf_P(cmd_line, PSTR(" Sensor | Block A | Block B\r\n"));
 	cmd_flush();
 
-	for (i=0; i<LTC_STACK_SIZE; i++)
+	for (i=0; i<LTC_STACK_SIZE<<1; i++)
 	{
 		tempA = ltc_get_external_temperature(i);
-		tempB = ltc_get_external_temperature(i+(LTC_STACK_SIZE>>1));
+		if (i+(LTC_STACK_SIZE>>1)+1 < LTC_STACK_SIZE)
+		{
+		    tempB = ltc_get_external_temperature(i+(LTC_STACK_SIZE>>1));
+		}
 		sprintf_P(cmd_line, PSTR("%7d | %4d.%02d | %4d.%02d\r\n"), 
 				i, tempA/100, tempA%100, tempB/100, tempB%100);
 		cmd_flush();
@@ -858,6 +875,92 @@ void cmd_date(void)
 	ds1307_read_time(&time);
 
 	ds1307_decode_time(&time, cmd_line);
+}
+
+void cmd_binfo(void)
+{
+	strcpy_P(cmd_line, PSTR("\n\rBattery info:\n\r"));
+
+	if (battery_info_get(REKUPERATION_NOK))
+	{
+		cmd_flush();
+		strcpy_P(cmd_line, PSTR("Rekuperation nicht erlaubt\n\r"));
+	}
+	if (battery_info_get(CHARGE_NOK))
+	{
+		cmd_flush();
+		strcpy_P(cmd_line, PSTR("Ladung nicht erlaubt\n\r"));
+	}
+	if (battery_info_get(DRIVE_NOK))
+	{
+		cmd_flush();
+		strcpy_P(cmd_line, PSTR("Fahren nicht erlaubt\n\r"));
+	}
+	if (battery_info_get(CHARGE_CUR_TO_HI))
+	{
+		cmd_flush();
+		strcpy_P(cmd_line, PSTR("Zu hoher Ladestrom\n\r"));
+	}
+	if (battery_info_get(DRIVE_CUR_TO_HI))
+	{
+		cmd_flush();
+		strcpy_P(cmd_line, PSTR("Zu hoher Fahrstrom\n\r"));
+	}
+	if (battery_info_get(VOLTAGE_TO_HI))
+	{
+		cmd_flush();
+		strcpy_P(cmd_line, PSTR("Zu hohe Ladespannung\n\r"));
+	}
+	if (battery_info_get(VOLTAGE_TO_LO))
+	{
+		cmd_flush();
+		strcpy_P(cmd_line, PSTR("Zu tiefe Fahrspannung\n\r"));
+	}
+	if (battery_info_get(BAT_REL_OPEN))
+	{
+		cmd_flush();
+		strcpy_P(cmd_line, PSTR("Batterie Relais offen\n\r"));
+	}
+	if (battery_info_get(BAT_FULL))
+	{
+		cmd_flush();
+		strcpy_P(cmd_line, PSTR("Batterie voll\n\r"));
+	}
+	if (battery_info_get(BAT_EMPTY))
+	{
+		cmd_flush();
+		strcpy_P(cmd_line, PSTR("Batterie entladen\n\r"));
+	}
+	if (battery_info_get(CHARGE_TEMP_TO_HI))
+	{
+		cmd_flush();
+		strcpy_P(cmd_line, PSTR("Zu hohe Ladetemperatur\n\r"));
+	}
+	if (battery_info_get(CHARGE_TEMP_TO_LO))
+	{
+		cmd_flush();
+		strcpy_P(cmd_line, PSTR("Zu tiefe Ladetemperatur\n\r"));
+	}
+	if (battery_info_get(DRIVE_TEMP_TO_HI))
+	{
+		cmd_flush();
+		strcpy_P(cmd_line, PSTR("Zu hohe Fahrtemperatur\n\r"));
+	}
+	if (battery_info_get(DRIVE_TEMP_TO_LO))
+	{
+		cmd_flush();
+		strcpy_P(cmd_line, PSTR("Zu tiefe Fahrtemperatur\n\r"));
+	}
+	if (battery_info_get(VOLTAGE_NOK))
+	{
+		cmd_flush();
+		strcpy_P(cmd_line, PSTR("Unsymmetrische Spannungen\n\r"));
+	}
+	if (battery_info_get(BAT_ERROR))
+	{
+		cmd_flush();
+		strcpy_P(cmd_line, PSTR("Fehler in der Batterieüberwachung\n\r"));
+	}
 }
 
 void cmd_print_signed_float(int16_t value)
