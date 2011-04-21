@@ -1,7 +1,7 @@
 /*
  * Energex
  * 
- * Copyright (C) 2008-2010 by Markus Walser
+ * Copyright (C) 2008-2011 by Markus Walser
  * markus.walser@gmail.com
  * 
  * This program is free software; you can redistribute it
@@ -132,7 +132,6 @@ void balancer_loop(void)
 
 		case BALANCER_SURVEILLANCE:
 		{
-			delay(500);
 			eDriveState = mediator_get_drive_state();
 			current = charge_get_current();
 			if (abs(current) > 50 || 
@@ -193,28 +192,21 @@ void balancer_twike_report(void)
 	battery_set_parameter_value(BATTERIE_TEMP, BATTERY_2, avg);
 	battery_set_parameter_value(BATTERIE_TEMP, BATTERY_3, max);
 }
-#if 0
+#if 1
 void balancer_check_voltage(void)
 {
-	static uint8_t errors;
 	switch (ltc_poll_interrupt(500))
 	{
 		case LTC_POLL_INTERRUPT:
-			errors=0;
 			// Under voltage or over voltage condition!
 			mediator_cell_limit_reached();
 			break;
 
 		case LTC_POLL_DISCONNECTED:
-			errors++;
-			if (errors>100)
-			{
-				error(ERROR_CABLE_BREAK);
-			}
+			error(ERROR_CABLE_BREAK);
 			break;
 
 		default: 
-			errors=0;
 			mediator_cell_limit_ok();
 	}
 }
