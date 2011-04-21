@@ -1,7 +1,7 @@
 /***************************************************************************
  *   Energex                                                               *
  *                                                                         *
- *   Copyright (C) 2008-2010 by Markus Walser                              *
+ *   Copyright (C) 2008-2011 by Markus Walser                              *
  *   markus.walser@gmail.com                                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -135,8 +135,8 @@ int main(void)
 
 	uart_init();
 
-	spi_speed_t speed = SPI_SPEED_125KHZ;
-//	spi_speed_t speed = SPI_SPEED_250KHZ;
+//	spi_speed_t speed = SPI_SPEED_125KHZ;
+	spi_speed_t speed = SPI_SPEED_250KHZ;
 //	spi_speed_t speed = SPI_SPEED_1MHZ;
 	spi_master_init(speed);
 	
@@ -176,6 +176,7 @@ int main(void)
 
 	i2c_init(100000); // 100kHz Speed
 
+	ltc_init();
 	ltc_update_data();
 	mediator_calibrate_gauge();
 
