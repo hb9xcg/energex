@@ -1,6 +1,15 @@
 /*
  * Energex
  * 
+ * Copyright (C) 2008-2011 by Markus Walser
+ * markus.walser@gmail.com
+ *
+ * Copyright (C) 2005-2007 by Benjamin Benz
+ * bbe@heise.de
+ *
+ * Copyright (C) 2005-2007 by Timo Sandmann
+ * mail@timosandmann.de
+ *
  * This program is free software; you can redistribute it
  * and/or modify it under the terms of the GNU General
  * Public License as published by the Free Software
@@ -211,3 +220,16 @@ void uart_send_twike(const uint8_t* data, uint8_t length)
 	PORTB &= ~TRANSMIT_ENABLE;
 	UCSRB |= (1 << RXEN);
 }
+	
+/*!
+ * @brief	Wartet, bis die Uebertragung fertig ist.
+ */
+void uart_flush(void)
+{
+	while (UCSRB & (1 << UDRIE))
+	{
+		// Sending one byte with 1200bd takes about 8ms.
+		os_thread_sleep(20);
+	}
+}
+
