@@ -1,6 +1,12 @@
 /*
  * Energex
  * 
+ * Copyright (C) 2008-2011 by Markus Walser
+ * markus.walser@gmail.com
+ *
+ * Copyright (C) 2005-2007 by Benjamin Benz
+ * bbe@heise.de
+ *
  * This program is free software; you can redistribute it
  * and/or modify it under the terms of the GNU General
  * Public License as published by the Free Software
@@ -99,9 +105,7 @@
 	/*!
 	 * @brief	Wartet, bis die Uebertragung fertig ist.
 	 */
-	static inline void uart_flush(void){
-		while (UCSRB & (1 << UDRIE));
-	}
+	void uart_flush(void);
 	
 	extern fifo_t infifo;	/*!< FIFO fuer Empfangspuffer */
 	
