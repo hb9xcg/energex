@@ -44,6 +44,8 @@ void fatal(uint8_t code)
 
 void error(uint8_t code)
 {
+	battery_info_set(BAT_ERROR);
+
 	for (;;)
 	{
 		io_set_red_led();
