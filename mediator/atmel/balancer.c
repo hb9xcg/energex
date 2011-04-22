@@ -99,8 +99,6 @@ void balancer_set_state(uint8_t on)
 void balancer_loop(void)
 {
 	static uint8_t counter;
-	EDriveState eDriveState;
-	int16_t current;
 
 	ltc_init();
 	
@@ -125,25 +123,16 @@ void balancer_loop(void)
 		
 			balancer_switch_load();
 			
-			
 			balancer_check_voltage();
 			break;
 		}
 
 		case BALANCER_SURVEILLANCE:
 		{
-			eDriveState = mediator_get_drive_state();
-			current = charge_get_current();
-			if (abs(current) > 50 || 
-			    eDriveState == eICharge || 
-			    eDriveState == eUCharge )
-			{
-				// Avoid EMI problems for now
-				break;
-			}
+			io_toggle_green_led();
+
 			ltc_update_data();
 			balancer_twike_report();
-			io_toggle_green_led();
 
 			if (counter != 0)
 			{
@@ -151,6 +140,7 @@ void balancer_loop(void)
 				io_clear_green_led();
 				balancer_all_off();
 			}
+
 			balancer_check_voltage();
 			break;
 		}

@@ -60,6 +60,7 @@
 #define V_REF          2500UL     // [mV]
 #define ADC_RESOLUTION 10
 
+#define ON_ENTER(state) ((state) == eDriveState && (state) != eLastState)
 
 typedef enum
 {
@@ -203,7 +204,7 @@ int main(void)
 		case 	eBreakDown: // BreakDown        Fehler des Umrichters 
 			break;
 		case 	eDrive: // Drive            Fahren
-			if (eLastState!=eDrive)
+			if (ON_ENTER(eDrive))
 			{
 				if (battery_info_get(BAT_FULL) ||
 				    charge_get_capacity() > 2500)
@@ -216,7 +217,7 @@ int main(void)
 		case 	eReadyCharge: // ReadyCharge      warten auf Netzspannung
 			break;
 		case 	ePreCharge: // PreCharge        Vorladung
-			if (eLastState==eReadyCharge)
+			if (ON_ENTER(eReadyCharge))
 			{
 				mediator_update_statistics();
 				charge_start(); // Reset Ah counter
@@ -228,11 +229,9 @@ int main(void)
 		case 	eICharge: // ICharge          I-Ladung
 			mediator_check_max_cell_voltage();
 		case 	eUCharge: // UCharge          U-Ladung
-			if (eDriveState == eUCharge &&
-			     eLastState != eUCharge)
+			if (ON_ENTER(eUCharge))
 			{
-// TODO Remove comment
-//				balancer_set_state(BALANCER_ACTIVE);
+				balancer_set_state(BALANCER_ACTIVE);
 			}
 			mediator_check_end_of_charge();
 			mediator_check_capacity();
@@ -354,7 +353,7 @@ void mediator_check_liveness()
 		data_save();
 		balancer_set_state(BALANCER_STANDBY);
 		ePowerSoll = ePowerOff;
-		wdt_enable(WDTO_4S); // reboot into 'wait for power'. 
+		wdt_enable(WDTO_8S); // reboot into 'wait for power'. 
 		io_clear_red_led();
 	}
 	else if (mediator_alive != eForced)
@@ -454,13 +453,12 @@ void mediator_check_current()
 {
 	int16_t current = charge_get_current();
 
-	if (current > 280) // > 2.8A charge current
+	if (current > 2000) // > 20A charge current
 	{
-//		battery_info_set(CHARGE_CUR_TO_HI);
-		battery_info_clear(CHARGE_CUR_TO_HI);
+		battery_info_set(CHARGE_CUR_TO_HI);
 		battery_info_clear(DRIVE_CUR_TO_HI);
 	}
-	else if (current > -20*A) //  1A...-10A discharge current
+	else if (current > -20*A) //  < 20A discharge current
 	{
 		battery_info_clear(CHARGE_CUR_TO_HI);
 		battery_info_clear(DRIVE_CUR_TO_HI);
@@ -476,7 +474,7 @@ void mediator_check_capacity()
 {
 	int16_t charge = charge_get_capacity();
 
-	if (charge > 26*Ah) // > 26Ah capacity
+	if (charge > 25*Ah) // > 25Ah capacity
 	{
 		battery_info_set(BAT_FULL);
 	}
@@ -486,8 +484,7 @@ void mediator_check_max_cell_voltage(void)
 {
 	if (battery_info_get(CHARGE_CUR_TO_HI))
 	{
-// TODO Remove comment
-//		balancer_set_state(BALANCER_ACTIVE);
+		balancer_set_state(BALANCER_ACTIVE);
 	}
 }
 

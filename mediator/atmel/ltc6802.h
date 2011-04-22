@@ -33,7 +33,7 @@
  */
 
 
-#define LTC_STACK_SIZE 4
+#define LTC_STACK_SIZE 8
 
 typedef union 
 {
