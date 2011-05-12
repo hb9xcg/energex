@@ -88,6 +88,7 @@ EPowerState ePowerIst;
 int16 mediator_temperature;
 ELiveness mediator_alive = eAlive;
 static uint8_t mediator_stop;
+static uint8_t mediator_quick_charge;
 
 static void wait_for_power(void);
 static void mediator_check_liveness(void);
@@ -135,6 +136,7 @@ int main(void)
 	delay(100);
 
 	uart_init();
+	
 
 //	spi_speed_t speed = SPI_SPEED_125KHZ;
 	spi_speed_t speed = SPI_SPEED_250KHZ;
@@ -206,6 +208,8 @@ int main(void)
 		case 	eDrive: // Drive            Fahren
 			if (ON_ENTER(eDrive))
 			{
+				balancer_enable_fan = 0;
+				balancer_set_state(BALANCER_SURVEILLANCE);
 				if (battery_info_get(BAT_FULL) ||
 				    charge_get_capacity() > 2500)
 				{
@@ -215,26 +219,40 @@ int main(void)
 			}	
 			break;
 		case 	eReadyCharge: // ReadyCharge      warten auf Netzspannung
-			break;
-		case 	ePreCharge: // PreCharge        Vorladung
 			if (ON_ENTER(eReadyCharge))
 			{
+				if (battery_info_get(BAT_FULL))
+				{
+					io_raise_emergency();
+				}
+				else
+				{
+					// enabling fans works before start of charge only :-(
+					balancer_enable_fan = 1; 
+					mediator_quick_charge = 1;
+				}
+				balancer_set_state(BALANCER_SURVEILLANCE);
+			}
+			break;
+		case 	ePreCharge: // PreCharge        Vorladung
+			if (ON_ENTER(ePreCharge))
+			{
 				mediator_update_statistics();
-				charge_start(); // Reset Ah counter
+			//	charge_start(); // Reset Ah counter
 				battery_info_clear(BAT_EMPTY);
 			}
 		case 	eClosePCRelais: // CloseVRelais     Vorladerelais schliessen
 			ePowerSoll = ePowerFull;
 			break;
 		case 	eICharge: // ICharge          I-Ladung
+			mediator_check_charge_voltage();
 			mediator_check_max_cell_voltage();
+			break;
 		case 	eUCharge: // UCharge          U-Ladung
-			if (ON_ENTER(eUCharge))
-			{
-				balancer_set_state(BALANCER_ACTIVE);
-			}
+			mediator_check_charge_voltage();
 			mediator_check_end_of_charge();
 			mediator_check_capacity();
+			balancer_enable_fan = 1;
 			break; 
 		case 	eOpenBatRelais: // OpenBRelais      Batterierelais öffnen
 			ePowerSoll = ePowerSave;	// can we open the relais while waiting for power?
@@ -247,7 +265,16 @@ int main(void)
 			ePowerSoll = ePowerFull;
 			break;
 		case 	eSymCharge: // SymmCharge       Symmetrierladung
+			if (ON_ENTER(eSymCharge))
+			{
+				balancer_set_state(BALANCER_ACTIVE);
+			}
+			break;
 		case 	eTrickleCharge: // TrickleCharge    Erhaltungsladung
+			// Also cooling state in normal charge
+			balancer_enable_fan = 0;
+			mediator_quick_charge = 0;
+			break;
 		case 	eTrickleWait: // TrickleWait      Pause
 		case 	eUnknown17: // (?)              (möglicherweise Erhaltungsladung einzelner Blöcke?)
 		case 	eUnknown18: // (?)              (möglicherweise Erhaltungsladung einzelner Blöcke?)
@@ -270,7 +297,11 @@ int main(void)
 
 void wait_for_power()
 {
-	while (!uart_data_available());            // Wait until Twike DC/DC converter delivers power.
+	while (!uart_data_available())
+	{
+		mediator_debounce_stop();
+		delay(100);
+	}
 }
 
 void mediator_check_binfo(void)
@@ -295,8 +326,6 @@ void mediator_check_binfo(void)
 		case	eTrickleWait:		// TrickleWait      Pause
 			mediator_check_min_charge_temperature();
 			mediator_check_max_charge_temperature();
-			mediator_check_charge_voltage();
-			mediator_check_current();
 			break;
 		case 	eSymCharge:		// SymmCharge       Symmetrierladung
 			mediator_limit_sym_current();
@@ -312,7 +341,7 @@ void mediator_calibrate_gauge(void)
 	
 	ltc_get_voltage_min_avg_max(&min, &avg, &max);
 	
-	// Calculate initial capacity base on lowest cell voltage
+	// Calculate initial capacity based on the lowest cell voltage
 	capacity = gauge_get_capacity(ltc_adc_voltage(min));
 	charge_set_capacity(capacity);
 	
@@ -353,7 +382,7 @@ void mediator_check_liveness()
 		data_save();
 		balancer_set_state(BALANCER_STANDBY);
 		ePowerSoll = ePowerOff;
-		wdt_enable(WDTO_8S); // reboot into 'wait for power'. 
+		wdt_enable(WDTO_4S); // reboot into 'wait for power'. 
 		io_clear_red_led();
 	}
 	else if (mediator_alive != eForced)
@@ -382,6 +411,8 @@ void mediator_check_power()
 		}
 		else
 		{
+			io_raise_emergency();              // shutdown converter
+			os_thread_sleep(500);              // wait for shutdown of converter
 			battery_info_set(BAT_REL_OPEN);    // Atomic update of battery info
 			io_open_relais();                  // Switch Relais off
 			os_thread_sleep(500);              // Relais spark quenching
@@ -398,7 +429,7 @@ void mediator_check_drive_voltage()
 
 	if (voltage < 326*V)
 	{
-		ePowerSoll = ePowerOff;
+//		ePowerSoll = ePowerOff;
 	}
 	else if (voltage < 336*V)
 	{
@@ -406,7 +437,7 @@ void mediator_check_drive_voltage()
 		battery_info_set(VOLTAGE_TO_LO);
 		battery_info_clear(VOLTAGE_TO_HI);
 	}
-	else if (voltage < 375*V)
+	else if (voltage < 394*V)
 	{
 		battery_info_clear(VOLTAGE_TO_LO);
 		battery_info_clear(VOLTAGE_TO_HI);
@@ -424,7 +455,7 @@ void mediator_check_deep_discharge()
 
 	if (voltage < 326*V)
 	{
-		ePowerSoll = ePowerOff;
+//		ePowerSoll = ePowerOff;
 	}
 }
 
@@ -437,7 +468,12 @@ void mediator_check_charge_voltage()
 		battery_info_set(VOLTAGE_TO_LO);
 		battery_info_clear(VOLTAGE_TO_HI);
 	}
-	else if (voltage < 375*V)
+	else if (voltage < 375*V && mediator_quick_charge == 0)
+	{
+		battery_info_clear(VOLTAGE_TO_LO);
+		battery_info_clear(VOLTAGE_TO_HI);
+	}
+	else if (voltage < 384*V && mediator_quick_charge == 1)
 	{
 		battery_info_clear(VOLTAGE_TO_LO);
 		battery_info_clear(VOLTAGE_TO_HI);
@@ -482,9 +518,10 @@ void mediator_check_capacity()
 
 void mediator_check_max_cell_voltage(void)
 {
+	// CHARGE_CUR_TO_HI will be set by mediator_cell_limit_reached()
 	if (battery_info_get(CHARGE_CUR_TO_HI))
 	{
-		balancer_set_state(BALANCER_ACTIVE);
+		battery_info_set(VOLTAGE_TO_HI);
 	}
 }
 
@@ -492,7 +529,7 @@ void mediator_limit_sym_current()
 {
 	int16_t current = charge_get_current();
 
-	if (current > 28) // > 280mA
+	if (current > 28)      // > 280mA
 	{
 		battery_info_set(CHARGE_CUR_TO_HI);
 	}
@@ -586,7 +623,7 @@ int16_t mediator_get_temperature(void)
 void mediator_check_end_of_charge()
 {
 	if ( eDriveState == eUCharge &&
-	     charge_get_current() < 125)
+	     charge_get_current() < 250)
 	{
 		battery_info_set(BAT_FULL);
 	}
@@ -647,6 +684,10 @@ void mediator_cell_limit_reached(void)
 	else
 	{
 		battery_info_set(CHARGE_CUR_TO_HI);
+		if (eDriveState == eSymCharge)
+		{
+			battery_info_set(CHARGE_NOK);
+		}
 	}
 }
 
@@ -654,7 +695,10 @@ void mediator_cell_limit_ok(void)
 {
 	if (eDriveState!=eDrive)
 	{
-		battery_info_clear(CHARGE_CUR_TO_HI);
+		if (!battery_info_get(VOLTAGE_TO_HI))
+		{
+			battery_info_clear(CHARGE_CUR_TO_HI);
+		}
 	}
 }
 
@@ -695,15 +739,24 @@ void mediator_stop_released(void)
 
 void mediator_stop_pressed(void)
 {
-	io_set_red_led();
-	data_save();
-	io_clear_red_led();
-	
-	io_raise_emergency();
+	if (mediator_get_drive_state() != eConverterOff)
+	{
+		io_set_red_led();
+		data_save();
+		io_clear_red_led();
+		
+		io_raise_emergency();
 
-	ePowerSoll = ePowerSave;
-	io_disable_interface_power();
-	
-	mediator_set_drive_state(eConverterOff);
+		balancer_set_state(BALANCER_STANDBY);
+		ePowerSoll = ePowerSave;
+		os_thread_sleep(500);
+		io_disable_interface_power();
+		
+		mediator_set_drive_state(eConverterOff);
+	}
+	else
+	{
+		io_release_emergency();
+	}
 }
 

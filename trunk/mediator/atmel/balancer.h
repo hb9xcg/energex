@@ -1,7 +1,7 @@
 /***************************************************************************
  *   Energex                                                               *
  *                                                                         *
- *   Copyright (C) 2008-2010 by Markus Walser                              *
+ *   Copyright (C) 2008-2011 by Markus Walser                              *
  *   markus.walser@gmail.com                                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -43,6 +43,7 @@ extern void balancer_set_state(uint8_t state);
 extern void balance_sample(void);
 extern uint16_t balancer_get_max_stack_usage(void);
 extern void balancer_dump(void);
+extern int8_t balancer_enable_fan;
 
 
 #endif

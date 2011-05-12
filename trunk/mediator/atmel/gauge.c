@@ -1,7 +1,7 @@
 /***************************************************************************
  *   Energex                                                               *
  *                                                                         *
- *   Copyright (C) 2008-2010 by Markus Walser                              *
+ *   Copyright (C) 2008-2011 by Markus Walser                              *
  *   markus.walser@gmail.com                                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -33,19 +33,20 @@
 
 #define COUNT_OF(A) (sizeof(A)/sizeof(A[0]))
 
+// off-load voltage
 prog_uint16_t gauge_table[] =
 {
-   4170,  // 25.0Ah  0
-   4000,  // 22.5Ah  1
-   3880,  // 20.0Ah  2
-   3790,  // 17.5Ah  3
-   3700,  // 15.0Ah  4
-   3660,  // 12.5Ah  5
-   3600,  // 10.0Ah  6
-   3570,  //  7.5Ah  7
-   3520,  //  5.0Ah  8
-   3460,  //  2.5Ah  9
-   3200,  //  0.0Ah  10
+   4170,  // 25.0Ah  0  100%
+   4000,  // 22.5Ah  1   90%
+   3880,  // 20.0Ah  2   80%
+   3790,  // 17.5Ah  3   70%
+   3700,  // 15.0Ah  4   60%
+   3660,  // 12.5Ah  5   50%
+   3600,  // 10.0Ah  6   40%
+   3570,  //  7.5Ah  7   30%
+   3520,  //  5.0Ah  8   20%
+   3460,  //  2.5Ah  9   10%
+   3200,  //  0.0Ah  10   0%
 };
 
 static int16_t gauge_read_table(uint8_t idx);

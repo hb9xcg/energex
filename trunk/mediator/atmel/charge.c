@@ -1,7 +1,7 @@
 /***************************************************************************
  *   Energex                                                               *
  *                                                                         *
- *   Copyright (C) 2008-2010 by Markus Walser                              *
+ *   Copyright (C) 2008-2011 by Markus Walser                              *
  *   markus.walser@gmail.com                                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -117,7 +117,7 @@ void charge_subsample(const int16_t sample)
 
 	charge_barrel_1mAh += charge_current;
 
-	if (charge_barrel_1mAh>= BARREL)
+	if (charge_barrel_1mAh >= BARREL)
 	{
 		charge_barrel_1mAh -= BARREL;
 		charge_counter_1mAh++;
