@@ -1,7 +1,7 @@
 /*
  * Energex
  * 
- * Copyright (C) 2008-2010 by Markus Walser
+ * Copyright (C) 2008-2011 by Markus Walser
  * markus.walser@gmail.com
  *
  * This program is free software; you can redistribute it
@@ -100,7 +100,8 @@ void io_disable_interface_power(void)
 
 void io_enable_igbt(void)
 {
-	PORTB |= (uint8_t)(1<<IGBT);
+// 	ATMega port is defect.
+//	PORTB |= (uint8_t)(1<<IGBT);
 }
 
 void io_disable_igbt(void)

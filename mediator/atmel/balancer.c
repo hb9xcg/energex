@@ -68,6 +68,7 @@ static void balancer_switch_load(void);
 static void balancer_all_off(void);
 static void balancer_check_voltage(void);
 static void balancer_twike_report(void);
+int8_t balancer_enable_fan;
 
 
 void balancer_init(void)
@@ -171,7 +172,8 @@ void balancer_twike_report(void)
 
 	ltc_get_temperature_min_avg_max(&min, &avg, &max);
 
-	if (balancer_state==BALANCER_ACTIVE)
+	if (balancer_state==BALANCER_ACTIVE ||
+	    balancer_enable_fan)
 	{
 		// Report 35°C temperature to switch on fan of battery 1 and 3:
 		min = 3500;
@@ -182,7 +184,7 @@ void balancer_twike_report(void)
 	battery_set_parameter_value(BATTERIE_TEMP, BATTERY_2, avg);
 	battery_set_parameter_value(BATTERIE_TEMP, BATTERY_3, max);
 }
-#if 1
+
 void balancer_check_voltage(void)
 {
 	switch (ltc_poll_interrupt(500))
@@ -193,49 +195,20 @@ void balancer_check_voltage(void)
 			break;
 
 		case LTC_POLL_DISCONNECTED:
-			error(ERROR_CABLE_BREAK);
+			// In the moment of connecting the 230V line voltage
+			// there may be a short glitch in the wire check.
+			if (mediator_get_drive_state() != eReadyCharge)
+			{	
+				battery_info_set(CHARGE_NOK);
+				error(ERROR_CABLE_BREAK);
+			}
 			break;
 
 		default: 
 			mediator_cell_limit_ok();
 	}
 }
-#else
-void balancer_check_voltage(void)
-{
-	uint16_t u;
 
-	switch(balancer_state)
-	{
-	case BALANCER_SURVEILLANCE:
-		u = ltc_get_min_voltage();
-		if (u < 3500)
-		{
-// TODO 21.12.2010 Uncomment me
-//			mediator_cell_limit_reached();
-		}
-		else
-		{
-			mediator_cell_limit_ok();
-		}
-		break;
-	case BALANCER_ACTIVE:
-		u = ltc_get_max_voltage();
-		if (u > 4000)
-		{
-			mediator_cell_limit_reached();
-		}
-		else
-		{
-			mediator_cell_limit_ok();
-		}
-		break;
-	default:
-		break;
-	}	
-	delay(500);
-}
-#endif
 void balancer_recalculate(void)
 {
 	uint16_t min_voltage, max_voltage;

@@ -1,7 +1,7 @@
 /***************************************************************************
  *   Energex                                                               *
  *                                                                         *
- *   Copyright (C) 2008-2010 by Markus Walser                              *
+ *   Copyright (C) 2008-2011 by Markus Walser                              *
  *   markus.walser@gmail.com                                               *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -58,7 +58,7 @@ int8_t battery_enable_sampling = 0;
 
 #ifndef PC
 
-// gets called every 400us from the timer interrupt 
+// gets called every 800us from the timer interrupt 
 void battery_sample(void)
 {
 	static uint8_t idx;

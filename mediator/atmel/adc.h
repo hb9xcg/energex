@@ -1,12 +1,12 @@
 /*
  * Energex
  * 
+ * Copyright (C) 2008-2011 by Markus Walser
+ * markus.walser@gmail.com 
+ * 
  * Copyright (C) 2005-2007 by Benjamin Benz
  * bbe@heise.de
  *
- * Copyright (C) 2008-2010 by Markus Walser
- * markus.walser@gmail.com 
- * 
  * This program is free software; you can redistribute it
  * and/or modify it under the terms of the GNU General
  * Public License as published by the Free Software
@@ -47,6 +47,7 @@
 #define CH_CURRENT_200    	0x0F	// -150mA ... +150mA
 #define CH_CURRENT_200_CALIB    0x0E
 
+#define CH_VOLTAGE_SINGLE 0x01	// ADC1, single ended
 #define CH_VOLTAGE        0x10	// ADC0+, ADC1-, V=1
 #define CH_VOLTAGE_CALIB  0x11	// ADC1+, ADC1-, 
 #define CH_TEMPERATURE    0x4
