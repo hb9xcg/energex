@@ -42,7 +42,6 @@
 #include "battery.h"
 #include "protocol.h"
 #include "data.h"
-#include "ko.h"
 #include "plc.h"
 
 #define COMMAND_STACK_SIZE 384
@@ -71,7 +70,6 @@ static void cmd_help(void);
 static void cmd_temperatur(void);
 static void cmd_voltage(void);
 static void cmd_current(void);
-static void cmd_ko(void);
 static void cmd_line_voltage(void);
 static void cmd_capacity(void);
 static void cmd_reset(void);
@@ -221,9 +219,6 @@ void cmd_process( const char* cmd )
 		break;
 		case 'i':
 			cmd_current();
-		break;
-		case 'k':
-			cmd_ko();
 		break;
 		case 'l':
 			cmd_line_voltage();
@@ -402,11 +397,6 @@ void cmd_stack_memory(void)
 	strcpy_P(cmd_line, PSTR("idle_thread's max stack usage: "));
 	cmd_print_unsigned_fix(result);
 	strcat_P(cmd_line, PSTR(" bytes\r\n"));
-}
-
-void cmd_ko(void)
-{
-	ko_print();
 }
 
 void cmd_line_voltage(void)

@@ -53,7 +53,7 @@ TARGET = plc
 
 
 # List C source files here. (C dependencies are automatically generated.)
-SRC = plc.c adc.c battery.c command.c data.c delay.c fifo.c io.c os_scheduler.c os_thread.c protocol.c timer.c timer-low.c uart.c spi.c ko.c error.c idle.c
+SRC = plc.c adc.c battery.c command.c data.c delay.c fifo.c io.c os_scheduler.c os_thread.c protocol.c timer.c timer-low.c uart.c spi.c error.c idle.c
 
 
 # List Assembler source files here.
