@@ -82,6 +82,8 @@ ELiveness plc_alive = eAlive;
 uint16_t plc_line_voltage;
 int8_t plc_enable_sampling;
 
+static void plc_check_end_of_charge(void);
+
 int main(void)
 {
 	PORTA=0; DDRA=0;		//Alles Eingang alles Null
@@ -146,7 +148,12 @@ int main(void)
 		case 	eDrive: // Drive            Fahren
 			break;
 		case 	eReadyCharge: // ReadyCharge      warten auf Netzspannung
-			io_close_relais();
+			if (!battery_info_get(BAT_FULL) &&
+			    !battery_info_get(CHARGE_NOK))
+			{
+				// start charing only if battery hasn't reported full state.
+				io_close_relais();
+			}
 			break;
 		case 	ePreCharge: // PreCharge        Vorladung
 		case 	eClosePCRelais: // CloseVRelais     Vorladerelais schliessen
@@ -157,9 +164,10 @@ int main(void)
 		case 	eCloseBatRelais: // CloseBRelais     Batterierelais schliessen
 			break;
 		case 	eSymCharge: // SymmCharge       Symmetrierladung
+			break;
 		case 	eTrickleCharge: // TrickleCharge    Erhaltungsladung
 		case 	eTrickleWait: // TrickleWait      Pause
-			io_open_relais();
+			plc_check_end_of_charge();
 			break;
 		case 	eUnknown17: // (?) (möglicherweise Erhaltungsladung einzelner Blöcke?)
 		case 	eUnknown18: // (?) (möglicherweise Erhaltungsladung einzelner Blöcke?)
@@ -172,7 +180,21 @@ int main(void)
 		}
 		eLastState = eDriveState;
 		os_thread_sleep(100);
-//		uart_write("Hallo\n\r", 7);
+		
+		if (battery_info_get(CHARGE_NOK))
+		{
+			// Abort charge
+			io_open_relais();
+		}
+		
+		if (io_is_relais_closed())
+		{
+			io_toggle_green_led();
+		}
+		else
+		{
+			io_clear_green_led();
+		}
 //		io_toggle_red_led();
 	}
 	return 0;
@@ -220,7 +242,7 @@ void plc_force_busy(int8_t on)
 	}
 }
 
-void plc_check_end_of_charge()
+void plc_check_end_of_charge(void)
 {
 	if (battery_info_get(BAT_FULL))
 	{
