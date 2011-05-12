@@ -126,13 +126,6 @@ int main(void)
 	
 	timer_2_init();
 	
-	/* Ist das ein Power on Reset? */
-	if (MCUSR & (1<<PORF)) {
-		MCUSR &= ~(1<<PORF);	// Bit loeschen
-		delay(100);
-		asm volatile("jmp 0");
-	}
-
 	delay(100);
 
 	uart_init();
