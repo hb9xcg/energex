@@ -149,9 +149,10 @@ int main(void)
 	set_sleep_mode(SLEEP_MODE_IDLE);
 */
 	ePowerIst = ePowerSave;
+	ePowerSoll = ePowerSave;
 
 	io_enable_igbt();              	// Power-up Twike DC/DC converter
-	io_release_emergency();	       	// Power-up board computer
+	io_release_emergency();         // Power-up Twike board computer
 
 //	sleep_mode();
 
@@ -165,6 +166,7 @@ int main(void)
 	io_enable_interface_power();
 	
 	battery_init();
+	battery_info_set(BAT_REL_OPEN); // Atomic update of battery info
 
 	data_load();
 
@@ -178,10 +180,6 @@ int main(void)
 
 	balancer_init(); // Lowest thread priority
 
-	battery_info_set(BAT_REL_OPEN);    // Atomic update of battery info
-
-
-	ePowerSoll = ePowerSave;
 
 	while(1)
 	{
@@ -216,7 +214,9 @@ int main(void)
 			{
 				if (battery_info_get(BAT_FULL))
 				{
-					io_raise_emergency();
+					// Line voltage has been removed and battery is full
+					// -> Switch off twike
+					io_raise_emergency(); // shutdown converter
 				}
 				else
 				{
@@ -260,6 +260,8 @@ int main(void)
 		case 	eSymCharge: // SymmCharge       Symmetrierladung
 			if (ON_ENTER(eSymCharge))
 			{
+				// Clear voltage to high flag when comming from U-charge
+				battery_info_clear(VOLTAGE_TO_HI);
 				balancer_set_state(BALANCER_ACTIVE);
 			}
 			break;
@@ -371,11 +373,11 @@ void mediator_check_liveness()
 {
 	if (mediator_alive == eSilent && ePowerSoll != ePowerOff)
 	{
+		// Twike board controller has been switched off...
 		io_set_red_led();
 		data_save();
-		balancer_set_state(BALANCER_STANDBY);
 		ePowerSoll = ePowerOff;
-		wdt_enable(WDTO_4S); // reboot into 'wait for power'. 
+//		wdt_enable(WDTO_4S); // reboot into 'wait for power'. 
 		io_clear_red_led();
 	}
 	else if (mediator_alive != eForced)
@@ -402,10 +404,11 @@ void mediator_check_power()
 			io_enable_igbt();                  // Switch IGBT on
 			io_open_relais();                  // Switch Relais off				
 		}
-		else
+		else // ePowerOff
 		{
+			balancer_set_state(BALANCER_STANDBY);
 			io_raise_emergency();              // shutdown converter
-			os_thread_sleep(500);              // wait for shutdown of converter
+			os_thread_sleep(5000);             // wait for shutdown of converter
 			battery_info_set(BAT_REL_OPEN);    // Atomic update of battery info
 			io_open_relais();                  // Switch Relais off
 			os_thread_sleep(500);              // Relais spark quenching
@@ -420,9 +423,9 @@ void mediator_check_drive_voltage()
 {
 	uint16_t voltage = battery_get_voltage();
 
-	if (voltage < 326*V)
+	if (voltage < 320*V)
 	{
-//		ePowerSoll = ePowerOff;
+		io_raise_emergency();
 	}
 	else if (voltage < 336*V)
 	{
@@ -446,9 +449,9 @@ void mediator_check_deep_discharge()
 {
 	uint16_t voltage = battery_get_voltage();
 
-	if (voltage < 326*V)
+	if (voltage < 320*V)
 	{
-//		ePowerSoll = ePowerOff;
+		io_raise_emergency();
 	}
 }
 
@@ -466,7 +469,7 @@ void mediator_check_charge_voltage()
 		battery_info_clear(VOLTAGE_TO_LO);
 		battery_info_clear(VOLTAGE_TO_HI);
 	}
-	else if (voltage < 384*V && mediator_quick_charge == 1)
+	else if (voltage < 398*V && mediator_quick_charge == 1)
 	{
 		battery_info_clear(VOLTAGE_TO_LO);
 		battery_info_clear(VOLTAGE_TO_HI);
@@ -734,18 +737,7 @@ void mediator_stop_pressed(void)
 {
 	if (mediator_get_drive_state() != eConverterOff)
 	{
-		io_set_red_led();
-		data_save();
-		io_clear_red_led();
-		
 		io_raise_emergency();
-
-		balancer_set_state(BALANCER_STANDBY);
-		ePowerSoll = ePowerSave;
-		os_thread_sleep(500);
-		io_disable_interface_power();
-		
-		mediator_set_drive_state(eConverterOff);
 	}
 	else
 	{
