@@ -31,8 +31,14 @@
 #include "io.h"
 #include "data.h"
 
+//#define SMOKED_IGBT_PORT   // ATMega IGBT port is defect.
+
 #define RELAIS		PB1
-#define IGBT		PB2
+#ifndef SMOKED_IGBT_PORT
+  #define IGBT		PB2
+#else
+  #define IGBT		PC3
+#endif
 #define LED_RED 	PD7
 #define LED_GREEN	PD6
 #define IO_POWER	PD4
@@ -56,7 +62,11 @@ void io_init(void)
 
 
 	DDRB |= (uint8_t)(1<<RELAIS);           // Relais output
+#ifndef SMOKED_IGBT_PORT
 	DDRB |= (uint8_t)(1<<IGBT);             // IGBT output
+#else
+	DDRC |= (uint8_t)(1<<IGBT);             // IGBT output
+#endif
 	
 	DDRB |= (uint8_t)(1<<EMERGENCY);        // Emergency Output
 	
@@ -100,13 +110,20 @@ void io_disable_interface_power(void)
 
 void io_enable_igbt(void)
 {
-// 	ATMega port is defect.
-//	PORTB |= (uint8_t)(1<<IGBT);
+#ifndef SMOKED_IGBT_PORT
+	PORTB |= (uint8_t)(1<<IGBT);
+#else
+	PORTC |= (uint8_t)(1<<IGBT);
+#endif
 }
 
 void io_disable_igbt(void)
 {
+#ifndef SMOKED_IGBT_PORT
 	PORTB &= (uint8_t)~(1<<IGBT);
+#else
+	PORTC &= (uint8_t)~(1<<IGBT);
+#endif
 }
 
 void io_close_relais(void)
