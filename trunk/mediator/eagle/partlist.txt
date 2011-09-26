@@ -1,0 +1,121 @@
+Partlist
+
+Exported from mediator.sch at 17.08.10 19:35
+
+EAGLE Version 5.8.0 Copyright (c) 1988-2010 CadSoft
+
+Part       Value          Device            Package      Library          Sheet
+
+BATTERIE+  PIN2F061.100   PIN2F061.100      F061.100     con-faston       1	Bestellung Farnell
+BATTERIE-  PIN2F061.100   PIN2F061.100      F061.100     con-faston       1	Bestellung Farnell
+C1         100nF          C-EUC0603K        C0603K       rcl              1	vorhanden
+C2         100nF          C-EUC0603K        C0603K       rcl              1	vorhanden
+C3         18pF           C-EUC0603K        C0603K       rcl              1	vorhanden
+C4         18pF           C-EUC0603K        C0603K       rcl              1	vorhanden
+C5         100nF          C-EUC0603K        C0603K       rcl              1	vorhanden
+C6         100nF          C-EUC0603K        C0603K       rcl              1	vorhanden
+C7         100nF          C-EUC0603K        C0603K       rcl              1	vorhanden
+C8         100nF          C-EUC0603K        C0603K       rcl              1	vorhanden
+C9         100nF          C-EUC0603K        C0603K       rcl              1	vorhanden
+C10        100nF          C-EUC0603K        C0603K       rcl              1	vorhanden
+C11        100nF          C-EUC0603K        C0603K       rcl              1	vorhanden
+C12        100nF          C-EUC0603K        C0603K       rcl              1	vorhanden
+C13        100nF          C-EUC0603K        C0603K       rcl              1	vorhanden
+C14        100nF          C-EUC0603K        C0603K       rcl              1	vorhanden
+C15        100nF          C-EUC0603K        C0603K       rcl              1	vorhanden
+C16        100nF          C-EUC0603K        C0603K       rcl              1	vorhanden
+C17        100nF          C-EUC0603K        C0603K       rcl              1	vorhanden
+C18        100nF          C-EUC0603K        C0603K       rcl              1	vorhanden
+C19        100nF          C-EUC0603K        C0603K       rcl              1	vorhanden
+C20        100nF          C-EUC0603K        C0603K       rcl              1	vorhanden
+C21        100nF          C-EUC0603K        C0603K       rcl              1	vorhanden
+C22        100nF          C-EUC0603K        C0603K       rcl              1	vorhanden
+C23        100nF          C-EUC0603K        C0603K       rcl              1	vorhanden
+C24        2200uF         CPOL-EUE5-10.5    E5-10,5      rcl              1	vorhanden
+C25        220uF          CPOL-EUE2.5-6     E2,5-6       rcl              1	Bestellung Farnel
+C26        100nF          C-EUC0603K        C0603K       rcl              1	vorhanden
+C27        10uF           CPOL-EUSMCA       SMC_A        rcl              1	vorhanden (2 Stück)
+C28        100nF          C-EUC0603K        C0603K       rcl              1	vorhanden
+C29        100nF          C-EUC0603K        C0603K       rcl              1	vorhanden
+C30        100nF          C-EUC0603K        C0603K       rcl              1	vorhanden
+C31        10uF           CPOL-EUSMCA       SMC_A        rcl              1	vorhanden (2 Stück)
+C32        100nF          C-EUC0603K        C0603K       rcl              1	vorhanden
+C33        1uF            C-EUC0603K        C0603K       rcl              1	vorhanden (8 Stück)
+C34        6800uF         CPOL-EUE7.5-16    E7,5-16      rcl              1	Bestellung Farnell
+CON1                      CON06             CON06        con-harting      1	vorhanden
+CON2                      CON10             CON10        con-harting      1
+D1         BAS40-06       BAS40-06          SOT23        diode            1	vorhanden
+D2         1N4148         DIODE-MICROMELF-R MICROMELF-R  diode            1	vorhanden (6 Stück)
+D3         1N4148         DIODE-MICROMELF-R MICROMELF-R  diode            1	vorhanden (6 Stück)
+D4         1N4148         DIODE-MICROMELF-R MICROMELF-R  diode            1	vorhanden (6 Stück)
+D6         1N4148         DIODE-MICROMELF-R MICROMELF-R  diode            1	vorhanden (6 Stück)
+D7         1N4004         1N4004            DO41-10      diode            1
+DC2        NME1205SC      NME               NME          dc-dc-converter  1	vorhanden
+DC4        NME1212SC      NME               NME          dc-dc-converter  1	vorhanden
+G1         CR2032H        CR2032H           CR2032H      mediator         1	vorhanden
+I2C        ADUM1250       ADUM1250          SO8          analog-devices   1
+IC1        ATMega644-A    MEGA32-A          TQFP44       atmel            1	Bestellung Farnell ATMega-644p (2 ATMega644 vorhanden)
+IC2        REF192         REF192            SO08         icontroller      1	vorhanden
+IC3        78L05          78L05             SOT89        icontroller      1	unterwegs
+IC4        78L05          78L05             SOT89        icontroller      1	unterwegs
+IC5        78L05          78L05             SOT89        icontroller      1	unterwegs
+IC6        MIC4420M       MIC4420M          SO-08        transistor-power 1	Bestellung Farnell
+IC8        ADM2483        ADM2483           SO16W        icontroller      1	vorhanden
+IC9        DS1307         DS1307            SO08         icontroller      1	vorhanden
+IC10       DS2482-100     DS2482-100        SO08         icontroller      1	vorhanden
+IC11       ADuM1401       ADUM1401          SO16W        spisolator       1	vorhanden
+IC12       OPA735         OPA743            SOT23-5      linear           1	unterwegs
+K1         JTN-PCB-DC12V  JTN-PCB-DC12V     JT-PCB       relay            1	vorhanden
+L1         10uH           L-EUL3225M        L3225M       rcl              1	vorhanden
+LED1       Red            LEDCHIPLED_0805   CHIPLED_0805 led              1	vorhanden
+LED2       Green          LEDCHIPLED_0805   CHIPLED_0805 led              1	vorhanden
+OK2        TLP281         TLP283            MINI-FLAT-4  optocoupler      1	unterwegs (3 Stück)
+OK3        TLP281         TLP283            MINI-FLAT-4  optocoupler      1	unterwegs (3 Stück)
+OK4        TLP281         TLP283            MINI-FLAT-4  optocoupler      1	unterwegs (3 Stück)
+OK6        TLP281         TLP283            MINI-FLAT-4  optocoupler      1
+Q1         STGB12NB60KD   IRG4BC15UD-S      D2PACK       transistor-power 1	vorhanden
+Q2         16MHz          XTAL/S            QS           special          1	vorhanden
+Q3         BC817-16SMD    BC817-16SMD       SOT23-BEC    transistor-npn   1	vorhanden (4 Stück)
+Q4         32768          CRYSTALTC26H      TC26H        crystal          1	vorhanden
+Q5         BC817-25LT1SMD BC817-25LT1SMD    SOT23-BEC    transistor-npn   1	vorhanden (4 Stück)
+Q6         BC817-25LT1SMD BC817-25LT1SMD    SOT23-BEC    transistor-npn   1	vorhanden (4 Stück)
+R2         1k5            R-EU_M0805        M0805        rcl              1	Bestellung Farnell (0.1%)
+R3         24k            R-EU_M0805        M0805        rcl              1	Bestellung Farnell (0.1%)
+R4         2k4            R-EU_M0805        M0805        rcl              1	vorhanden
+R5         24k            R-EU_M0805        M0805        rcl              1	Bestellung Farnell (0.1%)
+R6         1k             R-EU_M0805        M0805        rcl              1	vorhanden
+R7         4k7            R-EU_R0603        R0603        rcl              1	vorhanden
+R8         10k            R-EU_M0805        M0805        rcl              1	vorhanden
+R9         1k5            R-EU_M0805        M0805        rcl              1	Bestellung Farnell (0.1%)
+R10        10k            R-EU_M0805        M0805        rcl              1	vorhanden
+R11        10k            R-EU_M0805        M0805        rcl              1	vorhanden
+R12        0.005          RKH208-8          KH208-8      resistor-power   1	vorhanden
+R13        10k            R-EU_M0805        M0805        rcl              1	vorhanden
+R14        10k            R-EU_M0805        M0805        rcl              1	vorhanden
+R15        1k2            R-EU_R0603        R0603        rcl              1	vorhanden
+R16        3k57           R-EU_R0603        R0603        rcl              1	Bestellung Farnell
+R17        1k2            R-EU_R0603        R0603        rcl              1	vorhanden
+R18        3k57           R-EU_R0603        R0603        rcl              1	Bestellung Farnell
+R19        1k2            R-EU_R0603        R0603        rcl              1	vorhanden
+R20        1k2            R-EU_R0603        R0603        rcl              1	vorhanden
+R21        3k92           R-EU_M0805        M0805        rcl              1	vorhanden
+R22        1k             R-EU_R0603        R0603        rcl              1	vorhanden
+R23        100            R-EU_M0805        M0805        rcl              1	vorhanden
+R24        120            R-EU_R0603        R0603        rcl              1	vorhanden
+R25        1k             R-EU_M0805        M0805        rcl              1	vorhanden
+R26        1k             R-EU_R0603        R0603        rcl              1	vorhanden
+R27        1k             R-EU_M0805        M0805        rcl              1	vorhanden
+R28        10k            R-EU_M0805        M0805        rcl              1	vorhanden
+R29        1k             R-EU_M0805        M0805        rcl              1	vorhanden
+R30        332k           R-EU_0207/10      0207/10      rcl              1	vorhanden
+R31        3k57           R-EU_R0603        R0603        rcl              1	Bestellung Farnell
+R32        1k2            R-EU_R0603        R0603        rcl              1	vorhanden
+R33        332k           R-EU_0207/5V      0207/5V      rcl              1	vorhanden
+T2                        PMOSSOT23         SOT-23       zetex            1	Bestellung Farnell
+UMRICHTER+ PIN2F061.100   PIN2F061.100      F061.100     con-faston       1	Bestellung Farnell
+UMRICHTER- PIN2F061.100   PIN2F061.100      F061.100     con-faston       1	Bestellung Farnell
+X2                        233-104           233-104      con-wago         1	vorhanden
+X3                        233-102           233-102      con-wago         1	vorhanden
+X4                        233-104           233-104      con-wago         1	vorhanden
+X5                        233-203           233-203      con-wago         1	vorhanden
+~NUDEV~1   GND-GNDA       GND-GNDA          GND-GNDA     supply1          1	-
