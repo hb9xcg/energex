@@ -20,20 +20,17 @@
 #ifndef TWIKEPORT_H
 #define TWIKEPORT_H
 
-#include <QThread>
+#include <QObject>
 #include <QEventLoop>
 
 class QextSerialPort;
 
-class TwikePort : public QThread
+class TwikePort  : public QObject
 {
     Q_OBJECT
 
     QextSerialPort* port;
     bool running;
-
-protected:
-    virtual void run();
 
 public:
     TwikePort(const QString& portName);
@@ -44,10 +41,12 @@ public:
     bool isOpen();
     void flush();
 
+private slots:
+    void receiveData();
+
 public slots:
     void sendData(char data);
     void sendData(QByteArray data);
-    void dummy();
 
 signals:
     void receiveData(char data);

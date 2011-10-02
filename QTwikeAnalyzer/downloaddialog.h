@@ -45,8 +45,6 @@ public:
 
 signals:
     void closeDownload();
-    void startThread();
-
 
 public slots:
     void on_buttonFile_clicked();

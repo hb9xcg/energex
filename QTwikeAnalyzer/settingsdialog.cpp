@@ -19,6 +19,7 @@
  ***************************************************************************/
 #include "settingsdialog.h"
 #include <QSettings>
+#include <qextserialport/qextserialenumerator.h>
 
 #include "ui_settingsdialog.h"
 
@@ -30,7 +31,11 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
 
     m_ui->comboSerial->setInsertPolicy(QComboBox::InsertAlphabetically);
 
-    m_ui->comboSerial->addItem("/dev/ttyUSB0");
+    QList<QextPortInfo> ports = QextSerialEnumerator::getPorts();
+    foreach(QextPortInfo port, ports)
+    {
+        m_ui->comboSerial->addItem(port.portName);
+    }
 
     // restore current default
     QSettings settings;

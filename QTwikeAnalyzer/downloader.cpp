@@ -22,9 +22,10 @@
 #include "ihexconverter.h"
 #include "twikeport.h"
 #include "checksum.h"
+#include <QTimer>
 
 
-const char Downloader::NOTHING[]= {};
+const char Downloader::NOTHING[]= {0x10};
 const char Downloader::EXIT[]   = {'x'};
 const char Downloader::ESCAPE_MEDIATOR[] = {0x10,'d'};
 const char Downloader::ESCAPE_PLC[]      = {0x10,'p'};
@@ -53,7 +54,7 @@ Downloader::Downloader(DownloadDialog* dialog, TwikePort* port)
     state = eInvalid;
     protocol = eCRC16;
 
-    QObject::moveToThread(this);
+    //QObject::moveToThread(this);
 
     connect(port, SIGNAL(receiveData(char)),   this, SLOT(receiveData(char)), Qt::DirectConnection);
     connect(this, SIGNAL(sendData(QByteArray)), port, SLOT(sendData(QByteArray)),Qt::DirectConnection);
@@ -145,7 +146,7 @@ void Downloader::rebootPlc()
 
     sendCommand(QByteArray(REBOOT, sizeof(REBOOT)));
 
-    QThread::msleep(200);
+    wait(200);
     port->close();
 }
 
@@ -173,7 +174,7 @@ void Downloader::rebootMediator()
 
     sendCommand(QByteArray(REBOOT, sizeof(REBOOT)));
 
-    QThread::msleep(200);
+    wait(100);
     port->close();
 }
 
@@ -183,14 +184,14 @@ void Downloader::connectPlc()
     port->openBootloader();
 
     int loginCounter = 0;
-    QThread::msleep(200);
+    wait(200);
     state = eConnect;
 
     emit sendData(QByteArray(PASSWORD_PLC, sizeof(PASSWORD_PLC)));
 
     do
     {
-        QThread::msleep(100);
+        wait(100);
         if (++loginCounter>15)
         {
             emit appendLog("Login failed.");
@@ -208,14 +209,14 @@ void Downloader::connectMediator()
     port->openBootloader();
 
     int loginCounter = 0;
-    QThread::msleep(200);
+    wait(100);
     state = eConnect;
 
     emit sendData(QByteArray(PASSWORD_MEDIATOR, sizeof(PASSWORD_MEDIATOR)));
 
     do
     {
-        QThread::msleep(100);
+        wait(100);
         if (++loginCounter>15)
         {
             emit appendLog("Login failed.");
@@ -225,6 +226,17 @@ void Downloader::connectMediator()
     while (state != eDownload);
 
     emit appendLog("Connected!");
+}
+
+void Downloader::wait(int ms)
+{
+    QTimer::singleShot(ms, this, SLOT(timeout()));
+    m_loop.exec();
+}
+
+void Downloader::timeout()
+{
+    m_loop.exit();
 }
 
 void Downloader::download()
@@ -284,7 +296,7 @@ void Downloader::download()
         bool waiting = true;
         for(int t=0; t<500 && waiting; t++)
         {
-            QThread::msleep(1);
+            wait(1);
             switch(reply) {
             case XMODEM_NAK: //request resend
             retransmissionCount++;
@@ -339,7 +351,7 @@ void Downloader::sendCommand(const QByteArray& command)
         buffer.append(command.at(i));
         emit sendData(buffer);
         port->flush();
-        QThread::msleep(20);
+        wait(20);
     }
 
     for (unsigned int i=0; i<sizeof(RETURN); i++)
@@ -348,7 +360,7 @@ void Downloader::sendCommand(const QByteArray& command)
         buffer.append(RETURN[i]);
         emit sendData(buffer);
         port->flush();
-        QThread::msleep(20);
+        wait(20);
     }
 }
 
@@ -356,46 +368,13 @@ bool Downloader::waitForCommand(int timeout)
 {
     for (int waitCylces=0; waitCylces<10; waitCylces++)
     {
-        QThread::msleep(timeout/10); // Wait for echo
+        wait(timeout/10); // Wait for echo
         if (state == eCommand)
         {
-            QThread::msleep(50); // Wait for echo
+            wait(50); // Wait for echo
             return true;
         }
     }
     return false;
 }
 
-void Downloader::run()
-{
-    exec();
-}
-
-void Downloader::dummy()
-{
-}
-
-/*
-void Downloader::sendData(byte[] data)
-{
-        port.sendData(data);
-        String text = HexConverter.hex2string(data);
-        sendData.emit(text);
-}
-
-void Downloader::run()
-{
-    eventLoop = new QEventLoop();
-    eventLoop.exec();
-
-    port.close();
-
-    port = NULL;
-}
-
-
-void Downloader::close()
-{
-    eventLoop.quit();
-}
-*/

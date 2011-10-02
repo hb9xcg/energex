@@ -20,25 +20,21 @@
 #ifndef DOWNLOADER_H
 #define DOWNLOADER_H
 
-#include <QThread>
 #include <QtGlobal>
 #include <QByteArray>
+#include <QEventLoop>
 
 
 class QFile;
 class TwikePort;
 class DownloadDialog;
 
-class Downloader : public QThread
+class Downloader : public QObject
 {
     Q_OBJECT
 
-    void dummy();
     void sendCommand(const QByteArray& command);
     bool waitForCommand(int timeout);
-
-protected:
-    virtual void run();
 
 public:
     Downloader(DownloadDialog* dialog, TwikePort* port);
@@ -58,12 +54,16 @@ public slots:
     void startPlc();
     void startMediator();
 
+private slots:
+    void timeout();
+
 private:
     void rebootPlc();
     void rebootMediator();
     void connectPlc();
     void connectMediator();
     void download();
+    void wait(int ms);
 
     TwikePort* port;
 
@@ -111,6 +111,7 @@ private:
 
     QByteArray dataBuffer;
     DownloadDialog* dialog;
+    QEventLoop m_loop;
 };
 
 #endif // DOWNLOADER_H
