@@ -20,27 +20,26 @@
 #include "twikeport.h"
 #include <QTimer>
 #include <qextserialport/qextserialport.h>
-
-// #include <qextserialenumerator.h> not yet supported!
+#include <qextserialport/qextserialenumerator.h>
 
 
 
 TwikePort::TwikePort(const QString& portName)
 {
-#if 0
+    QString current;
     QList<QextPortInfo> ports = QextSerialEnumerator::getPorts();
 
     foreach(QextPortInfo port, ports)
     {
-        if (port.portName == portName)
+        if (port.portName.contains(portName))
         {
-            current = port;
+            current = port.physName;
             break;
         }
     }
-#endif
-    port = new QextSerialPort(portName);
-    QObject::moveToThread(this);
+
+    port = new QextSerialPort(current);
+    connect(port, SIGNAL(readyRead()), this, SLOT(receiveData()));
 }
 
 void TwikePort::openTwike()
@@ -65,9 +64,6 @@ void TwikePort::openTwike()
 
     port->open(QIODevice::ReadWrite | QIODevice::Unbuffered);
     qDebug("is open: %d", port->isOpen());
-
-    running = true;
-    start();
 }
 
 void TwikePort::openBootloader()
@@ -92,17 +88,12 @@ void TwikePort::openBootloader()
 
     port->open(QIODevice::ReadWrite | QIODevice::Unbuffered);
     qDebug("is open: %d", port->isOpen());
-
-    running = true;
-    start();
 }
 
 void TwikePort::close()
 {
     if (port)
     {
-        running = false;
-        wait(3000);
         port->close();
         qDebug("close: is open returned %d", port->isOpen());
     }
@@ -121,31 +112,19 @@ void TwikePort::sendData(char data)
 
 void TwikePort::sendData(QByteArray data)
 {
-    int i = port->write( data.constData(), data.length());
-    qDebug("sendData : %d", i);
+    port->write( data.constData(), data.length());
 }
 
-void TwikePort::run()
+void TwikePort::receiveData()
 {
-    while (running)
+    if (port->bytesAvailable() )
     {
-        if (port->bytesAvailable() )
+        char byte;
+        if (port->read(&byte, 1) > 0)
         {
-            char byte;
-            if (port->read(&byte, 1) > 0)
-            {
-                emit receiveData(byte);
-            }
-        }
-        else
-        {
-            QTimer::singleShot(100, this, SLOT(dummy()));
+            emit receiveData(byte);
         }
     }
-}
-
-void TwikePort::dummy()
-{
 }
 
 void TwikePort::flush()

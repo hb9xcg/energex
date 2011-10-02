@@ -43,8 +43,6 @@ DownloadDialog::DownloadDialog(QWidget* parent, TwikePort* port) :
     m_ui->progressBar->setValue(0);
 
     downloader = new Downloader(this, port);
-    connect(this, SIGNAL(startThread()), downloader, SLOT(start()));
-    emit startThread();
 
     connect(downloader, SIGNAL(appendReceivedData(qint8)), this, SLOT(appendReceivedData(qint8)));
     connect(downloader, SIGNAL(sendData(QByteArray)), this, SLOT(appendSentData(QByteArray)));
@@ -53,10 +51,6 @@ DownloadDialog::DownloadDialog(QWidget* parent, TwikePort* port) :
     connect(m_ui->buttonStartMediator, SIGNAL(clicked()), downloader, SLOT(startMediator()));
     connect(m_ui->buttonStartPlc,      SIGNAL(clicked()), downloader, SLOT(startPlc()));
     connect(downloader, SIGNAL(appendLog(QString)), this, SLOT(appendLog(QString)));
-
-    connect(this, SIGNAL(closeDownload()), downloader, SLOT(quit()));
-
-    downloader->start();
 
     readSettings();
 
@@ -202,7 +196,6 @@ void DownloadDialog::closeEvent(QCloseEvent* event)
 {
     emit closeDownload();
     writeSettings();
-    downloader->wait(3000);
     QWidget::closeEvent(event);
 }
 
