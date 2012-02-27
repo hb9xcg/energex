@@ -107,9 +107,9 @@ void BatteryPlot::update()
     if (!time.empty())
     {
         // Copy the data to the plot
-        curveVoltage->setData( time, u);
-        curveCurrent->setData( time, i);
-        curveTemperature->setData( timeT, T);
+        curveVoltage->setSamples(time, u);
+        curveCurrent->setSamples( time, i);
+        curveTemperature->setSamples( timeT, T);
 
         setAxisScale(xBottom, 0, time.last());
         repaint();
