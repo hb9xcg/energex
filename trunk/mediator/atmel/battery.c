@@ -92,7 +92,6 @@ void battery_sample(void)
 
 		adc_read_int( CH_VOLTAGE, &voltage_sample);
 		adc_read_int( CH_VOLTAGE, &voltage_sample);
-		adc_read_int( CH_VOLTAGE, &voltage_sample);
 	}
 }
 #endif
@@ -248,8 +247,8 @@ int16_t battery_get_parameter_value(uint8_t parameter, uint8_t address)
 	switch(parameter)
 	{						
 	case MODEL_TYPE:		value = 1;			break;
-	case PROGRAM_REV:		value = 530;			break;
-	case PAR_TAB_REV:		value = 530;			break;
+	case PROGRAM_REV:		value = 630;			break;
+	case PAR_TAB_REV:		value = 630;			break;
 	
 	case NENNSPNG:			value = 35520;			break;
 	case NENNSTROM:			value = 2500;			break;
