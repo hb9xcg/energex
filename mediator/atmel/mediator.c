@@ -121,21 +121,6 @@ int main(void)
 	}
 	wdt_disable();	// Watchdog aus!
 
-	// main Hauptthread anlegen mit höchster Priorität.
-	os_create_thread((uint8_t *)SP, NULL);		
-	
-	timer_2_init();
-	
-	delay(100);
-
-	uart_init();
-	
-
-//	spi_speed_t speed = SPI_SPEED_125KHZ;
-	spi_speed_t speed = SPI_SPEED_250KHZ;
-//	spi_speed_t speed = SPI_SPEED_1MHZ;
-	spi_master_init(speed);
-	
 	adc_init();
 	
 	// Calibrate current ADC offset without any load
@@ -143,24 +128,38 @@ int main(void)
 	adc_calibrate_offset(CH_CURRENT_10);
 	adc_calibrate_offset(CH_CURRENT_200);
 
+	io_enable_igbt();              	// Power-up Twike DC/DC converter
+
+	// main Hauptthread anlegen mit höchster Priorität.
+	os_create_thread((uint8_t *)SP, NULL);		
 	
-/*	power_all_disable();
+	timer_2_init();
+	
+	delay(100);
+	
+	uart_init();
+
+//	spi_speed_t speed = SPI_SPEED_125KHZ;
+	spi_speed_t speed = SPI_SPEED_250KHZ;
+//	spi_speed_t speed = SPI_SPEED_1MHZ;
+	spi_master_init(speed);
+	
+	power_all_disable();
 	power_usart0_enable();
 	set_sleep_mode(SLEEP_MODE_IDLE);
-*/
+
 	ePowerIst = ePowerSave;
 	ePowerSoll = ePowerSave;
 
-	io_enable_igbt();              	// Power-up Twike DC/DC converter
 	io_release_emergency();         // Power-up Twike board computer
 
-//	sleep_mode();
+	sleep_mode();
 
 	wait_for_power();		// Wait for board computer communication
 	
-//	power_all_enable();
+	power_all_enable();
 	
-	// Calibrate voltage offset at normal voltage
+	// Calibrate voltage offset at operation voltage
 	adc_calibrate_offset(CH_VOLTAGE_CALIB);
 
 	io_enable_interface_power();
@@ -168,7 +167,7 @@ int main(void)
 	battery_init();
 	battery_info_set(BAT_REL_OPEN); // Atomic update of battery info
 
-	data_load();
+	data_load(); // 7.4.2012 XCG TODO Sollte das nicht vor dem battery_init geschehen?
 
 	cmd_init();
 
