@@ -56,7 +56,7 @@ static int16_t charge_counter_1mAh;
 static int16_t charge_current;
 static int16_t charge_adc_sample;
 static int8_t  charge_channel;
-static int32_t charge_barrel_1mAh;
+static int32_t charge_barrel;
 
 
 
@@ -115,28 +115,28 @@ void charge_subsample(const int16_t sample)
 
 	charge_current = -sample;
 
-	charge_barrel_1mAh += charge_current;
+	charge_barrel += charge_current;
 
-	if (charge_barrel_1mAh >= BARREL)
+	if (charge_barrel >= BARREL)
 	{
-		charge_barrel_1mAh -= BARREL;
+		charge_barrel -= BARREL;
 		charge_counter_1mAh++;
 		
-		if (++counter_discharged_Ah >= 1000)
-		{
-			counter_discharged_Ah = 0;
-			charge_discharged_Ah++;
-		}
-	}
-	else if (charge_barrel_1mAh <= -BARREL)
-	{
-		charge_barrel_1mAh += BARREL;
-		charge_counter_1mAh--;
-
 		if (++counter_charged_Ah >= 1000)
 		{
 			counter_charged_Ah = 0;
 			charge_charged_Ah++;
+		}
+	}
+	else if (charge_barrel <= -BARREL)
+	{
+		charge_barrel += BARREL;
+		charge_counter_1mAh--;
+
+		if (++counter_discharged_Ah >= 1000)
+		{
+			counter_discharged_Ah = 0;
+			charge_discharged_Ah++;
 		}
 	}
 
@@ -171,7 +171,7 @@ void charge_reset(void)
 	charge_counter_1mAh = 0;
 	charge_charged_Ah = 0;
 	charge_discharged_Ah = 0;
-	charge_barrel_1mAh = 0;
+	charge_barrel = 0;
 }
 
 void charge_start(void)
@@ -211,12 +211,12 @@ uint16_t charge_get_total_charge(void)
 
 int32_t charge_get_barrel(void)
 {
-	return charge_barrel_1mAh;
+	return charge_barrel;
 }
 
 void charge_set_barrel(int32_t barrel)
 {
-	charge_barrel_1mAh = barrel;
+	charge_barrel = barrel;
 }
 
 // Returns actual current [10mA]
@@ -225,7 +225,7 @@ int16_t charge_get_current()
 	int32_t current;
 	
 	os_enterCS();
-	current = charge_current;	// 16Bit resolution, 1LSB = 1.03mA
+	current = charge_current;	// 16Bit resolution, 1LSB = 84.21mA
 	os_exitCS();
 
 	// div 8.419
