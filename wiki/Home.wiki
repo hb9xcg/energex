@@ -2,7 +2,7 @@ Welcome to Energex
 
 = Introduction =
 
-This project Energex hosts a software and hardware for a Twike battery management system (BMS). Due to the Twikes DC-Link voltage of about 300V...400V a lot of cells have to be connected in series. The Energex BMS is able to charge up to 192 cells of connected in series. Due to its open design it can be easily adapted to arbitrary cell type: So far NiCd and LiCoMn have been tested, LiFePo will follow. 
+This project Energex hosts a software and hardware for a Twike battery management system (BMS). Due to the Twikes DC-Link voltage of about 300V...400V a lot of cells have to be connected in series. The Energex BMS is able to charge up to 192 cells connected in series. Due to its open design it can be easily adapted to arbitrary cell type: So far NiCd and LiCoMn have been tested, LiFePo will follow. 
 
 
 = Details =
