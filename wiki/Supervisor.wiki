@@ -1,7 +1,7 @@
 #Dokumentation über Supervisor
 
 = Print =
-http://code.google.com/p/energex/source/browse/trunk/supervisor/doc/supervisor.jpeg
+http://energex.googlecode.com/svn/wiki/images/supervisor.jpeg
 
 
 = Anschlüsse =
