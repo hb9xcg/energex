@@ -4,7 +4,7 @@
 http://energex.googlecode.com/svn/wiki/images/mediator-top.jpeg
 
 = Print Rückseite =
-http://energex.googlecode.com/svn/wiki/images/mediator-button.jpeg
+http://energex.googlecode.com/svn/wiki/images/mediator-bottom.jpeg
 Gut ersichtlich sind die präventiven Verstärkungen der Leiterbahnen.
 
 = Anschlüsse =
