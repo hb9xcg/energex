@@ -16,3 +16,6 @@ dem Mediator.
 Ganz rechts die Starterbox, welche den 9V-Block enthält um den
 Mediator zu starten, wenn das Boardnetz komplett von der Batterie
 getrennt ist.
+
+Ein Blick ins Innere des Ladekontrollers:
+http://energex.googlecode.com/svn/wiki/images/energex-bms.jpeg
