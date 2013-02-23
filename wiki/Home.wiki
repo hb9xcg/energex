@@ -11,7 +11,7 @@ The Energex project is divided in several sub projetcs:
   * *QTwikeAnalyzer*, a C++ project developed with Qt is used to debug the communication between BMS and Twike converter.
   * *QTwikeSimulator*, also a C++ project is used to simulate charge/discharge and testing balancing algorithms.  
   * *Supervisor* is a piece of hardware connected and powered directly from the battery stack. It measures the cell voltage and cell temperature and is able to drain any overcurrent from the cell.
-  * [http://energex.googlecode.com/svn/wiki/Mediator.wiki Mediator] acts as communication interface between Supervisors and Twike converter. It is responsible to adjust charge current and voltage to the state of the battery stack. 
+  * [http://energex.googlecode.com/svn/wiki/Mediator Mediator] acts as communication interface between Supervisors and Twike converter. It is responsible to adjust charge current and voltage to the state of the battery stack. 
 
 = Forum =
 Technical discussion is possible on [https://groups.google.com/forum/?fromgroups=#!forum/energex-twike Energex Twike Forum].
