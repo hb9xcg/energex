@@ -1,0 +1,27 @@
+root@mediator:~> s                                                                   
+                                                                                     
+<10%    0                                                                            
+>10%    13                                                                           
+>20%    31                                                                           
+>30%    40                                                                           
+>40%    17                                                                           
+>50%    34                                                                           
+>60%    1                                                                            
+>70%    1                                                                            
+>80%    0                                                                            
+>90%    0                                                                            
+>100%   0                                                                            
+>110%   0                                                                            
+                                                                                     
+Charge cycles:          142                                                          
+Deep discharge cylces:  0                                                            
+Daisy chain BER:        0.0000                                                       
+                                                                                     
+root@mediator:~> q                                                                   
+Actual capacity:   0.00Ah                                                            
+Maximal capacity:  25.02Ah                                                           
+Nominal capacity:  25.00Ah                                                           
+Minimal capacity:  2.95Ah                                                            
+Total charge:      206Ah                                                             
+Total discharge:   336Ah                                                             
+                                                                                     
