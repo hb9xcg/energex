@@ -284,7 +284,7 @@ void adc_read_int(uint8 channel, int16* p_sens)
  * Interrupt-Handler fuer den ADC. Speichert das Ergebnis des aktuellen Channels und 
  * schaltet in der Liste der auszuwertenden Sensoren eins weiter.
  */
-SIGNAL (SIG_ADC)
+SIGNAL (ADC_vect)
 {
 	/* Daten speichern und Pointer im Puffer loeschen */
 	*channels[act_channel_idx].value = ADCL | (ADCH << 8);

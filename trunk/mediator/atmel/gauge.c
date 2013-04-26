@@ -34,7 +34,7 @@
 #define COUNT_OF(A) (sizeof(A)/sizeof(A[0]))
 
 // off-load voltage
-prog_uint16_t gauge_table[] =
+uint16_t PROGMEM gauge_table[] =
 {
    4170,  // 25.0Ah  0  100%
    4000,  // 22.5Ah  1   90%
