@@ -33,7 +33,7 @@
 
 #define COUNT_OF(A) (sizeof(A)/sizeof(A[0]))
 
-int16_t PROGMEM ntc_table[] =
+const int16_t ntc_table[] PROGMEM =
 {         // Vref = 3.065V 
    1996,  // 1996.433   -40°C    0
    1978,  // 1977.544   -35°C    1
