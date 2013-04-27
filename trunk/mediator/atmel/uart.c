@@ -68,7 +68,13 @@ fifo_t outfifo;				/*!< Ausgangs-FIFO */
  * Die Ein- und Ausgebe-FIFO werden initialisiert. Das globale Interrupt-Enable-Flag (I-Bit in SREG) wird nicht veraendert.
  */
 void uart_init(void){	 
+    /* FIFOs für Ein- und Ausgabe initialisieren */ 
+    fifo_init(&infifo, inbuf, BUFSIZE_IN);
+    fifo_init(&outfifo, outbuf, BUFSIZE_OUT);
+
     uint8 sreg = SREG;
+    /* Interrupts kurz deaktivieren */ 
+    cli();
 
     DDRB  |=  TRANSMIT_ENABLE; // Configure RS485 transmit/receive enable output
     PORTB &= ~TRANSMIT_ENABLE; // RS485-Transmitter ausschalten und RS485-Receiver einschalten
@@ -76,17 +82,14 @@ void uart_init(void){
     UBRRH = (UART_CALC_BAUDRATE(BAUDRATE)>>8) & 0xFF;
     UBRRL = (UART_CALC_BAUDRATE(BAUDRATE) & 0xFF);
     
-	/* Interrupts kurz deaktivieren */ 
-	cli();
-
-	/* UART Receiver und Transmitter anschalten, Receive-Interrupt aktivieren */ 
-	UCSRB = (1 << RXEN) | (1 << TXEN) | (1 << RXCIE);
-	/* Data mode 8N1, asynchron */
-	uint8 ucsrc = (1 << UCSZ1) | (1 << UCSZ0);
-	#ifdef URSEL
-		ucsrc |= (1 << URSEL);	// fuer ATMega32
-	#endif    
-	UCSRC = ucsrc;
+    /* UART Receiver und Transmitter anschalten, Receive-Interrupt aktivieren */ 
+    UCSRB = (1 << RXEN) | (1 << TXEN) | (1 << RXCIE);
+    /* Data mode 8N1, asynchron */
+    uint8 ucsrc = (1 << UCSZ1) | (1 << UCSZ0);
+    #ifdef URSEL
+	ucsrc |= (1 << URSEL);	// fuer ATMega32
+    #endif    
+    UCSRC = ucsrc;
 
     /* Flush Receive-Buffer (entfernen evtl. vorhandener ungueltiger Werte) */ 
     do{
@@ -103,9 +106,6 @@ void uart_init(void){
     /* Global Interrupt-Flag wiederherstellen */
     SREG = sreg;
 
-    /* FIFOs für Ein- und Ausgabe initialisieren */ 
-    fifo_init(&infifo, inbuf, BUFSIZE_IN);
-    fifo_init(&outfifo, outbuf, BUFSIZE_OUT);
 }
 
 /*!
