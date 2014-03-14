@@ -143,21 +143,21 @@ int main(void)
 	spi_speed_t speed = SPI_SPEED_250KHZ;
 //	spi_speed_t speed = SPI_SPEED_1MHZ;
 	spi_master_init(speed);
-	
+/*	16.10.2013 auskommentiert zugunsten Tiefentladeschutz in wait_for_power
 	power_all_disable();
 	power_usart0_enable();
 	set_sleep_mode(SLEEP_MODE_IDLE);
-
+*/
 	ePowerIst = ePowerSave;
 	ePowerSoll = ePowerSave;
 
 	io_release_emergency();         // Power-up Twike board computer
 
-	sleep_mode();
+//	sleep_mode(); //16.10.2013 auskommentiert zugunsten Tiefentladeschutz in wait_for_power
 
 	wait_for_power();		// Wait for board computer communication
-	
-	power_all_enable();
+
+//	power_all_enable(); //16.10.2013 auskommentiert zugunsten Tiefentladeschutz in wait_for_power
 	
 	// Calibrate voltage offset at operation voltage
 	adc_calibrate_offset(CH_VOLTAGE_CALIB);
@@ -175,7 +175,6 @@ int main(void)
 
 	ltc_init();
 	ltc_update_data();
-	mediator_calibrate_gauge();
 
 	balancer_init(); // Lowest thread priority
 
@@ -188,7 +187,6 @@ int main(void)
 		switch(eDriveState)
 		{
 		case 	eConverterOff: // InvOff           Umrichter aus
-			mediator_check_deep_discharge();
 			break;
 		case 	eConverterTest: // InvTest          Test-Modus
 		case 	eConverterProg: // InvProg          Programm-Modus
@@ -198,13 +196,15 @@ int main(void)
 		case 	eDrive: // Drive            Fahren
 			if (ON_ENTER(eDrive))
 			{
+				// Allow only charging with too low battery voltage
+				mediator_check_deep_discharge();
+
 				balancer_enable_fan = 0;
 				balancer_set_state(BALANCER_SURVEILLANCE);
 				if (battery_info_get(BAT_FULL) ||
 				    charge_get_capacity() > 2500)
 				{
 					battery_info_clear(BAT_FULL);
-					mediator_calibrate_gauge();
 				}
 			}	
 			break;
@@ -213,6 +213,7 @@ int main(void)
 			{
 				if (battery_info_get(BAT_FULL))
 				{
+					mediator_calibrate_gauge();
 					// Line voltage has been removed and battery is full
 					// -> Switch off twike
 					io_raise_emergency(); // shutdown converter
@@ -291,10 +292,24 @@ int main(void)
 
 void wait_for_power()
 {
+	int16_t timeout = 300; // Gib Benutzer 30s Zeit zum allfälligen Einschalten des Twikes.
 	while (!uart_data_available())
 	{
 		mediator_debounce_stop();
 		delay(100);
+		timeout--;
+		if (timeout == 0)
+		{
+			// Power off Twike to avoid deep discharge.
+			balancer_set_state(BALANCER_STANDBY);
+			io_raise_emergency();              // shutdown converter
+			delay(5000);             // wait for shutdown of converter
+			battery_info_set(BAT_REL_OPEN);    // Atomic update of battery info
+			io_open_relais();                  // Switch Relais off
+			delay(500);              // Relais spark quenching
+			io_disable_igbt();                 // Switch IGBT off
+			delay(5000);             // Let IGBT cool down, in case we're still powered.
+		}
 	}
 }
 
@@ -338,17 +353,6 @@ void mediator_calibrate_gauge(void)
 	// Calculate initial capacity based on the lowest cell voltage
 	capacity = gauge_get_capacity(ltc_adc_voltage(min));
 	charge_set_capacity(capacity);
-	
-	// Set also initial sym volages
-	battery_set_parameter_value(SYM_SPANNUNG, BATTERY_1, ltc_adc_voltage(min)/10);
-	battery_set_parameter_value(SYM_SPANNUNG, BATTERY_2, ltc_adc_voltage(avg)/10);
-	battery_set_parameter_value(SYM_SPANNUNG, BATTERY_3, ltc_adc_voltage(max)/10);
-
-	// and initial temperatures
-	ltc_get_temperature_min_avg_max(&min, &avg, &max);
-	battery_set_parameter_value(BATTERIE_TEMP, BATTERY_1, min);
-	battery_set_parameter_value(BATTERIE_TEMP, BATTERY_2, avg);
-	battery_set_parameter_value(BATTERIE_TEMP, BATTERY_3, max);
 }
 	
 void mediator_busy(void)
@@ -422,12 +426,9 @@ void mediator_check_drive_voltage()
 {
 	uint16_t voltage = battery_get_voltage();
 
-	if (voltage < 320*V)
+	if (voltage < 326*V)
 	{
-		io_raise_emergency();
-	}
-	else if (voltage < 336*V)
-	{
+		// Average cell voltage 3.4V
 		battery_info_set(BAT_EMPTY);
 		battery_info_set(VOLTAGE_TO_LO);
 		battery_info_clear(VOLTAGE_TO_HI);
@@ -448,7 +449,8 @@ void mediator_check_deep_discharge()
 {
 	uint16_t voltage = battery_get_voltage();
 
-	if (voltage < 320*V)
+	// Average cell voltage 3.3V
+	if (voltage < 317*V)
 	{
 		io_raise_emergency();
 	}
@@ -674,7 +676,7 @@ void mediator_cell_limit_reached(void)
 {
 	if (eDriveState==eDrive)
 	{
-		battery_info_set(BAT_EMPTY);
+		ePowerSoll = ePowerOff;
 	}
 	else
 	{
