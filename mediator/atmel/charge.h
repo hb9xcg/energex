@@ -46,4 +46,9 @@ uint16_t charge_get_total_discharge(void);
 int32_t charge_get_barrel(void);
 void charge_set_barrel(int32_t barrel);
 
+uint16_t charge_get_counter_charged_Ah(void);
+uint16_t charge_get_counter_discharged_Ah(void);
+void charge_set_counter_charged_Ah(uint16_t counter_charged_Ah);
+void charge_set_counter_discharged_Ah(uint16_t counter_discharged_Ah);
+
 #endif
