@@ -73,6 +73,20 @@ int8_t balancer_enable_fan;
 
 void balancer_init(void)
 {
+	int16_t min, avg, max, capacity;
+
+	ltc_get_voltage_min_avg_max(&min, &avg, &max);
+	// Set also initial sym volages
+	battery_set_parameter_value(SYM_SPANNUNG, BATTERY_1, ltc_adc_voltage(min)/10);
+	battery_set_parameter_value(SYM_SPANNUNG, BATTERY_2, ltc_adc_voltage(avg)/10);
+	battery_set_parameter_value(SYM_SPANNUNG, BATTERY_3, ltc_adc_voltage(max)/10);
+
+	// and initial temperatures
+	ltc_get_temperature_min_avg_max(&min, &avg, &max);
+	battery_set_parameter_value(BATTERIE_TEMP, BATTERY_1, min);
+	battery_set_parameter_value(BATTERIE_TEMP, BATTERY_2, avg);
+	battery_set_parameter_value(BATTERIE_TEMP, BATTERY_3, max);
+
 	memset(balancer_stack, 0xb6, sizeof(balancer_stack));
 	balancer_thread = os_create_thread( (uint8_t *)&balancer_stack[BALANCER_STACK_SIZE-1], 
 	                                    balancer_loop );
@@ -169,6 +183,22 @@ void balancer_twike_report(void)
 	battery_set_parameter_value(SYM_SPANNUNG, BATTERY_2, ltc_adc_voltage(avg)/10);
 	battery_set_parameter_value(SYM_SPANNUNG, BATTERY_3, ltc_adc_voltage(max)/10);
 
+	if (ltc_adc_voltage(max - min) > 100)
+	{
+		battery_info_set(VOLTAGE_NOK);
+	}
+	else
+	{
+		battery_info_clear(VOLTAGE_NOK);
+	}
+	if (ltc_adc_voltage(min) < 3400)
+	{
+		battery_info_set(BAT_EMPTY);
+	}
+	else
+	{
+		battery_info_clear(BAT_EMPTY);
+	}
 
 	ltc_get_temperature_min_avg_max(&min, &avg, &max);
 
