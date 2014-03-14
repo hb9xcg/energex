@@ -131,7 +131,9 @@ void ltc_init(void)
 	config.wdten  =   1; // Watchdog enabled
 	config.dcc    =   0; // All discharge switches off
 	config.mci    =   0; // All cell interrupts enabled
-	config.vuv    = 146; // Under voltage comparison 3.5V
+//	config.vuv    = 146; // Under voltage comparison 3.5V
+//	config.vuv    = 129; // Under voltage comparison 3.1V
+	config.vuv    = 125; // Under voltage comparison 3.0V
 //	config.vov    = 167; // Over voltage comparision 4.0V
 	config.vov    = 173; // Over voltage comparision 4.15V
 	
