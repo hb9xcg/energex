@@ -797,13 +797,11 @@ void cmd_supervisor_temperature()
 	sprintf_P(cmd_line, PSTR(" Sensor | Block A | Block B\r\n"));
 	cmd_flush();
 
-	for (i=0; i<LTC_STACK_SIZE<<1; i++)
+	for (i=0; i<LTC_STACK_SIZE; i++)
 	{
 		tempA = ltc_get_external_temperature(i);
-		if (i+(LTC_STACK_SIZE>>1)+1 < LTC_STACK_SIZE)
-		{
-		    tempB = ltc_get_external_temperature(i+(LTC_STACK_SIZE>>1));
-		}
+		tempB = ltc_get_external_temperature(i+LTC_STACK_SIZE);
+
 		sprintf_P(cmd_line, PSTR("%7d | %4d.%02d | %4d.%02d\r\n"), 
 				i, tempA/100, tempA%100, tempB/100, tempB%100);
 		cmd_flush();
