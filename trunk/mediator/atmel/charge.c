@@ -53,6 +53,9 @@ static uint16_t charge_charged_Ah;
 static uint16_t charge_discharged_Ah; 
 static int16_t charge_counter_1mAh;
 
+static uint16_t charge_counter_charged_Ah;
+static uint16_t charge_counter_discharged_Ah;
+
 static int16_t charge_current;
 static int16_t charge_adc_sample;
 static int8_t  charge_channel;
@@ -110,9 +113,6 @@ void charge_sample(void)
 // Gets called every 20ms 16Bit resolution, 1LSB = 1188uA
 void charge_subsample(const int16_t sample)
 {
-	static int16_t counter_charged_Ah;
-	static int16_t counter_discharged_Ah;
-
 	charge_current = -sample;
 
 	charge_barrel += charge_current;
@@ -122,9 +122,9 @@ void charge_subsample(const int16_t sample)
 		charge_barrel -= BARREL;
 		charge_counter_1mAh++;
 		
-		if (++counter_charged_Ah >= 1000)
+		if (++charge_counter_charged_Ah >= 1000)
 		{
-			counter_charged_Ah = 0;
+			charge_counter_charged_Ah = 0;
 			charge_charged_Ah++;
 		}
 	}
@@ -133,9 +133,9 @@ void charge_subsample(const int16_t sample)
 		charge_barrel += BARREL;
 		charge_counter_1mAh--;
 
-		if (++counter_discharged_Ah >= 1000)
+		if (++charge_counter_discharged_Ah >= 1000)
 		{
-			counter_discharged_Ah = 0;
+			charge_counter_discharged_Ah = 0;
 			charge_discharged_Ah++;
 		}
 	}
@@ -163,7 +163,7 @@ void charge_setup_channel(void)
 	// first 2 dummies to settle down Atmel's analog circuit, then real measurement
 	adc_read_int(charge_channel, &charge_adc_sample);  
 	adc_read_int(charge_channel, &charge_adc_sample);
-	adc_read_int(charge_channel, &charge_adc_sample);
+//	adc_read_int(charge_channel, &charge_adc_sample); // 3 samples ist saumässig knapp für 400us MAW 16.1.2014
 }
 
 void charge_reset(void)
@@ -217,6 +217,26 @@ int32_t charge_get_barrel(void)
 void charge_set_barrel(int32_t barrel)
 {
 	charge_barrel = barrel;
+}
+
+uint16_t charge_get_counter_charged_Ah(void)
+{
+	return charge_counter_charged_Ah;
+}
+
+uint16_t charge_get_counter_discharged_Ah(void)
+{
+	return charge_counter_discharged_Ah;
+}
+
+void charge_set_counter_charged_Ah(uint16_t counter_charged_Ah)
+{
+	charge_counter_charged_Ah = counter_charged_Ah;
+}
+
+void charge_set_counter_discharged_Ah(uint16_t counter_discharged_Ah)
+{
+	charge_counter_discharged_Ah = counter_discharged_Ah;
 }
 
 // Returns actual current [10mA]

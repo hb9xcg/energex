@@ -60,6 +60,8 @@ uint16_t eeMin_capacity        EEMEM = 9999;
 uint16_t eeVoltage_calibration EEMEM = 41592UL;  // Umax = 415.92V
 uint8_t  eeSPI_BER             EEMEM = 0;  // bit error rate
 
+uint16_t eeCounter_charged_Ah  EEMEM = 0; // internal 1mAh -> 1Ah counter
+uint16_t eeCounter_discharged_Ah  EEMEM = 0; // internal 1mAh -> 1Ah counter
 
 
 // SRAM data pool
@@ -133,6 +135,11 @@ void data_save(void)
 	
 	eeprom_write_byte( &eeSPI_BER, data_spi_ber);
 	eeprom_busy_wait();
+
+	eeprom_write_word( &eeCounter_charged_Ah, charge_get_counter_charged_Ah() );
+	eeprom_busy_wait();
+	eeprom_write_word( &eeCounter_discharged_Ah, charge_get_counter_discharged_Ah() );
+	eeprom_busy_wait();
 }
 
 void data_load(void)
@@ -193,6 +200,13 @@ void data_load(void)
 	
 	eeprom_busy_wait();
 	data_spi_ber = eeprom_read_byte( &eeSPI_BER );
+	
+	value = eeprom_read_word( &eeCounter_charged_Ah);
+	charge_set_counter_charged_Ah(value);
+	eeprom_busy_wait();
+	value = eeprom_read_word( &eeCounter_discharged_Ah);
+	charge_set_counter_discharged_Ah(value);
+	eeprom_busy_wait();
 }
 
 
