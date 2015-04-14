@@ -43,6 +43,10 @@
 #include "error.h"
 #include "io.h"
 
+#ifdef PC
+static uint16_t test_total_discharge;
+uint16_t charge_get_total_discharge(void);
+#endif
 
 #define ADC_MAX_VALUE		(1<<ADC_RESOLUTION)
 #define OVER_SAMPLING_LOG	6
@@ -56,9 +60,11 @@ battery_t battery;
 static uint16_t battery_voltage; // [ADC bits]
 int8_t battery_enable_sampling = 0;
 
+static uint16_t battery_get_total_discharge(uint8_t address);
+
 #ifndef PC
 
-// gets called every 800us from the timer interrupt 
+// gets called every 400us from the timer interrupt 
 void battery_sample(void)
 {
 	static uint8_t idx;
@@ -176,7 +182,7 @@ void battery_command(uint16_t relais_state)
 		ePowerSoll = ePowerSave;
 	}
 }
-
+#endif
 uint8_t battery_get_index(uint8_t address)
 {
 	if (address < BATTERY_1 ||
@@ -201,7 +207,7 @@ uint8_t battery_get_index(uint8_t address)
 
 	return index;
 }
-
+#ifndef PC
 void battery_set_parameter_value(uint8_t parameter, uint8_t address, uint16_t value)
 {
 	uint8_t index;
@@ -320,7 +326,7 @@ int16_t battery_get_parameter_value(uint8_t parameter, uint8_t address)
 	case MAX_KAPAZITAET:		value = 305;	break;
 	case MIN_KAPAZITAET:		value = 280;	break;
 	case GELADENE_AH:		value = charge_get_total_charge()/NBR_OF_BATTERIES;	break;
-	case ENTLADENE_AH:		value = charge_get_total_discharge()/NBR_OF_BATTERIES;	break;
+	case ENTLADENE_AH:		value = battery_get_total_discharge(address);	break;
 	case LADEZYKLEN:		value = data_charge_cycles;		break;
 	case TIEFENTLADE_ZYKLEN:	value = data_deep_discharge_cycles;	break;
 	
@@ -418,6 +424,31 @@ int16_t battery_get_parameter_value(uint8_t parameter, uint8_t address)
 	return value;
 }
 #endif
+uint16_t battery_get_total_discharge(uint8_t address)
+{
+	uint16_t value = charge_get_total_discharge();
+	uint16_t third = value / NBR_OF_BATTERIES;
+	uint16_t rest  = value % NBR_OF_BATTERIES;
+	uint8_t index = battery_get_index(address);
+
+	switch (rest)
+	{
+	case 0:	return third;
+	case 1: if (index == 0)
+			return third+rest;
+		else
+			return third;
+	case 2: if (index == 0)
+			return third+1;
+		else if (index == 1)
+			return third+1;
+		else
+			return third;
+	default:
+		return third;
+	}
+}
+
 void battery_info_set(uint8_t bitNo)
 {
 	uint16_t mask = 1;
@@ -467,6 +498,12 @@ void print_binfo(void)
 	printf("BINFO: 0x%04x\n\r", battery_get_info());
 }
 
+
+uint16_t charge_get_total_discharge(void)
+{
+	return test_total_discharge;
+}
+
 int main(int argc, char* argv[])
 {
 	battery_init();
@@ -486,6 +523,18 @@ int main(int argc, char* argv[])
 	{
 		puts("VOLTAGE_NOK not set\r\n");
 	}
+
+	uint8_t i;
+	for (i=0; i<100; i++)
+	{
+		test_total_discharge = i;
+
+		printf("Bat1: %d\t",   battery_get_total_discharge(BATTERY_1));
+		printf("Bat2: %d\t",   battery_get_total_discharge(BATTERY_2));
+		printf("Bat3: %d\t",   battery_get_total_discharge(BATTERY_3));
+		printf("Total: %d\n\r", test_total_discharge);
+	}
+
 	
 }
 #endif
