@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="description" content="Energex : The superior Twike battery management system">
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Energex</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/hb9xcg/energex">View on GitHub</a>
+
+          <h1 id="project_title">Energex</h1>
+          <h2 id="project_tagline">The superior Twike battery management system</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/hb9xcg/energex/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/hb9xcg/energex/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h3>
+<a id="welcome-to-energex" class="anchor" href="#welcome-to-energex" aria-hidden="true"><span class="octicon octicon-link"></span></a>Welcome to Energex.</h3>
+
+<p>This project Energex hosts a software and hardware for a Twike battery management system (BMS). Because of the Twikes DC-Link voltage of about 280V...435V a lot of cells have to be connected in series. The Energex BMS is able to charge up to 192 cells connected in series. Due to its open design it can be easily adapted to arbitrary cell type: So far NiCd, LiFePO4 and LiCoMn have been tested. </p>
+
+<pre><code>$ cd your_repo_root/repo_name
+$ git fetch origin
+$ git checkout gh-pages
+</code></pre>
+
+<h3>
+<a id="details" class="anchor" href="#details" aria-hidden="true"><span class="octicon octicon-link"></span></a>Details</h3>
+
+<p>The Energex project is divided in several sub projetcs:</p>
+
+<ul>
+<li>[QTwikeAnalyzer], a C++ project developed with Qt is used to debug the communication between BMS and Twike converter.</li>
+<li>
+<em>QTwikeSimulator</em>, also a C++ project is used to simulate charge/discharge and testing balancing algorithms.<br>
+</li>
+<li>[Supervisor] is a piece of hardware connected and powered directly from the battery stack. It measures the cell voltage and cell temperature and is able to drain any overcurrent from the cell.</li>
+<li>[Mediator] acts as communication interface between Supervisors and Twike converter. It is responsible to adjust charge current and voltage to the state of the battery stack. </li>
+</ul>
+
+<h3>
+<a id="forum" class="anchor" href="#forum" aria-hidden="true"><span class="octicon octicon-link"></span></a>Forum</h3>
+
+<p>Technical discussion is possible on [<a href="https://groups.google.com/forum/?fromgroups=#!forum/energex-twike">https://groups.google.com/forum/?fromgroups=#!forum/energex-twike</a> Energex Twike Forum].</p>
+
+<h3>
+<a id="authors-and-contributors" class="anchor" href="#authors-and-contributors" aria-hidden="true"><span class="octicon octicon-link"></span></a>Authors and Contributors</h3>
+
+<p>The project Energex was developed since 2008 by Markus Walser (<a href="https://github.com/hb9xcg" class="user-mention">@hb9xcg</a>). The LiFePO4 port was done by Thomas Blaser.</p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Energex maintained by <a href="https://github.com/hb9xcg">hb9xcg</a></p>
+        <p>Published with <a href="https://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
