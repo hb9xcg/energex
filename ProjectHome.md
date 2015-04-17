@@ -1,0 +1,1 @@
+The aim of this project is to develop the electronic devices as well as the required software to balance rechargeable Lithium cells. The balancer software interfaces with the Twike bordcomputer.
